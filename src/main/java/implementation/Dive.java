@@ -54,8 +54,8 @@ public class Dive {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    // Sleep for 200 milliseconds
-                    Thread.sleep(200);
+                    // Sleep for 20seconds
+                    Thread.sleep(20000);
 
                     // Check if getDepth method hasn't been called within 200ms
                     if (!Thread.currentThread().isInterrupted()) {
