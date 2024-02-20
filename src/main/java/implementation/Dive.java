@@ -10,12 +10,8 @@ import org.springframework.stereotype.Component;
 public class Dive {
 
     private WatchDog watchDogThread;
+    private static boolean firstTime = true;
  
-    public Dive() {
-        watchDogThread = new WatchDog();
-        watchDogThread.start();
-    }
-
     public Integer setFrontAngle(Integer angle) {
         return angle;
     }
@@ -29,11 +25,14 @@ public class Dive {
     }
 
     public Integer getDepth() {
-        // Stop the watch dog thread
-        watchDogThread.interrupt();
+    	if (!firstTime) {
+    		// Stop the watch dog thread
+    		watchDogThread.interrupt();
+    	}
         // Restart the watch dog thread
         watchDogThread = new WatchDog();
         watchDogThread.start();
+        firstTime = false;
         return 0;
     }
 
@@ -48,8 +47,8 @@ public class Dive {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    // Sleep for 20seconds
-                    Thread.sleep(20000);
+                    // Sleep for 500 milliseconds
+                    Thread.sleep(500);
 
                     // Check if getDepth method hasn't been called within 200ms
                     if (!Thread.currentThread().isInterrupted()) {
