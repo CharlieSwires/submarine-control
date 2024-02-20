@@ -17,11 +17,11 @@ public class EngineControl {
 	@Autowired
 	private Eng eng;
 	
-    @GetMapping(path = "/left/{percentPower}", produces = "application/json")
+    @GetMapping(path = "/left/{percentPower}")
     public ResponseEntity<Integer> getLeft (@PathVariable("percentPower") Integer percentPower){
 		return new ResponseEntity<Integer>(eng.setPowerLeft(percentPower),HttpStatus.OK);
     }
-    @GetMapping(path = "/right/{percentPower}", produces = "application/json")
+    @GetMapping(path = "/right/{percentPower}")
     public ResponseEntity<Integer> getRudder (@PathVariable("percentPower") Integer percentPower){
 		return new ResponseEntity<Integer>(eng.setPowerRight(percentPower),HttpStatus.OK);
     }

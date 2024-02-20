@@ -20,8 +20,8 @@ public class Dive {
         return angle;
     }
 
-    public Boolean setFillTank(Boolean action) {
-        return action;
+    public Integer setFillTank(Boolean action) {
+        return action?1:0;
     }
 
     public Integer getDepth() {
@@ -48,7 +48,7 @@ public class Dive {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     // Sleep for 500 milliseconds
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
 
                     // Check if getDepth method hasn't been called within 200ms
                     if (!Thread.currentThread().isInterrupted()) {

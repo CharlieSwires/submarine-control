@@ -4,5 +4,6 @@ rest\MainApp.class
 implementation\Dive.class
 rest\NavigationControl.class
 implementation\Nav.class
+rest\SwaggerConfig.class
 rest\DiveControl.class
 implementation\Dive$WatchDog.class

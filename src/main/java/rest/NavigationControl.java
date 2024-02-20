@@ -17,11 +17,11 @@ public class NavigationControl {
 	@Autowired
 	private Nav nav;
 	
-    @GetMapping(path = "/bearing", produces = "application/json")
+    @GetMapping(path = "/bearing")
     public ResponseEntity<Integer> getBearing (){
 		return new ResponseEntity<Integer>(nav.readBearing(),HttpStatus.OK);
     }
-    @GetMapping(path = "/rudder/{angle}" ,produces = "application/json")
+    @GetMapping(path = "/rudder/{angle}")
     public ResponseEntity<Integer> getRudder (@PathVariable("angle") Integer angle){
 		return new ResponseEntity<Integer>(nav.setRudder(angle),HttpStatus.OK);
     }
