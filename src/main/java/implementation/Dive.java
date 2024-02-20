@@ -12,24 +12,20 @@ public class Dive {
     private WatchDog watchDogThread;
  
     public Dive() {
-        // Initialize the watch dog thread
         watchDogThread = new WatchDog();
         watchDogThread.start();
     }
 
     public Integer setFrontAngle(Integer angle) {
-        // TODO Auto-generated method stub
-        return null;
+        return angle;
     }
 
     public Integer setBackAngle(Integer angle) {
-        // TODO Auto-generated method stub
-        return null;
+        return angle;
     }
 
     public Boolean setFillTank(Boolean action) {
-        // TODO Auto-generated method stub
-        return null;
+        return action;
     }
 
     public Integer getDepth() {
@@ -38,13 +34,11 @@ public class Dive {
         // Restart the watch dog thread
         watchDogThread = new WatchDog();
         watchDogThread.start();
-        // TODO: Implement getDepth method logic here
-        return null;
+        return 0;
     }
 
     public Integer getDiveAngle() {
-        // TODO: Implement getDiveAngle method logic here
-        return null;
+        return 0;
     }
 
     // Watch Dog thread class
