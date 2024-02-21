@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 import implementation.Nav;
 
 @RestController
-@RequestMapping(path = "/navigation")
+@RequestMapping(path = "navigation")
 public class NavigationControl {
 
 	@Autowired
 	private Nav nav;
 	
-    @GetMapping(path = "/bearing")
+    @GetMapping(path = "bearing", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Integer> getBearing (){
 		return new ResponseEntity<Integer>(nav.readBearing(),HttpStatus.OK);
     }
-    @GetMapping(path = "/rudder/{angle}")
+    @GetMapping(path = "rudder/{angle}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Integer> getRudder (@PathVariable("angle") Integer angle){
 		return new ResponseEntity<Integer>(nav.setRudder(angle),HttpStatus.OK);
     }

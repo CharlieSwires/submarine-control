@@ -1,5 +1,7 @@
 package implementation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -9,22 +11,30 @@ import org.springframework.stereotype.Component;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Dive {
 
+	Logger log = LoggerFactory.getLogger(Dive.class);
+	
     private WatchDog watchDogThread;
     private static boolean firstTime = true;
  
     public Integer setFrontAngle(Integer angle) {
+    	log.info("setFrontAngle:"+angle);
         return angle;
     }
 
     public Integer setBackAngle(Integer angle) {
+    	log.info("setBackAngle:"+angle);
         return angle;
     }
 
     public Integer setFillTank(Boolean action) {
+    	log.info("setFillTank:"+action);
+
         return action?1:0;
     }
 
     public Integer getDepth() {
+    	log.info("getDepth");
+
     	if (!firstTime) {
     		// Stop the watch dog thread
     		watchDogThread.interrupt();
@@ -37,6 +47,8 @@ public class Dive {
     }
 
     public Integer getDiveAngle() {
+    	log.info("getDiveAngle");
+
         return 0;
     }
 
@@ -64,6 +76,7 @@ public class Dive {
     }
     // Method to trigger emergency surface event
     private void emergencySurface() {
+    	log.info("emergencySurface");
         setFillTank(false);
     }
 }

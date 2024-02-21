@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 import implementation.Eng;
 
 @RestController
-@RequestMapping(path = "/engine")
+@RequestMapping(path = "engine")
 public class EngineControl {
 
 	@Autowired
 	private Eng eng;
 	
-    @GetMapping(path = "/left/{percentPower}")
+    @GetMapping(path = "left/{percentPower}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Integer> getLeft (@PathVariable("percentPower") Integer percentPower){
 		return new ResponseEntity<Integer>(eng.setPowerLeft(percentPower),HttpStatus.OK);
     }
-    @GetMapping(path = "/right/{percentPower}")
+    @GetMapping(path = "right/{percentPower}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Integer> getRudder (@PathVariable("percentPower") Integer percentPower){
 		return new ResponseEntity<Integer>(eng.setPowerRight(percentPower),HttpStatus.OK);
     }
