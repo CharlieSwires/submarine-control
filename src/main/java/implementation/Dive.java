@@ -17,23 +17,23 @@ public class Dive {
     private static boolean firstTime = true;
  
     public Integer setFrontAngle(Integer angle) {
-    	log.info("setFrontAngle:"+angle);
+    	log.debug("setFrontAngle:"+angle);
         return angle;
     }
 
     public Integer setBackAngle(Integer angle) {
-    	log.info("setBackAngle:"+angle);
+    	log.debug("setBackAngle:"+angle);
         return angle;
     }
 
     public Integer setFillTank(Boolean action) {
-    	log.info("setFillTank:"+action);
+    	log.debug("setFillTank:"+action);
 
         return action?1:0;
     }
 
     public Integer getDepth() {
-    	log.info("getDepth");
+    	log.debug("getDepth");
 
     	if (!firstTime) {
     		// Stop the watch dog thread
@@ -47,7 +47,7 @@ public class Dive {
     }
 
     public Integer getDiveAngle() {
-    	log.info("getDiveAngle");
+    	log.debug("getDiveAngle");
 
         return 0;
     }
@@ -76,7 +76,7 @@ public class Dive {
     }
     // Method to trigger emergency surface event
     private void emergencySurface() {
-    	log.info("emergencySurface");
+    	log.debug("emergencySurface");
         setFillTank(false);
     }
 }
