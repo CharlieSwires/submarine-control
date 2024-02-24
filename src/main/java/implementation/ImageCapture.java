@@ -1,5 +1,5 @@
 package implementation;
-import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class ImageCapture {
 
 
-	public Image captureImage() {
+	public BufferedImage captureImage() {
 		try {
 			// Define the output file name
 			String outputFileName = "image.jpg";
@@ -34,7 +34,7 @@ public class ImageCapture {
 
 				// Load the image from the file
 				File imageFile = new File(outputFileName);
-				Image image = ImageIO.read(imageFile);
+				BufferedImage image = ImageIO.read(imageFile);
 
 				// Return the loaded image
 				return image;
