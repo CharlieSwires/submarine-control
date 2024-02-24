@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ImageCapture {
+	Logger log = LoggerFactory.getLogger(ImageCapture.class);
 
 
 	public BufferedImage captureImage() {
@@ -30,7 +33,7 @@ public class ImageCapture {
 			// Wait for the command to finish
 			int exitVal = process.waitFor();
 			if (exitVal == 0) {
-				System.out.println("Image captured successfully");
+				log.debug("Image captured successfully");
 
 				// Load the image from the file
 				File imageFile = new File(outputFileName);
@@ -39,7 +42,7 @@ public class ImageCapture {
 				// Return the loaded image
 				return image;
 			} else {
-				System.out.println("Image capture failed");
+				log.error("Image capture failed");
 			}
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
