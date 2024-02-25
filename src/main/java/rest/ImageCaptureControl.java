@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import implementation.ImageCapture;
+import implementation.ImageCapture.Resolution;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
@@ -23,7 +24,7 @@ public class ImageCaptureControl {
     @GetMapping(path = "capture/false", produces = "image/jpeg")
     public void getImage(HttpServletResponse response) {
         try {
-            BufferedImage image = ic.captureImage(false); // Assuming captureImage() returns a BufferedImage
+            BufferedImage image = ic.captureImage(Resolution.SMALL); // Assuming captureImage() returns a BufferedImage
             if (image != null) {
                 response.setContentType("image/jpeg");
                 ImageIO.write(image, "JPEG", response.getOutputStream());
@@ -39,7 +40,7 @@ public class ImageCaptureControl {
     @GetMapping(path = "capture/true", produces = "image/jpeg")
     public void getImageFull(HttpServletResponse response) {
         try {
-            BufferedImage image = ic.captureImage(true); // Assuming captureImage() returns a BufferedImage
+            BufferedImage image = ic.captureImage(Resolution.HD); // Assuming captureImage() returns a BufferedImage
             if (image != null) {
                 response.setContentType("image/jpeg");
                 ImageIO.write(image, "JPEG", response.getOutputStream());
@@ -55,7 +56,7 @@ public class ImageCaptureControl {
     @GetMapping(path = "capture/photo", produces = "image/jpeg")
     public void getPhotoFull(HttpServletResponse response) {
         try {
-            BufferedImage image = ic.capturePhoto(); // Assuming captureImage() returns a BufferedImage
+            BufferedImage image = ic.captureImage(Resolution.PHOTO); // Assuming captureImage() returns a BufferedImage
             if (image != null) {
                 response.setContentType("image/jpeg");
                 ImageIO.write(image, "JPEG", response.getOutputStream());

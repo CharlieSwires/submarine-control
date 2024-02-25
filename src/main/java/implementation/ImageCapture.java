@@ -16,55 +16,32 @@ import org.springframework.stereotype.Component;
 public class ImageCapture {
 	Logger log = LoggerFactory.getLogger(ImageCapture.class);
 
-
-	public BufferedImage captureImage(boolean full) {
+	public static enum Resolution {
+		SMALL,
+		HD,
+		PHOTO;
+	}
+	public BufferedImage captureImage(Resolution resolution) {
 		try {
 			// Define the output file name
 			String outputFileName = "image.jpg";
 			Process process;
-				// Set the command to execute
-			if (full) {
-				process = Runtime.getRuntime().exec("libcamera-still --width=1080 --height=960 -o "+ outputFileName);
-			} else {
-				process = Runtime.getRuntime().exec("libcamera-still --width=640 --height=480 -o "+ outputFileName);
-			}
-
-
-			// Wait for the command to finish
-			int exitVal = process.waitFor();
-			if (exitVal == 0) {
-				log.debug("Image captured successfully");
-
-				// Load the image from the file
-				File imageFile = new File(outputFileName);
-				BufferedImage image = ImageIO.read(imageFile);
-
-				// Return the loaded image
-				return image;
-			} else {
-				log.error("Image capture failed");
-			}
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		// Return null if the image capture or loading failed
-		return null;
-	}
-
-
-	public BufferedImage capturePhoto() {
-		try {
-			// Define the output file name
-			String outputFileName = "image.jpg";
-
-			// Create a ProcessBuilder
-			ProcessBuilder builder = new ProcessBuilder();
 			// Set the command to execute
-			builder.command("libcamera-still", "-o", outputFileName);
+			switch (resolution) {
+			case HD:
+				process = Runtime.getRuntime().exec("libcamera-still --width=1080 --height=960 -o "+ outputFileName);
+				break;
+			case SMALL:
+				process = Runtime.getRuntime().exec("libcamera-still --width=640 --height=480 -o "+ outputFileName);
+				break;
+			case PHOTO:
+				process = Runtime.getRuntime().exec("libcamera-still -o "+ outputFileName);
+				break;
+			default:
+				throw new RuntimeException("Not implemented:"+resolution.toString());
+				
+			}
 
-			// Start the process
-			Process process = builder.start();
 
 			// Wait for the command to finish
 			int exitVal = process.waitFor();
