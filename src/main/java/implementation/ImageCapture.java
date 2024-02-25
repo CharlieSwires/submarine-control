@@ -17,7 +17,7 @@ public class ImageCapture {
 	Logger log = LoggerFactory.getLogger(ImageCapture.class);
 
 
-	public BufferedImage captureImage() {
+	public BufferedImage captureImage(boolean full) {
 		try {
 			// Define the output file name
 			String outputFileName = "image.jpg";
@@ -25,7 +25,11 @@ public class ImageCapture {
 			// Create a ProcessBuilder
 			ProcessBuilder builder = new ProcessBuilder();
 			// Set the command to execute
-			builder.command("libcamera-still", "-o", outputFileName);
+			if (full) {
+				builder.command("libcamera-still", "--width 1080 --height 960 -o", outputFileName);
+			} else {
+				builder.command("libcamera-still", "--width 640 --height 480 -o", outputFileName);
+			}
 
 			// Start the process
 			Process process = builder.start();

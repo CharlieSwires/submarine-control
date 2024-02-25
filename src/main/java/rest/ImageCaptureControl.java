@@ -20,10 +20,26 @@ public class ImageCaptureControl {
     @Autowired
     private ImageCapture ic;
 
-    @GetMapping(path = "capture", produces = "image/jpeg")
+    @GetMapping(path = "capture/false", produces = "image/jpeg")
     public void getImage(HttpServletResponse response) {
         try {
-            BufferedImage image = ic.captureImage(); // Assuming captureImage() returns a BufferedImage
+            BufferedImage image = ic.captureImage(false); // Assuming captureImage() returns a BufferedImage
+            if (image != null) {
+                response.setContentType("image/jpeg");
+                ImageIO.write(image, "JPEG", response.getOutputStream());
+                response.getOutputStream().close();
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+    @GetMapping(path = "capture/true", produces = "image/jpeg")
+    public void getImageFull(HttpServletResponse response) {
+        try {
+            BufferedImage image = ic.captureImage(true); // Assuming captureImage() returns a BufferedImage
             if (image != null) {
                 response.setContentType("image/jpeg");
                 ImageIO.write(image, "JPEG", response.getOutputStream());
