@@ -21,18 +21,14 @@ public class ImageCapture {
 		try {
 			// Define the output file name
 			String outputFileName = "image.jpg";
-
-			// Create a ProcessBuilder
-			ProcessBuilder builder = new ProcessBuilder();
-			// Set the command to execute
+			Process process;
+				// Set the command to execute
 			if (full) {
-				builder.command("libcamera-still --width=1080 --height=960", "-o", outputFileName);
+				process = Runtime.getRuntime().exec("libcamera-still --width=1080 --height=960 -o "+ outputFileName);
 			} else {
-				builder.command("libcamera-still --width=640 --height=480 ", "-o", outputFileName);
+				process = Runtime.getRuntime().exec("libcamera-still --width=640 --height=480 -o "+ outputFileName);
 			}
 
-			// Start the process
-			Process process = builder.start();
 
 			// Wait for the command to finish
 			int exitVal = process.waitFor();
