@@ -51,5 +51,21 @@ public class ImageCaptureControl {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }    
+    @GetMapping(path = "capture/photo", produces = "image/jpeg")
+    public void getPhotoFull(HttpServletResponse response) {
+        try {
+            BufferedImage image = ic.capturePhoto(); // Assuming captureImage() returns a BufferedImage
+            if (image != null) {
+                response.setContentType("image/jpeg");
+                ImageIO.write(image, "JPEG", response.getOutputStream());
+                response.getOutputStream().close();
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 }
