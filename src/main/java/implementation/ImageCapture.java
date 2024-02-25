@@ -26,9 +26,9 @@ public class ImageCapture {
 			ProcessBuilder builder = new ProcessBuilder();
 			// Set the command to execute
 			if (full) {
-				builder.command("libcamera-still", "--width 1080 --height 960 -o", outputFileName);
+				builder.command("libcamera-still --width=1080 --height=960", "-o", outputFileName);
 			} else {
-				builder.command("libcamera-still", "--width 640 --height 480 -o", outputFileName);
+				builder.command("libcamera-still --width=640 --height=480 ", "-o", outputFileName);
 			}
 
 			// Start the process
