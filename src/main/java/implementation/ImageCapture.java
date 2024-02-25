@@ -29,10 +29,10 @@ public class ImageCapture {
 			// Set the command to execute
 			switch (resolution) {
 			case HD:
-				process = Runtime.getRuntime().exec("libcamera-still --width=1080 --height=960 -o "+ outputFileName);
+				process = Runtime.getRuntime().exec("libcamera-still --width=1920 --height=1080 -o "+ outputFileName);
 				break;
 			case SMALL:
-				process = Runtime.getRuntime().exec("libcamera-still --width=640 --height=480 -o "+ outputFileName);
+				process = Runtime.getRuntime().exec("libcamera-still --width=500 --height=500 -o "+ outputFileName);
 				break;
 			case PHOTO:
 				process = Runtime.getRuntime().exec("libcamera-still -o "+ outputFileName);
