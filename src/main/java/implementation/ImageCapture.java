@@ -30,12 +30,15 @@ public class ImageCapture {
 			switch (resolution) {
 			case HD:
 				process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", "./runner.sh"});
+				log.info("runner hd");
 				break;
 			case SMALL:
 				process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", "./runner.sh"});
+				log.info("runner small");
 				break;
 			case PHOTO:
 				process = Runtime.getRuntime().exec("libcamera-still -o "+ outputFileName);
+				log.info("photo");
 				break;
 			default:
 				throw new RuntimeException("Not implemented:"+resolution.toString());
