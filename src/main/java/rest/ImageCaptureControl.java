@@ -22,11 +22,11 @@ public class ImageCaptureControl {
     private ImageCapture ic;
 
     @GetMapping(path = "capture/false", produces = "image/jpeg")
-    public void getImage(HttpServletResponse response) {
+    public void getImage() {
         ic.captureImage(Resolution.SMALL); // Assuming captureImage() returns a BufferedImage
     }
     @GetMapping(path = "capture/true", produces = "image/jpeg")
-    public void getImageFull(HttpServletResponse response) {
+    public void getImageFull() {
         ic.captureImage(Resolution.HD); // Assuming captureImage() returns a BufferedImage
 
     }    
