@@ -1,7 +1,9 @@
 package implementation;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.imageio.ImageIO;
 
@@ -31,11 +33,31 @@ public class ImageCapture {
 			case HD:
 				log.info("before runner hd");
 				process = Runtime.getRuntime().exec("runner.sh");
+				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				String line = "";
+				while ((line = reader.readLine()) != null) {
+				    System.out.println(line);
+				}
+				BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+				String errorLine = "";
+				while ((errorLine = errorReader.readLine()) != null) {
+				    System.err.println(errorLine);
+				}
 				log.info("runner hd");
 				break;
 			case SMALL:
 				log.info("before runner small");
 				process = Runtime.getRuntime().exec("runner.sh");
+				reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				line = "";
+				while ((line = reader.readLine()) != null) {
+				    System.out.println(line);
+				}
+				errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+				errorLine = "";
+				while ((errorLine = errorReader.readLine()) != null) {
+				    System.err.println(errorLine);
+				}				
 				log.info("runner small");
 				break;
 			case PHOTO:
