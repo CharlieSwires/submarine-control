@@ -14,13 +14,13 @@ public class Eng {
 	public Integer setPowerLeft(Integer percentPower) {
 		log.debug("setPowerLeft:"+percentPower+"%");
 		// TODO Auto-generated method stub
-		return null;
+		return percentPower;
 	}
 
 	public Integer setPowerRight(Integer percentPower) {
 		log.debug("setPowerRight:"+percentPower+"%");
 		// TODO Auto-generated method stub
-		return null;
+		return percentPower;
 	}
 
 }

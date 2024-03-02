@@ -1,12 +1,11 @@
 implementation\Eng.class
-rest\EngineControl.class
-implementation\Dive.class
-rest\ImageCaptureControl.class
-implementation\ImageCapture$Resolution.class
-implementation\ImageCapture$1.class
 implementation\ImageCapture.class
+rest\EngineControl.class
 rest\MainApp.class
+implementation\Dive.class
 rest\NavigationControl.class
 implementation\Nav.class
+rest\ImageCaptureControl.class
+implementation\ImageCapture$Resolution.class
 rest\DiveControl.class
 implementation\Dive$WatchDog.class

@@ -14,13 +14,13 @@ public class Nav {
 	public Integer readBearing() {
 		log.debug("readBearing");
 		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
 
 	public Integer setRudder(Integer angle) {
 		log.debug("setRudder:"+angle+"degrees");
 		// TODO Auto-generated method stub
-		return null;
+		return angle;
 	}
 
 }
