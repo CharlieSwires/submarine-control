@@ -23,35 +23,12 @@ public class ImageCaptureControl {
 
     @GetMapping(path = "capture/false", produces = "image/jpeg")
     public void getImage(HttpServletResponse response) {
-        try {
-            BufferedImage image = ic.captureImage(Resolution.SMALL); // Assuming captureImage() returns a BufferedImage
-            if (image != null) {
-                response.setContentType("image/jpeg");
-                ImageIO.write(image, "JPEG", response.getOutputStream());
-                response.getOutputStream().close();
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+        ic.captureImage(Resolution.SMALL); // Assuming captureImage() returns a BufferedImage
     }
     @GetMapping(path = "capture/true", produces = "image/jpeg")
     public void getImageFull(HttpServletResponse response) {
-        try {
-            BufferedImage image = ic.captureImage(Resolution.HD); // Assuming captureImage() returns a BufferedImage
-            if (image != null) {
-                response.setContentType("image/jpeg");
-                ImageIO.write(image, "JPEG", response.getOutputStream());
-                response.getOutputStream().close();
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+        ic.captureImage(Resolution.HD); // Assuming captureImage() returns a BufferedImage
+
     }    
     @GetMapping(path = "capture/photo", produces = "image/jpeg")
     public void getPhotoFull(HttpServletResponse response) {
