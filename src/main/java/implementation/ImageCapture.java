@@ -29,10 +29,10 @@ public class ImageCapture {
 			// Set the command to execute
 			switch (resolution) {
 			case HD:
-				process = Runtime.getRuntime().exec("libcamera-still --width=1920 --height=1080 -o "+ outputFileName);
+				process = Runtime.getRuntime().exec("pkill vlc");
 				break;
 			case SMALL:
-				process = Runtime.getRuntime().exec("libcamera-still --width=500 --height=500 -o "+ outputFileName);
+				process = Runtime.getRuntime().exec("libcamera-vid -t 0 --width 640 --height 480 --codec yuv420 --framerate 10 --inline --listen -o - | cvlc -vvv stream:///dev/stdin --sout '#transcode{vcodec=h264,vb=800,scale=Auto,acodec=none}:rtp{sdp=rtsp://192.168.137.205:8554/}' --demux=rawvideo --rawvid-fps=10 --rawvid-width=640 --rawvid-height=480 --rawvid-chroma=I420&");
 				break;
 			case PHOTO:
 				process = Runtime.getRuntime().exec("libcamera-still -o "+ outputFileName);
@@ -45,7 +45,7 @@ public class ImageCapture {
 
 			// Wait for the command to finish
 			int exitVal = process.waitFor();
-			if (exitVal == 0) {
+			if (resolution == Resolution.PHOTO && exitVal == 0) {
 				log.debug("Image captured successfully");
 
 				// Load the image from the file
