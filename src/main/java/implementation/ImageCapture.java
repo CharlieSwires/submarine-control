@@ -29,10 +29,12 @@ public class ImageCapture {
 			// Set the command to execute
 			switch (resolution) {
 			case HD:
+				log.info("before runner hd");
 				process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", "./runner.sh"});
 				log.info("runner hd");
 				break;
 			case SMALL:
+				log.info("before runner small");
 				process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", "./runner.sh"});
 				log.info("runner small");
 				break;
