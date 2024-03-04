@@ -71,7 +71,7 @@ public class Eng {
 	}
 
 	public Integer setPowerLeft(Integer percentPower) {
-		log.debug("setPowerLeft:" + percentPower + "%");
+		log.info("setPowerLeft:" + percentPower + "%");
 
 		// Set direction based on the sign of percentPower
 		motor1pinA.setState(percentPower >= 0);
@@ -84,7 +84,7 @@ public class Eng {
 	}
 
 	public Integer setPowerRight(Integer percentPower) {
-		log.debug("setPowerRight:" + percentPower + "%");
+		log.info("setPowerRight:" + percentPower + "%");
 
 		// Set direction based on the sign of percentPower
 		motor2pinA.setState(percentPower >= 0);
