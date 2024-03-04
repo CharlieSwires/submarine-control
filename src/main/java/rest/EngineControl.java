@@ -22,7 +22,7 @@ public class EngineControl {
 		return new ResponseEntity<Integer>(eng.setPowerLeft(percentPower),HttpStatus.OK);
     }
     @GetMapping(path = "right/{percentPower}", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Integer> getRudder (@PathVariable("percentPower") Integer percentPower){
+    public ResponseEntity<Integer> getRight (@PathVariable("percentPower") Integer percentPower){
 		return new ResponseEntity<Integer>(eng.setPowerRight(percentPower),HttpStatus.OK);
     }
 
