@@ -15,7 +15,6 @@ import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfigBuilder;
 
 @Component
-@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Eng {
     private static final Logger log = LoggerFactory.getLogger(Eng.class);
 
@@ -61,7 +60,7 @@ public class Eng {
                 .address(address)
                 .id(id)
                 .frequency(500) // Set the PWM frequency if necessary
-                .dutyCycle(0); // Start with 0% duty cycle
+                .dutyCycle(0.0); // Start with 0% duty cycle
     }
 
     public Integer setPowerLeft(Integer percentPower) {
