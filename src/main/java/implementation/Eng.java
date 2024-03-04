@@ -13,7 +13,6 @@ import com.pi4j.io.gpio.digital.DigitalOutputConfigBuilder;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfigBuilder;
-import com.pi4j.platform.Platforms;
 import com.pi4j.provider.exception.ProviderException;
 
 @Component
@@ -37,49 +36,37 @@ public class Eng {
 
 	public Eng() {
 		try {
-		// Initialize Pi4J with auto context
-		pi4j = Pi4J.newAutoContext();
+			// Initialize Pi4J with auto context
+			pi4j = Pi4J.newAutoContext();
 
-		// Initialize GPIO digital output pins for motor direction control
-		motor1pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_A, "M1A"));
-		motor1pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_B, "M1B"));
-		motor2pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_A, "M2A"));
-		motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
+			// Initialize GPIO digital output pins for motor direction control
+			motor1pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_A, "M1A"));
+			motor1pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_B, "M1B"));
+			motor2pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_A, "M2A"));
+			motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
 
-		// Initialize PWM pins for motor speed control
-		motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
-		motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
+			// Initialize PWM pins for motor speed control
+			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
+			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	private DigitalOutputConfigBuilder buildDigitalOutputConfig(int address, String id) {
-		try {
-			return DigitalOutput.newConfigBuilder(pi4j)
-					.address(pi4j.defaultPlatform().getDigitalOutputProvider().create(address))
-					.id(id)
-					.shutdown(DigitalState.LOW)
-					.initial(DigitalState.LOW);
-		} catch (ProviderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		return DigitalOutput.newConfigBuilder(pi4j)
+				.address(address)
+				.id(id)
+				.shutdown(DigitalState.LOW)
+				.initial(DigitalState.LOW);
 	}
 
 	private PwmConfigBuilder buildPwmConfig(int address, String id) {
-		try {
-			return Pwm.newConfigBuilder(pi4j)
-					.address(pi4j.defaultPlatform().getDigitalOutputProvider().create(address))
-					.id(id)
-					.frequency(500) // Set the PWM frequency if necessary
-					.dutyCycle(0.0); // Start with 0% duty cycle
-		} catch (ProviderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		return Pwm.newConfigBuilder(pi4j)
+				.address(address)
+				.id(id)
+				.frequency(500) // Set the PWM frequency if necessary
+				.dutyCycle(0.0); // Start with 0% duty cycle
 	}
 
 	public Integer setPowerLeft(Integer percentPower) {
