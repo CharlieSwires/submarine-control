@@ -67,7 +67,7 @@ public class Eng {
 				.address(address)
 				.id(id)
 				.frequency(500) // Set the PWM frequency if necessary
-				.dutyCycle(0.0); // Start with 0% duty cycle
+				.dutyCycle(0); // Start with 0% duty cycle
 	}
 
 	public Integer setPowerLeft(Integer percentPower) {
