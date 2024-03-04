@@ -72,7 +72,7 @@ public class Eng {
         motor1pinB.setState(percentPower < 0);
 
         // Set speed using the absolute value of percentPower
-        motor1pinE.dutyCycle(Math.abs(percentPower) / 100.0);
+        motor1pinE.dutyCycle(Math.abs(percentPower));
 
         return percentPower;
     }
@@ -85,7 +85,7 @@ public class Eng {
         motor2pinB.setState(percentPower < 0);
 
         // Set speed using the absolute value of percentPower
-        motor2pinE.dutyCycle(Math.abs(percentPower) / 100.0);
+        motor2pinE.dutyCycle(Math.abs(percentPower));
 
         return percentPower;
     }
