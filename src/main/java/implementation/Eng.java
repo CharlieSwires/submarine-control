@@ -15,6 +15,7 @@ import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfigBuilder;
 
 @Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Eng {
     private static final Logger log = LoggerFactory.getLogger(Eng.class);
 
@@ -33,6 +34,7 @@ public class Eng {
     private Context pi4j;
 
     public Eng() {
+    	try {
         // Initialize Pi4J with auto context
         pi4j = Pi4J.newAutoContext();
 
@@ -45,6 +47,9 @@ public class Eng {
         // Initialize PWM pins for motor speed control
         motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
         motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
     }
 
     private DigitalOutputConfigBuilder buildDigitalOutputConfig(int address, String id) {
