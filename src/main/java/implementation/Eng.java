@@ -20,12 +20,12 @@ public class Eng {
     private static final Logger log = LoggerFactory.getLogger(Eng.class);
 
     // Motor 1 (Left Motor) Pins
-    private static final int MOTOR_1_PIN_E = 6; // PWM pin for left motor speed
+    private static final int MOTOR_1_PIN_E = 12; // PWM pin for left motor speed
     private static final int MOTOR_1_PIN_A = 4; // Direction pin A for left motor
     private static final int MOTOR_1_PIN_B = 5; // Direction pin B for left motor
 
     // Motor 2 (Right Motor) Pins
-    private static final int MOTOR_2_PIN_E = 3; // PWM pin for right motor speed
+    private static final int MOTOR_2_PIN_E = 13; // PWM pin for right motor speed
     private static final int MOTOR_2_PIN_A = 0; // Direction pin A for right motor
     private static final int MOTOR_2_PIN_B = 2; // Direction pin B for right motor
 
@@ -34,7 +34,6 @@ public class Eng {
     private Context pi4j;
 
     public Eng() {
-    	try {
         // Initialize Pi4J with auto context
         pi4j = Pi4J.newAutoContext();
 
@@ -47,9 +46,6 @@ public class Eng {
         // Initialize PWM pins for motor speed control
         motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
         motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    	}
     }
 
     private DigitalOutputConfigBuilder buildDigitalOutputConfig(int address, String id) {
