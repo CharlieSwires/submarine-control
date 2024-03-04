@@ -36,6 +36,7 @@ public class Eng {
 	private Context pi4j;
 
 	public Eng() {
+		try {
 		// Initialize Pi4J with auto context
 		pi4j = Pi4J.newAutoContext();
 
@@ -48,6 +49,9 @@ public class Eng {
 		// Initialize PWM pins for motor speed control
 		motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
 		motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private DigitalOutputConfigBuilder buildDigitalOutputConfig(int address, String id) {
