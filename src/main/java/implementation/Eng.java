@@ -50,6 +50,7 @@ public class Eng {
 			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new RuntimeException("Abort");
 		}
 	}
 
