@@ -70,7 +70,21 @@
     <version>2.4.0</version>
     <scope>compile</scope>
 </dependency>
-  </dependencies>
+
+    <!-- Pi4J Plugin for Raspberry Pi -->
+<dependency>
+    <groupId>com.pi4j</groupId>
+    <artifactId>pi4j-plugin-raspberrypi</artifactId>
+    <version>2.4.0</version>
+</dependency>
+
+    <!-- Pi4J Plugin for GPIO Digital Output -->
+<dependency>
+    <groupId>com.pi4j</groupId>
+    <artifactId>pi4j-plugin-pigpio</artifactId>
+    <version>2.4.0</version>
+</dependency>
+</dependencies>
   
 <build>
     <finalName>${project.artifactId}</finalName>
