@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalOutput;
+import com.pi4j.io.gpio.digital.DigitalOutputConfig;
 import com.pi4j.io.gpio.digital.DigitalOutputConfigBuilder;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.pwm.Pwm;
@@ -55,12 +56,13 @@ public class Eng {
 		}
 	}
 
-	private DigitalOutputConfigBuilder buildDigitalOutputConfig(int address, String id) {
+	private DigitalOutputConfig buildDigitalOutputConfig(int address, String id) {
 		return DigitalOutput.newConfigBuilder(pi4j)
 				.address(address)
 				.id(id)
 				.shutdown(DigitalState.LOW)
-				.initial(DigitalState.LOW);
+				.initial(DigitalState.LOW)
+				.build();
 	}
 
 	private PwmConfig buildPwmConfig(int address, String id) {
