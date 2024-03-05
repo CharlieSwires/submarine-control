@@ -79,7 +79,7 @@ public class Eng {
 
 		// Set speed using the absolute value of percentPower
 		motor1pinE.on(Math.abs(percentPower), 500);
-
+		log.info("type : " +motor1pinE.pwmType());
 		return percentPower;
 	}
 
@@ -92,6 +92,7 @@ public class Eng {
 
 		// Set speed using the absolute value of percentPower
 		motor2pinE.on(Math.abs(percentPower), 500);
+		log.info("type : " +motor2pinE.pwmType());
 
 		return percentPower;
 	}
