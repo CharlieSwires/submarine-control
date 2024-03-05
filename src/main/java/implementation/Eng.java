@@ -10,11 +10,9 @@ import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfig;
-import com.pi4j.io.gpio.digital.DigitalOutputConfigBuilder;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
-import com.pi4j.io.pwm.PwmConfigBuilder;
 import com.pi4j.io.pwm.PwmType;
 
 @Component
@@ -72,6 +70,7 @@ public class Eng {
 				.pwmType(PwmType.HARDWARE)
 				.frequency(800) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
+                .provider("pigpio-pwm")
 				.build();
 	}
 
