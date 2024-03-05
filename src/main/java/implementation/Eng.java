@@ -47,7 +47,7 @@ public class Eng {
 
 			// Initialize PWM pins for motor speed control
 			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "BCM12"));
-			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "BCM18"));
+			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "BCM19"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Abort");
@@ -60,6 +60,7 @@ public class Eng {
 				.id(id)
 				.shutdown(DigitalState.LOW)
 				.initial(DigitalState.LOW)
+				.provider("pigpio-digital-output")
 				.build();
 	}
 
