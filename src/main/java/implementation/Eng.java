@@ -66,7 +66,7 @@ public class Eng {
 		return Pwm.newConfigBuilder(pi4j)
 				.address(address)
 				.id(id)
-				//.frequency(500) // Set the PWM frequency if necessary
+				.frequency(500) // Set the PWM frequency if necessary
 				.dutyCycle(0); // Start with 0% duty cycle
 	}
 
@@ -79,6 +79,7 @@ public class Eng {
 
 		// Set speed using the absolute value of percentPower
 		motor1pinE.dutyCycle(Math.abs(percentPower));
+		motor1pinE.on();
 
 		return percentPower;
 	}
@@ -92,6 +93,7 @@ public class Eng {
 
 		// Set speed using the absolute value of percentPower
 		motor2pinE.dutyCycle(Math.abs(percentPower));
+		motor2pinE.on();
 
 		return percentPower;
 	}
