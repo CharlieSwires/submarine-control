@@ -26,7 +26,7 @@ public class Eng {
 	private static final int MOTOR_1_PIN_B = 5; // Direction pin B for left motor
 
 	// Motor 2 (Right Motor) Pins
-	private static final int MOTOR_2_PIN_E = 3; // PWM pin for right motor speed
+	private static final int MOTOR_2_PIN_E = 16; // PWM pin for right motor speed
 	private static final int MOTOR_2_PIN_A = 0; // Direction pin A for right motor
 	private static final int MOTOR_2_PIN_B = 2; // Direction pin B for right motor
 
@@ -66,7 +66,7 @@ public class Eng {
 		return Pwm.newConfigBuilder(pi4j)
 				.address(address)
 				.id(id)
-				.frequency(500) // Set the PWM frequency if necessary
+				.frequency(50) // Set the PWM frequency if necessary
 				.dutyCycle(0); // Start with 0% duty cycle
 	}
 
@@ -78,7 +78,7 @@ public class Eng {
 		motor1pinB.setState(percentPower < 0);
 
 		// Set speed using the absolute value of percentPower
-		motor1pinE.on(Math.abs(percentPower), 500);
+		motor1pinE.on(Math.abs(percentPower), 50);
 		log.info("type : " +motor1pinE.pwmType());
 		return percentPower;
 	}
@@ -91,7 +91,7 @@ public class Eng {
 		motor2pinB.setState(percentPower < 0);
 
 		// Set speed using the absolute value of percentPower
-		motor2pinE.on(Math.abs(percentPower), 500);
+		motor2pinE.on(Math.abs(percentPower), 50);
 		log.info("type : " +motor2pinE.pwmType());
 
 		return percentPower;
