@@ -13,7 +13,6 @@ import com.pi4j.io.gpio.digital.DigitalOutputConfigBuilder;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfigBuilder;
-import com.pi4j.provider.exception.ProviderException;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -66,7 +65,7 @@ public class Eng {
 		return Pwm.newConfigBuilder(pi4j)
 				.address(address)
 				.id(id)
-				.frequency(50) // Set the PWM frequency if necessary
+				.frequency(10) // Set the PWM frequency if necessary
 				.dutyCycle(0); // Start with 0% duty cycle
 	}
 
@@ -78,7 +77,7 @@ public class Eng {
 		motor1pinB.setState(percentPower < 0);
 
 		// Set speed using the absolute value of percentPower
-		motor1pinE.on(Math.abs(percentPower), 50);
+		motor1pinE.on(Math.abs(percentPower));
 		log.info("type : " +motor1pinE.pwmType());
 		return percentPower;
 	}
@@ -91,7 +90,7 @@ public class Eng {
 		motor2pinB.setState(percentPower < 0);
 
 		// Set speed using the absolute value of percentPower
-		motor2pinE.on(Math.abs(percentPower), 50);
+		motor2pinE.on(Math.abs(percentPower));
 		log.info("type : " +motor2pinE.pwmType());
 
 		return percentPower;
