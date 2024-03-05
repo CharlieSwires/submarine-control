@@ -21,12 +21,12 @@ public class Eng {
 	private static final Logger log = LoggerFactory.getLogger(Eng.class);
 
 	// Motor 1 (Left Motor) Pins
-	private static final int MOTOR_1_PIN_E = 12; // PWM pin for left motor speed
+	private static final int MOTOR_1_PIN_E = 32; // PWM pin for left motor speed
 	private static final int MOTOR_1_PIN_A = 4; // Direction pin A for left motor
 	private static final int MOTOR_1_PIN_B = 5; // Direction pin B for left motor
 
 	// Motor 2 (Right Motor) Pins
-	private static final int MOTOR_2_PIN_E = 13; // PWM pin for right motor speed
+	private static final int MOTOR_2_PIN_E = 33; // PWM pin for right motor speed
 	private static final int MOTOR_2_PIN_A = 0; // Direction pin A for right motor
 	private static final int MOTOR_2_PIN_B = 2; // Direction pin B for right motor
 
