@@ -12,7 +12,9 @@ import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfigBuilder;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.pwm.Pwm;
+import com.pi4j.io.pwm.PwmConfig;
 import com.pi4j.io.pwm.PwmConfigBuilder;
+import com.pi4j.io.pwm.PwmType;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -20,12 +22,12 @@ public class Eng {
 	private static final Logger log = LoggerFactory.getLogger(Eng.class);
 
 	// Motor 1 (Left Motor) Pins
-	private static final int MOTOR_1_PIN_E = 31; // PWM pin for left motor speed
+	private static final int MOTOR_1_PIN_E = 12; // PWM pin for left motor speed
 	private static final int MOTOR_1_PIN_A = 4; // Direction pin A for left motor
 	private static final int MOTOR_1_PIN_B = 5; // Direction pin B for left motor
 
 	// Motor 2 (Right Motor) Pins
-	private static final int MOTOR_2_PIN_E = 36; // PWM pin for right motor speed
+	private static final int MOTOR_2_PIN_E = 13; // PWM pin for right motor speed
 	private static final int MOTOR_2_PIN_A = 0; // Direction pin A for right motor
 	private static final int MOTOR_2_PIN_B = 2; // Direction pin B for right motor
 
@@ -61,12 +63,14 @@ public class Eng {
 				.initial(DigitalState.LOW);
 	}
 
-	private PwmConfigBuilder buildPwmConfig(int address, String id) {
+	private PwmConfig buildPwmConfig(int address, String id) {
 		return Pwm.newConfigBuilder(pi4j)
 				.address(address)
 				.id(id)
-				.frequency(10) // Set the PWM frequency if necessary
-				.dutyCycle(0); // Start with 0% duty cycle
+				.pwmType(PwmType.HARDWARE)
+				.frequency(500) // Set the PWM frequency if necessary
+				.dutyCycle(0) // Start with 0% duty cycle
+				.build();
 	}
 
 	public Integer setPowerLeft(Integer percentPower) {
