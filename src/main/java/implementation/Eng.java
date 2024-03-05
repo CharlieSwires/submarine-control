@@ -48,8 +48,8 @@ public class Eng {
 			motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
 
 			// Initialize PWM pins for motor speed control
-			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
-			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
+			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "BCM12"));
+			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "BCM18"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Abort");
@@ -68,7 +68,7 @@ public class Eng {
 	private PwmConfig buildPwmConfig(int address, String id) {
 		return Pwm.newConfigBuilder(pi4j)
 				.address(address)
-				.id(id)
+                .id(id)
 				.pwmType(PwmType.SOFTWARE)
 				.frequency(10) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
