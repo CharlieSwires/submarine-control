@@ -69,8 +69,8 @@ public class Eng {
 		return Pwm.newConfigBuilder(pi4j)
 				.address(address)
 				.id(id)
-				.pwmType(PwmType.HARDWARE)
-				.frequency(500) // Set the PWM frequency if necessary
+				.pwmType(PwmType.SOFTWARE)
+				.frequency(10) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
 				.build();
 	}
