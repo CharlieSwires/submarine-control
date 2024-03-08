@@ -25,5 +25,9 @@ public class EngineControl {
     public ResponseEntity<Integer> getRight (@PathVariable("percentPower") Integer percentPower){
 		return new ResponseEntity<Integer>(eng.setPowerRight(percentPower),HttpStatus.OK);
     }
+    @GetMapping(path = "cpu-temp", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Integer> getTemperature (){
+		return new ResponseEntity<Integer>(eng.getTemperature(),HttpStatus.OK);
+    }
 
 }

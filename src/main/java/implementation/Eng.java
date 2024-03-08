@@ -1,5 +1,9 @@
 package implementation;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -46,8 +50,8 @@ public class Eng {
 			motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
 
 			// Initialize PWM pins for motor speed control
-			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "BCM12"));
-			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "BCM19"));
+			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
+			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Abort");
@@ -101,4 +105,27 @@ public class Eng {
 
 		return percentPower;
 	}
-}
+
+
+    public Integer getTemperature() {
+        try {
+            // Execute the command to get the temperature
+            Process process = Runtime.getRuntime().exec("vcgencmd measure_temp");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            // Read the command output
+            String line = reader.readLine();
+            if (line != null && !line.isEmpty()) {
+                // Extract the temperature value from the output string
+                // The output is in the format: temp=XX.X'C
+                String tempString = line.split("=")[1].replace("'C", "");
+                
+                // Convert to double, multiply by 10, and then to integer
+                Double tempDouble = Double.parseDouble(tempString) * 10;
+                return tempDouble.intValue();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -999; 
+    }}
