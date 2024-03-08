@@ -43,6 +43,8 @@ EngineControl
 
 <p>http://192.168.137.205:8080/submarine/engine/left/{percentPower}</p>
 <p>http://192.168.137.205:8080/submarine/engine/right/{percentPower}</p>
+<p>http://192.168.137.205:8080/submarine/engine/cpu-temp</p>
+<p>returns integer Celcius * 10</p>
 
 DiveControl
 -----------
