@@ -21,8 +21,11 @@ This is for the first time or after you make a change in your repo.</p>
 <p>type: cd submarine-control</p>
 <p>type: chmod 777 runner.sh</p>
 <p>type: chmod 777 libcam.sh</p>
+<p>type: chmod 777 runnerHD.sh</p>
+<p>type: chmod 777 libcamHD.sh</p>
 <p>type: cd ..</p>
-<p>type: ~/submarine-control/runner.sh</p>
+<p>type for SD: ~/submarine-control/runner.sh</p>
+<p>or type for HD not both: ~/submarine-control/runnerHD.sh</p>
 <p> I put the cd's and chmod's into the .bashrc just so logging in corrects the permissions.</p>
 <p> running the runner from .bashrc doesn't work fully: the java works but not the libcam.</p>
 
