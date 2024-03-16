@@ -26,13 +26,13 @@ public class Eng {
 
 	// Motor 1 (Left Motor) Pins
 	private static final int MOTOR_1_PIN_E = 12; // PWM pin for left motor speed
-	private static final int MOTOR_1_PIN_A = 4; // Direction pin A for left motor
-	private static final int MOTOR_1_PIN_B = 5; // Direction pin B for left motor
+	private static final int MOTOR_1_PIN_A = 17; // Direction pin A for left motor
+	private static final int MOTOR_1_PIN_B = 27; // Direction pin B for left motor
 
 	// Motor 2 (Right Motor) Pins
 	private static final int MOTOR_2_PIN_E = 19; // PWM pin for right motor speed
-	private static final int MOTOR_2_PIN_A = 0; // Direction pin A for right motor
-	private static final int MOTOR_2_PIN_B = 2; // Direction pin B for right motor
+	private static final int MOTOR_2_PIN_A = 5; // Direction pin A for right motor
+	private static final int MOTOR_2_PIN_B = 6; // Direction pin B for right motor
 
 	private DigitalOutput motor1pinA, motor1pinB, motor2pinA, motor2pinB;
 	private Pwm motor1pinE, motor2pinE;
