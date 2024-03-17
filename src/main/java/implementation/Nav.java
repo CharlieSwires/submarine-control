@@ -85,8 +85,8 @@ public class Nav {
 			byte[] magData = new byte[9];
 			deviceMag.readRegister(0x03, magData, 3, 6);
 
-			short xMag = (short) (((magData[3] & 0xFF) << 8) | (magData[4] & 0xFF));
-			short yMag = (short) (((magData[7] & 0xFF) << 8) | (magData[8] & 0xFF));
+			short xMag = (short) (((magData[0] & 0xFF) << 8) | (magData[1] & 0xFF));
+			short yMag = (short) (((magData[4] & 0xFF) << 8) | (magData[5] & 0xFF));
 			log.info("readBearing: x = " + xMag + " y = " + yMag);
 
 			// Adjust values if they are negative
