@@ -2,6 +2,7 @@ package implementation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Component;
 public class Dive {
 
 	Logger log = LoggerFactory.getLogger(Dive.class);
+	
+	@Autowired
+	private Nav nav;
 	
     private WatchDog watchDogThread;
     private static boolean firstTime = true;
@@ -49,7 +53,7 @@ public class Dive {
     public Integer getDiveAngle() {
     	log.debug("getDiveAngle");
 
-        return 0;
+        return nav.getDiveAngle();
     }
 
     // Watch Dog thread class
@@ -59,10 +63,10 @@ public class Dive {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    // Sleep for 500 milliseconds
+                    // Sleep for 1000 milliseconds
                     Thread.sleep(1000);
 
-                    // Check if getDepth method hasn't been called within 200ms
+                    // Check if getDepth method hasn't been called within 1000ms
                     if (!Thread.currentThread().isInterrupted()) {
                         // Trigger emergency surface event
                         emergencySurface();
