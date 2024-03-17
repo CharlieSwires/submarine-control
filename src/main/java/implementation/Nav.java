@@ -36,19 +36,21 @@ public class Nav {
 					.id("LSM303DLHC-Accl")
 					.name("LSM303DLHC Accelerometer")
 					.bus(1)
-					.device(0x19);
+					.device(0x19)
+					.provider("pigpio-i2c");
+;
 
 			// Create I2C config for magnetometer (LSM303DLHC)
 			I2CConfigBuilder configMag = I2C.newConfigBuilder(pi4j)
 					.id("LSM303DLHC-Mag")
 					.name("LSM303DLHC Magnetometer")
 					.bus(1)
-					.device(0x1E);
+					.device(0x1E)
+					.provider("pigpio-i2c");
 
 			// Get I2C provider and create I2C instances
-			I2CProvider i2cProvider = pi4j.provider("pigpio-i2c");
-			deviceAccl = i2cProvider.create(configAccl.build());
-			deviceMag = i2cProvider.create(configMag.build());
+			deviceAccl = pi4j.create(configAccl.build());
+			deviceMag = pi4j.create(configMag.build());
 
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x20, (byte) 0x27); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
