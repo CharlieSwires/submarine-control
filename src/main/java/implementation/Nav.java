@@ -78,14 +78,14 @@ public class Nav {
 
 
 	public Integer readBearing() {
-		log.debug("readBearing");
+		log.info("readBearing");
 		try {
 			byte[] magData = new byte[6];
 			deviceMag.readRegister(0x03, magData, 0, 6);
 
 			short xMag = (short) (((magData[0] & 0xFF) << 8) | (magData[1] & 0xFF));
 			short yMag = (short) (((magData[4] & 0xFF) << 8) | (magData[5] & 0xFF));
-			log.debug("readBearing: x = " + xMag + " y = " + yMag);
+			log.info("readBearing: x = " + xMag + " y = " + yMag);
 
 			// Adjust values if they are negative
 			if (xMag > 32767) xMag -= 65536;
