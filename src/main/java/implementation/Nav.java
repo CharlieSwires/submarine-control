@@ -55,6 +55,7 @@ public class Nav {
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x20, (byte) 0x27); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
 			deviceAccl.writeRegister(0x23, (byte) 0x00); // Full scale +/- 2g, continuous update
+			Thread.sleep(500); // Wait for settings to take effect
 
 			// Initialize magnetometer
 			deviceMag.writeRegister(0x02, (byte) 0x00); // Continuous conversion mode
