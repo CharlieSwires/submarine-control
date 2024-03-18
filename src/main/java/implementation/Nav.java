@@ -12,6 +12,7 @@ import com.pi4j.context.Context;
 import com.pi4j.io.exception.IOException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
+import com.pi4j.io.i2c.I2CProvider;
 
 import jakarta.annotation.PostConstruct;
 
@@ -29,6 +30,7 @@ public class Nav {
 		try {
 			// Initialize Pi4J with auto context
 			pi4j = Pi4J.newAutoContext();
+	        I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
 
 			// Create I2C config for accelerometer (LSM303DLHC)
 			I2CConfig configAccl = I2C.newConfigBuilder(pi4j)
@@ -36,7 +38,7 @@ public class Nav {
 					.name("LSM303DLHC Accelerometer")
 					.bus(1)
 					.device(0x19)
-					.provider("linuxfs-i2c").build();
+					.build();
 			;
 
 			// Create I2C config for magnetometer (LSM303DLHC)
@@ -45,11 +47,11 @@ public class Nav {
 					.name("LSM303DLHC Magnetometer")
 					.bus(1)
 					.device(0x1E)
-					.provider("linuxfs-i2c").build();
+					.build();
 
 			// Get I2C provider and create I2C instances
-			deviceAccl = pi4j.create(configAccl);
-			deviceMag = pi4j.create(configMag);
+			deviceAccl = i2CProvider.create(configAccl);
+			deviceMag = i2CProvider.create(configMag);
 
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x20, (byte) 0x27); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
