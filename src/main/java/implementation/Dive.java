@@ -105,7 +105,7 @@ public class Dive {
 					byte[] acclData = new byte[6];
 					deviceAccl.readRegister(0x28, acclData, 0, 6);
 					try {
-						Thread.sleep(10);
+						Thread.sleep(20);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
