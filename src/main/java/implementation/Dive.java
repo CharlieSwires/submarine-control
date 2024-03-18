@@ -51,7 +51,7 @@ public class Dive {
 			deviceAccl.writeRegister(0x21, (byte) 0x00); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
 			deviceAccl.writeRegister(0x22, (byte) 0x00); // Full scale +/- 2g, continuous update
 			deviceAccl.writeRegister(0x23, (byte) 0x81); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
-			deviceAccl.writeRegister(0x20, (byte) 0x57); // Full scale +/- 2g, continuous update
+			deviceAccl.writeRegister(0x20, (byte) 0x27); // Full scale +/- 2g, continuous update
 
 
 			Thread.sleep(500); // Wait for settings to take effect
