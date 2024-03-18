@@ -52,7 +52,7 @@ public class Dive {
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
-			deviceAccl.writeRegister(0x23, (byte) 0x80); //not continuous normal SPI disabled
+			deviceAccl.writeRegister(0x23, (byte) 0x00); //continuous normal SPI disabled
 			deviceAccl.writeRegister(0x20, (byte) 0x67); //normal power 200Hz xyz enabled
 
 
