@@ -30,12 +30,12 @@ public class Nav {
 		try {
 			// Initialize Pi4J with auto context
 			pi4j = Pi4J.newAutoContext();
-	        I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
+			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
 
 			// Create I2C config for accelerometer (LSM303DLHC)
 			I2CConfig configAccl = I2C.newConfigBuilder(pi4j)
-					.id("LSM303DLHC-Accl")
-					.name("LSM303DLHC Accelerometer")
+					.id("LSM303AGR-Accl")
+					.name("LSM303AGR Accelerometer")
 					.bus(1)
 					.device(0x19)
 					.build();
@@ -43,8 +43,8 @@ public class Nav {
 
 			// Create I2C config for magnetometer (LSM303DLHC)
 			I2CConfig configMag = I2C.newConfigBuilder(pi4j)
-					.id("LSM303DLHC-Mag")
-					.name("LSM303DLHC Magnetometer")
+					.id("LSM303AGR-Mag")
+					.name("LSM303AGR Magnetometer")
 					.bus(1)
 					.device(0x1E)
 					.build();
@@ -54,16 +54,16 @@ public class Nav {
 			deviceMag = i2CProvider.create(configMag);
 
 			// Initialize accelerometer
-			deviceAccl.writeRegister(0x20, (byte) 0x27); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
-			deviceAccl.writeRegister(0x23, (byte) 0x00); // Full scale +/- 2g, continuous update
-			Thread.sleep(500); // Wait for settings to take effect
+//			deviceAccl.writeRegister(0x20, (byte) 0x27); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
+//			deviceAccl.writeRegister(0x23, (byte) 0x00); // Full scale +/- 2g, continuous update
+//			Thread.sleep(500); // Wait for settings to take effect
 
 			// Initialize magnetometer
-			deviceMag.writeRegister(0x02, (byte) 0x00); // Continuous conversion mode
-			deviceMag.writeRegister(0x00, (byte) 0x10); // Data output rate = 15Hz
-			deviceMag.writeRegister(0x01, (byte) 0x20); // Set gain = +/- 1.3g
+			//			deviceMag.writeRegister(0x02, (byte) 0x00); // Continuous conversion mode
+			//			deviceMag.writeRegister(0x00, (byte) 0x10); // Data output rate = 15Hz
+			//			deviceMag.writeRegister(0x01, (byte) 0x20); // Set gain = +/- 1.3g
 
-			Thread.sleep(500); // Wait for settings to take effect
+			//			Thread.sleep(500); // Wait for settings to take effect
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 		}
@@ -90,11 +90,11 @@ public class Nav {
 		while (xMag == 0 && yMag == 0 && zMag == 0 && count++ < 20) {
 			try {
 				byte[] magData = new byte[6];
-				deviceMag.readRegister(0x03, magData, 0, 6);
+				deviceMag.readRegister(0x68, magData, 0, 6);
 
-				xMag = (short) (((magData[0] & 0xFF) << 8) | (magData[1] & 0xFF));
-				yMag = (short) (((magData[4] & 0xFF) << 8) | (magData[5] & 0xFF));
-				zMag = (short) (((magData[2] & 0xFF) << 8) | (magData[3] & 0xFF));
+				xMag = (short) ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
+				yMag = (short) ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
+				zMag = (short) ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
 				log.info("readBearing: x = " + xMag + " y = " + yMag);
 
 				// Adjust values if they are negative
@@ -133,25 +133,40 @@ public class Nav {
 
 	public Integer getDiveAngle() {
 		log.debug("getDiveAngle");
-		try {
-			byte[] acclData = new byte[6];
-			deviceAccl.readRegister(0x28, acclData, 0, 6);
+		short xAccl = 0;
+		short yAccl = 0;
+		short zAccl = 0;
+		int count = 0;
+		while (xAccl == 0 && yAccl == 0 && zAccl == 0 && count++ < 20) {
+			try {
+				byte[] acclData = new byte[6];
+				deviceAccl.readRegister(0x28, acclData, 0, 6);
 
-			int xAccl = ((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF);
-			int zAccl = ((acclData[5] & 0xFF) << 8) | (acclData[4] & 0xFF);
+				xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
+				yAccl = (short) (((acclData[3] & 0xFF) << 8) | (acclData[2] & 0xFF));
+				zAccl = (short) (((acclData[5] & 0xFF) << 8) | (acclData[4] & 0xFF));
 
-			// Adjust values if they are negative
-			if (xAccl > 32767) xAccl -= 65536;
-			if (zAccl > 32767) zAccl -= 65536;
+				// Adjust values if they are negative
+				if (xAccl > 32767) xAccl -= 65536;
+				if (zAccl > 32767) zAccl -= 65536;
 
-			// Calculate dive angle
-			double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
+				// Calculate dive angle
+				double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
 
-			return (int) diveAngle;
-		} catch (IOException e) {
-			log.error("Error reading accelerometer data", e);
-			throw new RuntimeException("Error reading accelerometer data", e);
+				return (int) diveAngle;
+			} catch (IOException e) {
+				log.error("Error reading accelerometer data", e);
+				throw new RuntimeException("Error reading accelerometer data", e);
+			}finally{
+				try {
+					if (xAccl == 0 && yAccl == 0 && zAccl == 0) Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
+		return 0;
 	}
 
 	// Additional methods for interacting with the LSM303DLHC sensor could be added here
