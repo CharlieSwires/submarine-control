@@ -101,22 +101,29 @@ public class Dive {
 				byte[] ready = new byte[1];
 				deviceAccl.readRegister(0x27, ready, 0, 1);
 				log.info("ready = " + ready[0]);
-				if ((ready[0] & 7) == 7) {
-					byte[] acclData = new byte[6];
-					deviceAccl.readRegister(0x28, acclData, 0, 6);
+				if ((ready[0] & 7) == 7 && ready[0] != -1 ) {
+					byte[] acclDataX = new byte[2];
+					deviceAccl.readRegister(0x28, acclDataX, 0, 2);
 					try {
-						Thread.sleep(20);
+						Thread.sleep(10);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					deviceAccl.readRegister(0x27, ready, 0, 1);
-					log.info("ready2 = " + ready[0]);
-					deviceAccl.readRegister(0x28, acclData, 0, 6);
+					byte[] acclDataY = new byte[2];
+					deviceAccl.readRegister(0x2A, acclDataY, 0, 2);
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					byte[] acclDataZ = new byte[2];
+					deviceAccl.readRegister(0x2C, acclDataZ, 0, 2);
 
-					xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
-					yAccl = (short) (((acclData[3] & 0xFF) << 8) | (acclData[2] & 0xFF));
-					zAccl = (short) (((acclData[5] & 0xFF) << 8) | (acclData[4] & 0xFF));
+					xAccl = (short) (((acclDataX[1] & 0xFF) << 8) | (acclDataX[0] & 0xFF));
+					yAccl = (short) (((acclDataY[1] & 0xFF) << 8) | (acclDataY[0] & 0xFF));
+					zAccl = (short) (((acclDataZ[1] & 0xFF) << 8) | (acclDataZ[0] & 0xFF));
 					log.info("getDiveAngle: x = " + xAccl + " y = " + yAccl + " z = " + zAccl );
 
 					// Calculate dive angle
