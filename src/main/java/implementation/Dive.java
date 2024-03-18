@@ -50,11 +50,11 @@ public class Dive {
 			deviceAccl = i2CProvider.create(configAccl);
 
 			// Initialize accelerometer
+			deviceAccl.writeRegister(0x25, (byte) 0x80); //reboot no fifo
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
 			deviceAccl.writeRegister(0x23, (byte) 0x00); //continuous normal SPI disabled
 			deviceAccl.writeRegister(0x20, (byte) 0x67); //normal power 200Hz xyz enabled
-			deviceAccl.writeRegister(0x25, (byte) 0x80); //reboot no fifo
 
 
 			Thread.sleep(500); // Wait for settings to take effect
