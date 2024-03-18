@@ -51,7 +51,7 @@ public class Dive {
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
 			deviceAccl.writeRegister(0x23, (byte) 0x80); //normal SPI disabled
-			deviceAccl.writeRegister(0x20, (byte) 0x27); //normal power 10Hz xyz enabled
+			deviceAccl.writeRegister(0x20, (byte) 0x67); //normal power 200Hz xyz enabled
 
 
 			Thread.sleep(500); // Wait for settings to take effect
@@ -105,7 +105,7 @@ public class Dive {
 					byte[] acclData = new byte[6];
 					deviceAccl.readRegister(0x28, acclData, 0, 6);
 					try {
-						Thread.sleep(1);
+						Thread.sleep(10);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
