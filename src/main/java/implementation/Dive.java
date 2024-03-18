@@ -42,7 +42,7 @@ public class Dive {
 					.bus(1)
 					.device(0x19)
 					.build();
-			
+
 
 			// Get I2C provider and create I2C instances
 			deviceAccl = i2CProvider.create(configAccl);
@@ -101,25 +101,52 @@ public class Dive {
 				byte[] ready = new byte[1];
 				deviceAccl.readRegister(0x27, ready, 0, 1);
 				log.info("ready = " + ready[0]);
-				if ((ready[0] & 7) == 7) {
+				if ((ready[0] & 7) > 0) {
 					byte[] acclDataX = new byte[2];
-					deviceAccl.readRegister(0x28, acclDataX, 0, 2);
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					while(true) {
+						ready = new byte[1];
+						deviceAccl.readRegister(0x27, ready, 0, 1);
+						if ((ready[0] & 1) == 1) {
+							deviceAccl.readRegister(0x28, acclDataX, 0, 2);
+							break;
+						}
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					byte[] acclDataY = new byte[2];
-					deviceAccl.readRegister(0x2A, acclDataY, 0, 2);
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					while(true) {
+						ready = new byte[1];
+						deviceAccl.readRegister(0x27, ready, 0, 1);
+						if ((ready[0] & 2) == 2) {
+							deviceAccl.readRegister(0x2A, acclDataY, 0, 2);
+							break;
+						}
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					byte[] acclDataZ = new byte[2];
-					deviceAccl.readRegister(0x2C, acclDataZ, 0, 2);
+					while(true) {
+						ready = new byte[1];
+						deviceAccl.readRegister(0x27, ready, 0, 1);
+						if ((ready[0] & 4) == 4) {
+							deviceAccl.readRegister(0x2C, acclDataZ, 0, 2);
+							break;
+						}
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 
 					xAccl = (short) (((acclDataX[1] & 0xFF) << 8) | (acclDataX[0] & 0xFF));
 					yAccl = (short) (((acclDataY[1] & 0xFF) << 8) | (acclDataY[0] & 0xFF));
