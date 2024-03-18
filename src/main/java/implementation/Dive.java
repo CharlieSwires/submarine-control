@@ -50,7 +50,7 @@ public class Dive {
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
-			deviceAccl.writeRegister(0x23, (byte) 0x80); //continuous SPI disabled
+			deviceAccl.writeRegister(0x23, (byte) 0x08); //continuous HR SPI disabled
 			deviceAccl.writeRegister(0x20, (byte) 0x27); //10Hz
 
 
