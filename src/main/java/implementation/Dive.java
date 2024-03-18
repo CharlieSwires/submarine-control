@@ -50,8 +50,8 @@ public class Dive {
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
-			deviceAccl.writeRegister(0x23, (byte) 0x88); //HR SPI disabled
-			deviceAccl.writeRegister(0x20, (byte) 0x2F); //low power 10Hz xyz enabled
+			deviceAccl.writeRegister(0x23, (byte) 0x80); //normal SPI disabled
+			deviceAccl.writeRegister(0x20, (byte) 0x27); //normal power 10Hz xyz enabled
 
 
 			Thread.sleep(500); // Wait for settings to take effect
