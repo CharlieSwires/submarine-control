@@ -113,10 +113,12 @@ public class Dive {
 						if ((ready[0] & 1) == 1) {
 							deviceAccl.readRegister(0x28, acclDataX, 0, 2);
 							set.add("X");
-						} else if ((ready[0] & 2) == 2) {
+						} 
+						if ((ready[0] & 2) == 2) {
 							deviceAccl.readRegister(0x2A, acclDataY, 0, 2);
 							set.add("Y");
-						} else if ((ready[0] & 4) == 4) {
+						}
+						if ((ready[0] & 4) == 4) {
 							deviceAccl.readRegister(0x2C, acclDataZ, 0, 2);
 							set.add("Z");
 						}
