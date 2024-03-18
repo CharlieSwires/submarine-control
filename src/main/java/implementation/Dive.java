@@ -101,7 +101,7 @@ public class Dive {
 				byte[] acclData = new byte[6];
 				byte[] ready = new byte[1];
 				deviceAccl.read(ready, 0x27);
-				if (ready[0] > 0) {
+				if (ready[0] >= 4) {
 				deviceAccl.readRegister(0x28, acclData, 0, 6);
 
 				xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
