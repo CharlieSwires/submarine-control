@@ -22,13 +22,13 @@ import jakarta.annotation.PostConstruct;
 public class Dive {
 
 	Logger log = LoggerFactory.getLogger(Dive.class);
-		
-    private WatchDog watchDogThread;
-    private static boolean firstTime = true;
+
+	private WatchDog watchDogThread;
+	private static boolean firstTime = true;
 	private I2C deviceAccl;
 	private Context pi4j;
 
-    @PostConstruct
+	@PostConstruct
 	public void init() {
 		try {
 			// Initialize Pi4J with auto context
@@ -60,35 +60,35 @@ public class Dive {
 		}
 	}
 
-    public Integer setFrontAngle(Integer angle) {
-    	log.debug("setFrontAngle:"+angle);
-        return angle;
-    }
+	public Integer setFrontAngle(Integer angle) {
+		log.debug("setFrontAngle:"+angle);
+		return angle;
+	}
 
-    public Integer setBackAngle(Integer angle) {
-    	log.debug("setBackAngle:"+angle);
-        return angle;
-    }
+	public Integer setBackAngle(Integer angle) {
+		log.debug("setBackAngle:"+angle);
+		return angle;
+	}
 
-    public Integer setFillTank(Boolean action) {
-    	log.debug("setFillTank:"+action);
+	public Integer setFillTank(Boolean action) {
+		log.debug("setFillTank:"+action);
 
-        return action?1:0;
-    }
+		return action?1:0;
+	}
 
-    public Integer getDepth() {
-    	log.debug("getDepth");
+	public Integer getDepth() {
+		log.debug("getDepth");
 
-    	if (!firstTime) {
-    		// Stop the watch dog thread
-    		watchDogThread.interrupt();
-    	}
-        // Restart the watch dog thread
-        watchDogThread = new WatchDog();
-        watchDogThread.start();
-        firstTime = false;
-        return 0;
-    }
+		if (!firstTime) {
+			// Stop the watch dog thread
+			watchDogThread.interrupt();
+		}
+		// Restart the watch dog thread
+		watchDogThread = new WatchDog();
+		watchDogThread.start();
+		firstTime = false;
+		return 0;
+	}
 
 	public Integer getDiveAngle() {
 		log.debug("getDiveAngle");
@@ -101,18 +101,18 @@ public class Dive {
 				byte[] acclData = new byte[6];
 				byte[] ready = new byte[1];
 				deviceAccl.readRegister(0x27, ready, 0, 1);
-				if (ready[0] >= 4) {
-				deviceAccl.readRegister(0x28, acclData, 0, 6);
+				if (ready[0] >= 7) {
+					deviceAccl.readRegister(0x28, acclData, 0, 6);
 
-				xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
-				yAccl = (short) (((acclData[3] & 0xFF) << 8) | (acclData[2] & 0xFF));
-				zAccl = (short) (((acclData[5] & 0xFF) << 8) | (acclData[4] & 0xFF));
-				log.info("getDiveAngle: x = " + xAccl + " y = " + yAccl + " z = " + zAccl );
+					xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
+					yAccl = (short) (((acclData[3] & 0xFF) << 8) | (acclData[2] & 0xFF));
+					zAccl = (short) (((acclData[5] & 0xFF) << 8) | (acclData[4] & 0xFF));
+					log.info("getDiveAngle: x = " + xAccl + " y = " + yAccl + " z = " + zAccl );
 
-				// Calculate dive angle
-				double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
+					// Calculate dive angle
+					double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
 
-				return (int) diveAngle;
+					return (int) diveAngle;
 				} else {
 					try {
 						Thread.sleep(100);
@@ -137,31 +137,31 @@ public class Dive {
 		return 0;
 	}
 
-    // Watch Dog thread class
-    private class WatchDog extends Thread {
- 
-        @Override
-        public void run() {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    // Sleep for 1000 milliseconds
-                    Thread.sleep(2000);
+	// Watch Dog thread class
+	private class WatchDog extends Thread {
 
-                    // Check if getDepth method hasn't been called within 1000ms
-                    if (!Thread.currentThread().isInterrupted()) {
-                        // Trigger emergency surface event
-                        emergencySurface();
-                    }
-                } catch (InterruptedException e) {
-                    // Thread interrupted, exit the loop
-                    break;
-                }
-            }
-        }
-    }
-    // Method to trigger emergency surface event
-    private void emergencySurface() {
-    	log.debug("emergencySurface");
-        setFillTank(false);
-    }
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					// Sleep for 1000 milliseconds
+					Thread.sleep(2000);
+
+					// Check if getDepth method hasn't been called within 1000ms
+					if (!Thread.currentThread().isInterrupted()) {
+						// Trigger emergency surface event
+						emergencySurface();
+					}
+				} catch (InterruptedException e) {
+					// Thread interrupted, exit the loop
+					break;
+				}
+			}
+		}
+	}
+	// Method to trigger emergency surface event
+	private void emergencySurface() {
+		log.debug("emergencySurface");
+		setFillTank(false);
+	}
 }
