@@ -36,7 +36,7 @@ public class Nav {
 					.name("LSM303DLHC Accelerometer")
 					.bus(1)
 					.device(0x19)
-					.provider("pigpio-i2c").build();
+					.provider("linuxfs-i2c").build();
 			;
 
 			// Create I2C config for magnetometer (LSM303DLHC)
@@ -45,7 +45,7 @@ public class Nav {
 					.name("LSM303DLHC Magnetometer")
 					.bus(1)
 					.device(0x1E)
-					.provider("pigpio-i2c").build();
+					.provider("linuxfs-i2c").build();
 
 			// Get I2C provider and create I2C instances
 			deviceAccl = pi4j.create(configAccl);
