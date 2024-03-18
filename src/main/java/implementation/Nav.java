@@ -96,12 +96,7 @@ public class Nav {
 				xMag = (short) ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
 				yMag = (short) ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
 				zMag = (short) ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
-				log.info("readBearing: x = " + xMag + " y = " + yMag);
-
-				// Adjust values if they are negative
-				if (xMag > 32767) xMag -= 65536;
-				if (yMag > 32767) yMag -= 65536;
-				if (zMag > 32767) zMag -= 65536;
+				log.info("readBearing: x = " + xMag + " y = " + yMag+ " z = " + zMag);
 
 				// Calculate bearing
 				double bearing = Math.atan2(yMag, xMag) * (180 / Math.PI);
@@ -145,10 +140,7 @@ public class Nav {
 				xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
 				yAccl = (short) (((acclData[3] & 0xFF) << 8) | (acclData[2] & 0xFF));
 				zAccl = (short) (((acclData[5] & 0xFF) << 8) | (acclData[4] & 0xFF));
-
-				// Adjust values if they are negative
-				if (xAccl > 32767) xAccl -= 65536;
-				if (zAccl > 32767) zAccl -= 65536;
+				log.info("getDiveAngle: x = " + xAccl + " y = " + yAccl + " z = " + zAccl );
 
 				// Calculate dive angle
 				double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
