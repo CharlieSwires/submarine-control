@@ -87,12 +87,12 @@ public class Nav {
 		int count = 0;
 		while (xMag == 0 && yMag == 0 && zMag == 0 && count++ < 20) {
 			try {
-				byte[] magData = new byte[9];
-				deviceMag.readRegister(0x03, magData, 0, 9);
+				byte[] magData = new byte[6];
+				deviceMag.readRegister(0x03, magData, 0, 6);
 
-				xMag = (short) (((magData[3] & 0xFF) << 8) | (magData[4] & 0xFF));
-				yMag = (short) (((magData[7] & 0xFF) << 8) | (magData[8] & 0xFF));
-				zMag = (short) (((magData[5] & 0xFF) << 8) | (magData[6] & 0xFF));
+				xMag = (short) (((magData[0] & 0xFF) << 8) | (magData[1] & 0xFF));
+				yMag = (short) (((magData[4] & 0xFF) << 8) | (magData[5] & 0xFF));
+				zMag = (short) (((magData[2] & 0xFF) << 8) | (magData[3] & 0xFF));
 				log.info("readBearing: x = " + xMag + " y = " + yMag);
 
 				// Adjust values if they are negative
