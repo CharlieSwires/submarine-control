@@ -101,7 +101,7 @@ public class Dive {
 				byte[] ready = new byte[1];
 				deviceAccl.readRegister(0x27, ready, 0, 1);
 				log.info("ready = " + ready[0]);
-				if ((ready[0] & 7) == 7 && ready[0] != -1 ) {
+				if ((ready[0] & 7) == 7) {
 					byte[] acclDataX = new byte[2];
 					deviceAccl.readRegister(0x28, acclDataX, 0, 2);
 					try {
