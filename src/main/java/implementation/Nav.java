@@ -54,16 +54,17 @@ public class Nav {
 			deviceMag = i2CProvider.create(configMag);
 
 			// Initialize accelerometer
-//			deviceAccl.writeRegister(0x20, (byte) 0x27); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
-//			deviceAccl.writeRegister(0x23, (byte) 0x00); // Full scale +/- 2g, continuous update
-//			Thread.sleep(500); // Wait for settings to take effect
+			deviceAccl.writeRegister(0x21, (byte) 0x00); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
+			deviceAccl.writeRegister(0x22, (byte) 0x00); // Full scale +/- 2g, continuous update
+			deviceAccl.writeRegister(0x23, (byte) 0x81); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
+			deviceAccl.writeRegister(0x20, (byte) 0x57); // Full scale +/- 2g, continuous update
 
 			// Initialize magnetometer
-			//			deviceMag.writeRegister(0x02, (byte) 0x00); // Continuous conversion mode
-			//			deviceMag.writeRegister(0x00, (byte) 0x10); // Data output rate = 15Hz
-			//			deviceMag.writeRegister(0x01, (byte) 0x20); // Set gain = +/- 1.3g
+			deviceMag.writeRegister(0x60, (byte) 0x8C); // Continuous conversion mode
+			deviceMag.writeRegister(0x61, (byte) 0x02); // Data output rate = 15Hz
+			deviceMag.writeRegister(0x62, (byte) 0x10); // Set gain = +/- 1.3g
 
-			//			Thread.sleep(500); // Wait for settings to take effect
+			Thread.sleep(500); // Wait for settings to take effect
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 		}
