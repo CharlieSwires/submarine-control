@@ -48,10 +48,10 @@ public class Dive {
 			deviceAccl = i2CProvider.create(configAccl);
 
 			// Initialize accelerometer
-			deviceAccl.writeRegister(0x21, (byte) 0x00); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
-			deviceAccl.writeRegister(0x22, (byte) 0x00); // Full scale +/- 2g, continuous update
-			deviceAccl.writeRegister(0x23, (byte) 0x81); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
-			deviceAccl.writeRegister(0x20, (byte) 0x27); // Full scale +/- 2g, continuous update
+			deviceAccl.writeRegister(0x21, (byte) 0x00); 
+			deviceAccl.writeRegister(0x22, (byte) 0x00); 
+			deviceAccl.writeRegister(0x23, (byte) 0x80); //continuous SPI disabled
+			deviceAccl.writeRegister(0x20, (byte) 0x27); //10Hz
 
 
 			Thread.sleep(500); // Wait for settings to take effect
@@ -118,7 +118,7 @@ public class Dive {
 
 				} else {
 					try {
-						Thread.sleep(100);
+						Thread.sleep(50);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -130,7 +130,7 @@ public class Dive {
 				throw new RuntimeException("Error reading accelerometer data", e);
 			}finally{
 				try {
-					if (xAccl == 0 && yAccl == 0 && zAccl == 0) Thread.sleep(100);
+					if (xAccl == 0 && yAccl == 0 && zAccl == 0) Thread.sleep(50);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
