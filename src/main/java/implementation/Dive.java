@@ -98,10 +98,10 @@ public class Dive {
 		int count = 0;
 		while (xAccl == 0 && yAccl == 0 && zAccl == 0 && count++ < 20) {
 			try {
-				byte[] acclData = new byte[6];
 				byte[] ready = new byte[1];
 				deviceAccl.readRegister(0x27, ready, 0, 1);
 				if ((ready[0] & 8) > 0) {
+					byte[] acclData = new byte[6];
 					deviceAccl.readRegister(0x28, acclData, 0, 6);
 
 					xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
@@ -111,8 +111,10 @@ public class Dive {
 
 					// Calculate dive angle
 					double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
+					if (xAccl != 0 || yAccl != 0 || zAccl != 0) {
+						return (int) diveAngle;
+					}
 
-					return (int) diveAngle;
 				} else {
 					try {
 						Thread.sleep(100);
