@@ -1,8 +1,10 @@
 package implementation;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -50,7 +52,7 @@ public class Dive {
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
-			deviceAccl.writeRegister(0x23, (byte) 0x00); //continuous normal SPI disabled
+			deviceAccl.writeRegister(0x23, (byte) 0x80); //not continuous normal SPI disabled
 			deviceAccl.writeRegister(0x20, (byte) 0x67); //normal power 200Hz xyz enabled
 
 
@@ -102,42 +104,27 @@ public class Dive {
 				deviceAccl.readRegister(0x27, ready, 0, 1);
 				log.info("ready = " + ready[0]);
 				if ((ready[0] & 7) > 0) {
+					byte[] acclData = new byte[6];
+					deviceAccl.readRegister(0x28, acclData, 0, 6);
+
 					byte[] acclDataX = new byte[2];
+					byte[] acclDataY = new byte[2];
+					byte[] acclDataZ = new byte[2];
+					Set<String> set = new HashSet<String>();
 					while(true) {
 						ready = new byte[1];
 						deviceAccl.readRegister(0x27, ready, 0, 1);
 						if ((ready[0] & 1) == 1) {
 							deviceAccl.readRegister(0x28, acclDataX, 0, 2);
-							break;
-						}
-						try {
-							Thread.sleep(10);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					byte[] acclDataY = new byte[2];
-					while(true) {
-						ready = new byte[1];
-						deviceAccl.readRegister(0x27, ready, 0, 1);
-						if ((ready[0] & 2) == 2) {
+							set.add("X");
+						} else if ((ready[0] & 2) == 2) {
 							deviceAccl.readRegister(0x2A, acclDataY, 0, 2);
-							break;
-						}
-						try {
-							Thread.sleep(10);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					byte[] acclDataZ = new byte[2];
-					while(true) {
-						ready = new byte[1];
-						deviceAccl.readRegister(0x27, ready, 0, 1);
-						if ((ready[0] & 4) == 4) {
+							set.add("Y");
+						} else if ((ready[0] & 4) == 4) {
 							deviceAccl.readRegister(0x2C, acclDataZ, 0, 2);
+							set.add("Z");
+						}
+						if (set.size() == 3) {
 							break;
 						}
 						try {
