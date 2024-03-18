@@ -21,7 +21,6 @@ import jakarta.annotation.PostConstruct;
 public class Nav {
 	private static final Logger log = LoggerFactory.getLogger(Nav.class);
 
-	private I2C deviceAccl;
 	private I2C deviceMag;
 	private Context pi4j;
 
@@ -32,14 +31,6 @@ public class Nav {
 			pi4j = Pi4J.newAutoContext();
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
 
-			// Create I2C config for accelerometer (LSM303DLHC)
-			I2CConfig configAccl = I2C.newConfigBuilder(pi4j)
-					.id("LSM303AGR-Accl")
-					.name("LSM303AGR Accelerometer")
-					.bus(1)
-					.device(0x19)
-					.build();
-			;
 
 			// Create I2C config for magnetometer (LSM303DLHC)
 			I2CConfig configMag = I2C.newConfigBuilder(pi4j)
@@ -50,14 +41,7 @@ public class Nav {
 					.build();
 
 			// Get I2C provider and create I2C instances
-			deviceAccl = i2CProvider.create(configAccl);
 			deviceMag = i2CProvider.create(configMag);
-
-			// Initialize accelerometer
-			deviceAccl.writeRegister(0x21, (byte) 0x00); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
-			deviceAccl.writeRegister(0x22, (byte) 0x00); // Full scale +/- 2g, continuous update
-			deviceAccl.writeRegister(0x23, (byte) 0x81); // X, Y and Z-axis enable, power on mode, o/p data rate 10 Hz
-			deviceAccl.writeRegister(0x20, (byte) 0x57); // Full scale +/- 2g, continuous update
 
 			// Initialize magnetometer
 			deviceMag.writeRegister(0x60, (byte) 0x8C); // Continuous conversion mode
@@ -126,40 +110,6 @@ public class Nav {
 	}
 
 
-	public Integer getDiveAngle() {
-		log.debug("getDiveAngle");
-		short xAccl = 0;
-		short yAccl = 0;
-		short zAccl = 0;
-		int count = 0;
-		while (xAccl == 0 && yAccl == 0 && zAccl == 0 && count++ < 20) {
-			try {
-				byte[] acclData = new byte[6];
-				deviceAccl.readRegister(0x28, acclData, 0, 6);
-
-				xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
-				yAccl = (short) (((acclData[3] & 0xFF) << 8) | (acclData[2] & 0xFF));
-				zAccl = (short) (((acclData[5] & 0xFF) << 8) | (acclData[4] & 0xFF));
-				log.info("getDiveAngle: x = " + xAccl + " y = " + yAccl + " z = " + zAccl );
-
-				// Calculate dive angle
-				double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
-
-				return (int) diveAngle;
-			} catch (IOException e) {
-				log.error("Error reading accelerometer data", e);
-				throw new RuntimeException("Error reading accelerometer data", e);
-			}finally{
-				try {
-					if (xAccl == 0 && yAccl == 0 && zAccl == 0) Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		return 0;
-	}
 
 	// Additional methods for interacting with the LSM303DLHC sensor could be added here
 }
