@@ -99,6 +99,9 @@ public class Dive {
 		while (xAccl == 0 && yAccl == 0 && zAccl == 0 && count++ < 20) {
 			try {
 				byte[] acclData = new byte[6];
+				byte[] ready = new byte[1];
+				deviceAccl.read(ready, 0x27);
+				if (ready[0] > 0) {
 				deviceAccl.readRegister(0x28, acclData, 0, 6);
 
 				xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
@@ -110,6 +113,15 @@ public class Dive {
 				double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
 
 				return (int) diveAngle;
+				} else {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					continue;
+				}
 			} catch (IOException e) {
 				log.error("Error reading accelerometer data", e);
 				throw new RuntimeException("Error reading accelerometer data", e);
