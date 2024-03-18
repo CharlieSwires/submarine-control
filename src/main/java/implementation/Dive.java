@@ -42,7 +42,7 @@ public class Dive {
 					.bus(1)
 					.device(0x19)
 					.build();
-			;
+			
 
 			// Get I2C provider and create I2C instances
 			deviceAccl = i2CProvider.create(configAccl);
@@ -50,8 +50,8 @@ public class Dive {
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
-			deviceAccl.writeRegister(0x23, (byte) 0x08); //continuous HR SPI disabled
-			deviceAccl.writeRegister(0x20, (byte) 0x27); //10Hz
+			deviceAccl.writeRegister(0x23, (byte) 0x88); //HR SPI disabled
+			deviceAccl.writeRegister(0x20, (byte) 0x2F); //low power 10Hz xyz enabled
 
 
 			Thread.sleep(500); // Wait for settings to take effect
