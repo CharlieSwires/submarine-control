@@ -104,6 +104,13 @@ public class Dive {
 				if ((ready[0] & 7) == 7) {
 					byte[] acclData = new byte[6];
 					deviceAccl.readRegister(0x28, acclData, 0, 6);
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					deviceAccl.readRegister(0x28, acclData, 0, 6);
 
 					xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
 					yAccl = (short) (((acclData[3] & 0xFF) << 8) | (acclData[2] & 0xFF));
