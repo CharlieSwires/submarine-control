@@ -12,8 +12,6 @@ import com.pi4j.context.Context;
 import com.pi4j.io.exception.IOException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
-import com.pi4j.io.i2c.I2CConfigBuilder;
-import com.pi4j.io.i2c.I2CProvider;
 
 import jakarta.annotation.PostConstruct;
 
@@ -39,7 +37,7 @@ public class Nav {
 					.bus(1)
 					.device(0x19)
 					.provider("pigpio-i2c").build();
-;
+			;
 
 			// Create I2C config for magnetometer (LSM303DLHC)
 			I2CConfig configMag = I2C.newConfigBuilder(pi4j)
@@ -83,28 +81,45 @@ public class Nav {
 
 	public Integer readBearing() {
 		log.info("readBearing");
-		try {
-			byte[] magData = new byte[9];
-			deviceMag.readRegister(0x03, magData, 0, 9);
+		short xMag = 0;
+		short yMag = 0;
+		short zMag = 0;
+		int count = 0;
+		while (xMag == 0 && yMag == 0 && zMag == 0 && count++ < 20) {
+			try {
+				byte[] magData = new byte[9];
+				deviceMag.readRegister(0x03, magData, 0, 9);
 
-			short xMag = (short) (((magData[3] & 0xFF) << 8) | (magData[4] & 0xFF));
-			short yMag = (short) (((magData[7] & 0xFF) << 8) | (magData[8] & 0xFF));
-			log.info("readBearing: x = " + xMag + " y = " + yMag);
+				xMag = (short) (((magData[3] & 0xFF) << 8) | (magData[4] & 0xFF));
+				yMag = (short) (((magData[7] & 0xFF) << 8) | (magData[8] & 0xFF));
+				zMag = (short) (((magData[5] & 0xFF) << 8) | (magData[6] & 0xFF));
+				log.info("readBearing: x = " + xMag + " y = " + yMag);
 
-			// Adjust values if they are negative
-			if (xMag > 32767) xMag -= 65536;
-			if (yMag > 32767) yMag -= 65536;
+				// Adjust values if they are negative
+				if (xMag > 32767) xMag -= 65536;
+				if (yMag > 32767) yMag -= 65536;
+				if (zMag > 32767) zMag -= 65536;
 
-			// Calculate bearing
-			double bearing = Math.atan2(yMag, xMag) * (180 / Math.PI);
+				// Calculate bearing
+				double bearing = Math.atan2(yMag, xMag) * (180 / Math.PI);
 
-			if (bearing < 0) bearing += 360.0;
-			
-			return (int) bearing;
-		} catch (IOException e) {
-			log.error("Error reading magnetometer data", e);
-			throw new RuntimeException("Error reading magnetometer data", e);
+				if (bearing < 0) bearing += 360.0;
+				if (xMag != 0 || yMag != 0 || zMag != 0) {
+					return (int) bearing;
+				}
+			} catch (IOException e) {
+				log.error("Error reading magnetometer data", e);
+				throw new RuntimeException("Error reading magnetometer data", e);
+			} finally{
+				try {
+					if (xMag == 0 && yMag == 0 && zMag == 0) Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
+		return 0;
 	}
 
 	public Integer setRudder(Integer angle) {
