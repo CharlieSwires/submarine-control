@@ -50,7 +50,7 @@ public class Dive {
 			deviceAccl = i2CProvider.create(configAccl);
 
 			// Initialize accelerometer
-			deviceAccl.writeRegister(0x25, (byte) 0x00); //normal no fifo
+			deviceAccl.writeRegister(0x24, (byte) 0x80); //normal no fifo
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
 			deviceAccl.writeRegister(0x23, (byte) 0x00); //continuous normal SPI disabled
