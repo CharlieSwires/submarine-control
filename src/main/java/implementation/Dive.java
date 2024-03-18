@@ -100,6 +100,7 @@ public class Dive {
 			try {
 				byte[] ready = new byte[1];
 				deviceAccl.readRegister(0x27, ready, 0, 1);
+				log.info("ready = " + ready[0]);
 				if ((ready[0] & 8) > 0) {
 					byte[] acclData = new byte[6];
 					deviceAccl.readRegister(0x28, acclData, 0, 6);
