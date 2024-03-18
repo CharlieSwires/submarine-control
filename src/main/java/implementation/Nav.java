@@ -36,7 +36,7 @@ public class Nav {
 			I2CConfig configAccl = I2C.newConfigBuilder(pi4j)
 					.id("LSM303DLHC-Accl")
 					.name("LSM303DLHC Accelerometer")
-					.bus(1)
+					.bus(0)
 					.device(0x19)
 					.provider("pigpio-i2c").build();
 ;
@@ -45,7 +45,7 @@ public class Nav {
 			I2CConfig configMag = I2C.newConfigBuilder(pi4j)
 					.id("LSM303DLHC-Mag")
 					.name("LSM303DLHC Magnetometer")
-					.bus(1)
+					.bus(0)
 					.device(0x1E)
 					.provider("pigpio-i2c").build();
 
