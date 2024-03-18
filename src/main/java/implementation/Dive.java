@@ -54,6 +54,7 @@ public class Dive {
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
 			deviceAccl.writeRegister(0x23, (byte) 0x00); //continuous normal SPI disabled
 			deviceAccl.writeRegister(0x20, (byte) 0x67); //normal power 200Hz xyz enabled
+			deviceAccl.writeRegister(0x25, (byte) 0x80); //reboot no fifo
 
 
 			Thread.sleep(500); // Wait for settings to take effect
@@ -104,9 +105,6 @@ public class Dive {
 				deviceAccl.readRegister(0x27, ready, 0, 1);
 				log.info("ready = " + ready[0]);
 				if ((ready[0] & 7) > 0) {
-//					byte[] acclData = new byte[6];
-//					deviceAccl.readRegister(0x28, acclData, 0, 6);
-
 					byte[] acclDataX = new byte[2];
 					byte[] acclDataY = new byte[2];
 					byte[] acclDataZ = new byte[2];
