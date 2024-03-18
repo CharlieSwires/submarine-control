@@ -50,7 +50,7 @@ public class Dive {
 			// Initialize accelerometer
 			deviceAccl.writeRegister(0x21, (byte) 0x00); 
 			deviceAccl.writeRegister(0x22, (byte) 0x00); 
-			deviceAccl.writeRegister(0x23, (byte) 0x80); //normal SPI disabled
+			deviceAccl.writeRegister(0x23, (byte) 0x00); //continuous normal SPI disabled
 			deviceAccl.writeRegister(0x20, (byte) 0x67); //normal power 200Hz xyz enabled
 
 
@@ -110,6 +110,8 @@ public class Dive {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					deviceAccl.readRegister(0x27, ready, 0, 1);
+					log.info("ready2 = " + ready[0]);
 					deviceAccl.readRegister(0x28, acclData, 0, 6);
 
 					xAccl = (short) (((acclData[1] & 0xFF) << 8) | (acclData[0] & 0xFF));
