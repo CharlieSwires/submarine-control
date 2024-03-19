@@ -158,7 +158,7 @@ public class Dive {
 					log.info("Average: x = " + average[0] + " y = " + average[1] + " z = " + average[2]);
 
 					// Calculate dive angle using averages
-					double diveAngle = Math.atan2(average[1], average[2]) * (180 / Math.PI);
+					double diveAngle = Math.atan2(average[0], average[2]) * (180 / Math.PI);
 
 
 					// Calculate dive angle
@@ -206,10 +206,10 @@ public class Dive {
 			}
 		}
 		if (count != 0) {
-			short[] result = {(short)(-sumX/count), (short)(sumY/count), (short)(-sumZ/count)};
+			short[] result = {(short)(sumX/count), (short)(sumY/count), (short)(sumZ/count)};
 			return result;
 		}
-		short[] result = {(short)(-1), (short)(1), (short)(-1)};
+		short[] result = {(short)(1), (short)(1), (short)(1)};
 		return result;
 
 	}
