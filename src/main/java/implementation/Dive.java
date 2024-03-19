@@ -158,7 +158,7 @@ public class Dive {
 					log.info("Average: x = " + average[0] + " y = " + average[1] + " z = " + average[2]);
 
 					// Calculate dive angle using averages
-					double diveAngle = Math.atan2(-average[0], -average[2]) * (180 / Math.PI);
+					double diveAngle = Math.atan2(-average[1], -average[2]) * (180 / Math.PI);
 
 
 					// Calculate dive angle
