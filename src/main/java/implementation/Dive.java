@@ -29,11 +29,11 @@ public class Dive {
 	private static boolean firstTime = true;
 	private I2C deviceAccl;
 	private Context pi4j;
-    private static final int BUFFER_SIZE = 128;
-    private short[] xBuffer = new short[BUFFER_SIZE];
-    private short[] yBuffer = new short[BUFFER_SIZE];
-    private short[] zBuffer = new short[BUFFER_SIZE];
-    private int bufferIndex = 0;
+	private static final int BUFFER_SIZE = 10;
+	private short[] xBuffer = new short[BUFFER_SIZE];
+	private short[] yBuffer = new short[BUFFER_SIZE];
+	private short[] zBuffer = new short[BUFFER_SIZE];
+	private int bufferIndex = 0;
 
 	@PostConstruct
 	public void init() {
@@ -144,27 +144,25 @@ public class Dive {
 					xAccl = (short) (((acclDataX[1] & 0xFF) << 8) | (acclDataX[0] & 0xFF));
 					yAccl = (short) (((acclDataY[1] & 0xFF) << 8) | (acclDataY[0] & 0xFF));
 					zAccl = (short) (((acclDataZ[1] & 0xFF) << 8) | (acclDataZ[0] & 0xFF));
-		               // Read and process each axis data
-	                updateBuffer(xBuffer, xAccl);
-	                updateBuffer(yBuffer, yAccl);
-	                updateBuffer(zBuffer, zAccl);
-	                bufferIndex++;
-	                if (bufferIndex == BUFFER_SIZE) {
-	                	bufferIndex = 0;
-	                }
-	                // Calculate averages
-	                short xAvg = calculateAverage(xBuffer);
-	                short yAvg = calculateAverage(yBuffer);
-	                short zAvg = calculateAverage(zBuffer);
+					// Read and process each axis data
+					updateBuffer(xBuffer, xAccl);
+					updateBuffer(yBuffer, yAccl);
+					updateBuffer(zBuffer, zAccl);
+					bufferIndex++;
+					if (bufferIndex == BUFFER_SIZE) {
+						bufferIndex = 0;
+					}
+					// Calculate averages
+					short[] average = calculateAverage(xBuffer, yBuffer, zBuffer);
 
-	                log.info("Average: x = " + xAvg + " y = " + yAvg + " z = " + zAvg);
+					log.info("Average: x = " + average[0] + " y = " + average[1] + " z = " + average[2]);
 
-	                // Calculate dive angle using averages
-	                double diveAngle = Math.atan2(xAvg, zAvg) * (180 / Math.PI);
+					// Calculate dive angle using averages
+					double diveAngle = Math.atan2(average[1], average[2]) * (180 / Math.PI);
 
 
 					// Calculate dive angle
-						return (int) diveAngle;
+					return (int) diveAngle;
 
 				} else {
 					try {
@@ -189,18 +187,32 @@ public class Dive {
 		}
 		return 0;
 	}
-    private void updateBuffer(short[] buffer, short data) {
-        short value = data;
-        buffer[bufferIndex] = value;
-    }
+	private void updateBuffer(short[] buffer, short data) {
+		short value = data;
+		buffer[bufferIndex] = value;
+	}
 
-    private short calculateAverage(short[] buffer) {
-        int sum = 0;
-        for (short value : buffer) {
-            sum += value;
-        }
-        return (short) (sum / buffer.length);
-    }
+	private short[] calculateAverage(short[] bufferX,short[] bufferY,short[] bufferZ) {
+		int sumX = 0;
+		int sumY = 0;
+		int sumZ = 0;
+		int count = 0;
+		for (int i = 0; i < bufferX.length; i++) {
+			if (bufferX[i] != 0 || bufferY[i] != 0 || bufferZ[i] != 0) {
+				sumX += bufferX[i];
+				sumY += bufferY[i];
+				sumZ += bufferZ[i];
+				count++;
+			}
+		}
+		if (count != 0) {
+			short[] result = {(short)(sumX/count), (short)(sumY/count), (short)(sumZ/count)};
+			return result;
+		}
+		short[] result = {(short)(1), (short)(1), (short)(1)};
+		return result;
+
+	}
 	// Watch Dog thread class
 	private class WatchDog extends Thread {
 
