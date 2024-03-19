@@ -37,6 +37,9 @@ public class Dive {
 	private static final int X_ID = 0;
 	private static final int Y_ID = 1;
 	private static final int Z_ID = 2;
+	private static final int MSB = 0;
+	private static final int LSB = 1;
+	
 	@PostConstruct
 	public void init() {
 		try {
@@ -143,9 +146,9 @@ public class Dive {
 
 					}
 
-					xAccl = (short) (((acclDataX[1] & 0xFF) << 8) | (acclDataX[0] & 0xFF));
-					yAccl = (short) (((acclDataY[1] & 0xFF) << 8) | (acclDataY[0] & 0xFF));
-					zAccl = (short) (((acclDataZ[1] & 0xFF) << 8) | (acclDataZ[0] & 0xFF));
+					xAccl = (short) (((acclDataX[MSB] & 0xFF) << 8) | (acclDataX[LSB] & 0xFF));
+					yAccl = (short) (((acclDataY[MSB] & 0xFF) << 8) | (acclDataY[LSB] & 0xFF));
+					zAccl = (short) (((acclDataZ[MSB] & 0xFF) << 8) | (acclDataZ[LSB] & 0xFF));
 					// Read and process each axis data
 					updateBuffer(xBuffer, xAccl);
 					updateBuffer(yBuffer, yAccl);
