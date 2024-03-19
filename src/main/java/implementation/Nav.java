@@ -67,7 +67,7 @@ public class Nav {
 
 
 	public Integer readBearing() {
-		log.info("readBearing");
+		log.debug("readBearing");
 		short xMag = 0;
 		short yMag = 0;
 		short zMag = 0;
@@ -80,7 +80,7 @@ public class Nav {
 				xMag = (short) ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
 				yMag = (short) ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
 				zMag = (short) ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
-				log.info("readBearing: x = " + xMag + " y = " + yMag+ " z = " + zMag);
+				log.debug("readBearing: x = " + xMag + " y = " + yMag+ " z = " + zMag);
 
 				// Calculate bearing
 				double bearing = Math.atan2(yMag, xMag) * (180 / Math.PI);

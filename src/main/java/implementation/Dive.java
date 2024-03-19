@@ -113,7 +113,7 @@ public class Dive {
 			try {
 				byte[] ready = new byte[1];
 				deviceAccl.readRegister(0x27, ready, 0, 1);
-				log.info("ready = " + ready[0]);
+				log.debug("ready = " + ready[0]);
 				if ((ready[0] & 7) > 0) {
 					byte[] acclDataX = new byte[2];
 					byte[] acclDataY = new byte[2];
@@ -160,7 +160,7 @@ public class Dive {
 					// Calculate averages
 					short[] average = calculateAverage(xBuffer, yBuffer, zBuffer);
 
-					log.info("Average: x = " + average[X_ID] + " y = " + average[Y_ID] + " z = " + average[Z_ID]);
+					log.debug("Average: x = " + average[X_ID] + " y = " + average[Y_ID] + " z = " + average[Z_ID]);
 
 					// Calculate dive angle using averages
 					double diveAngle = Math.atan2(-average[Z_ID], -average[X_ID]) * (180 / Math.PI);

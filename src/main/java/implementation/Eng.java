@@ -80,7 +80,7 @@ public class Eng {
 	}
 
 	public Integer setPowerLeft(Integer percentPower) {
-		log.info("setPowerLeft:" + percentPower + "%");
+		log.debug("setPowerLeft:" + percentPower + "%");
 
 		// Set direction based on the sign of percentPower
 		motor1pinA.setState(percentPower >= 0);
@@ -88,12 +88,12 @@ public class Eng {
 
 		// Set speed using the absolute value of percentPower
 		motor1pinE.on(Math.abs(percentPower));
-		log.info("type : " +motor1pinE.pwmType());
+		log.debug("type : " +motor1pinE.pwmType());
 		return percentPower;
 	}
 
 	public Integer setPowerRight(Integer percentPower) {
-		log.info("setPowerRight:" + percentPower + "%");
+		log.debug("setPowerRight:" + percentPower + "%");
 
 		// Set direction based on the sign of percentPower
 		motor2pinA.setState(percentPower >= 0);
@@ -101,7 +101,7 @@ public class Eng {
 
 		// Set speed using the absolute value of percentPower
 		motor2pinE.on(Math.abs(percentPower));
-		log.info("type : " +motor2pinE.pwmType());
+		log.debug("type : " +motor2pinE.pwmType());
 
 		return percentPower;
 	}
