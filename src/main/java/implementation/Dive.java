@@ -206,10 +206,10 @@ public class Dive {
 			}
 		}
 		if (count != 0) {
-			short[] result = {(short)(-sumX/count), (short)(sumY/count), (short)(sumZ/count)};
+			short[] result = {(short)(-sumX/count), (short)(sumY/count), (short)(-sumZ/count)};
 			return result;
 		}
-		short[] result = {(short)(-1), (short)(1), (short)(1)};
+		short[] result = {(short)(-1), (short)(1), (short)(-1)};
 		return result;
 
 	}
