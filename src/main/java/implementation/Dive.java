@@ -34,7 +34,9 @@ public class Dive {
 	private short[] yBuffer = new short[BUFFER_SIZE];
 	private short[] zBuffer = new short[BUFFER_SIZE];
 	private int bufferIndex = 0;
-
+	private static final int X_ID = 0;
+	private static final int Y_ID = 1;
+	private static final int Z_ID = 2;
 	@PostConstruct
 	public void init() {
 		try {
@@ -155,10 +157,10 @@ public class Dive {
 					// Calculate averages
 					short[] average = calculateAverage(xBuffer, yBuffer, zBuffer);
 
-					log.info("Average: x = " + average[0] + " y = " + average[1] + " z = " + average[2]);
+					log.info("Average: x = " + average[X_ID] + " y = " + average[Y_ID] + " z = " + average[Z_ID]);
 
 					// Calculate dive angle using averages
-					double diveAngle = Math.atan2(-average[1], -average[2]) * (180 / Math.PI);
+					double diveAngle = Math.atan2(-average[Z_ID], -average[X_ID]) * (180 / Math.PI);
 
 
 					// Calculate dive angle
