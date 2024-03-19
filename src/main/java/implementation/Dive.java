@@ -37,8 +37,8 @@ public class Dive {
 	private static final int X_ID = 0;
 	private static final int Y_ID = 1;
 	private static final int Z_ID = 2;
-	private static final int MSB = 0;
-	private static final int LSB = 1;
+	private static final int MSB = 1;
+	private static final int LSB = 0;
 	
 	@PostConstruct
 	public void init() {
