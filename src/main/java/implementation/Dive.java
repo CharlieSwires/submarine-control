@@ -29,7 +29,7 @@ public class Dive {
 	private static boolean firstTime = true;
 	private I2C deviceAccl;
 	private Context pi4j;
-	private static final int BUFFER_SIZE = 20;
+	private static final int BUFFER_SIZE = 30;
 	private short[] xBuffer = new short[BUFFER_SIZE];
 	private short[] yBuffer = new short[BUFFER_SIZE];
 	private short[] zBuffer = new short[BUFFER_SIZE];
