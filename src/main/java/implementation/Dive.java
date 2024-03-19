@@ -29,6 +29,11 @@ public class Dive {
 	private static boolean firstTime = true;
 	private I2C deviceAccl;
 	private Context pi4j;
+    private static final int BUFFER_SIZE = 128;
+    private short[] xBuffer = new short[BUFFER_SIZE];
+    private short[] yBuffer = new short[BUFFER_SIZE];
+    private short[] zBuffer = new short[BUFFER_SIZE];
+    private int bufferIndex = 0;
 
 	@PostConstruct
 	public void init() {
@@ -139,17 +144,31 @@ public class Dive {
 					xAccl = (short) (((acclDataX[1] & 0xFF) << 8) | (acclDataX[0] & 0xFF));
 					yAccl = (short) (((acclDataY[1] & 0xFF) << 8) | (acclDataY[0] & 0xFF));
 					zAccl = (short) (((acclDataZ[1] & 0xFF) << 8) | (acclDataZ[0] & 0xFF));
-					log.info("getDiveAngle: x = " + xAccl + " y = " + yAccl + " z = " + zAccl );
+		               // Read and process each axis data
+	                updateBuffer(xBuffer, xAccl);
+	                updateBuffer(yBuffer, yAccl);
+	                updateBuffer(zBuffer, zAccl);
+	                bufferIndex++;
+	                if (bufferIndex == BUFFER_SIZE) {
+	                	bufferIndex = 0;
+	                }
+	                // Calculate averages
+	                short xAvg = calculateAverage(xBuffer);
+	                short yAvg = calculateAverage(yBuffer);
+	                short zAvg = calculateAverage(zBuffer);
+
+	                log.info("Average: x = " + xAvg + " y = " + yAvg + " z = " + zAvg);
+
+	                // Calculate dive angle using averages
+	                double diveAngle = Math.atan2(xAvg, zAvg) * (180 / Math.PI);
+
 
 					// Calculate dive angle
-					double diveAngle = Math.atan2(xAccl, zAccl) * (180 / Math.PI);
-					if (xAccl != 0 || yAccl != 0 || zAccl != 0) {
 						return (int) diveAngle;
-					}
 
 				} else {
 					try {
-						Thread.sleep(50);
+						Thread.sleep(10);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -161,7 +180,7 @@ public class Dive {
 				throw new RuntimeException("Error reading accelerometer data", e);
 			}finally{
 				try {
-					if (xAccl == 0 && yAccl == 0 && zAccl == 0) Thread.sleep(50);
+					if (xAccl == 0 && yAccl == 0 && zAccl == 0) Thread.sleep(10);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -170,7 +189,18 @@ public class Dive {
 		}
 		return 0;
 	}
+    private void updateBuffer(short[] buffer, short data) {
+        short value = data;
+        buffer[bufferIndex] = value;
+    }
 
+    private short calculateAverage(short[] buffer) {
+        int sum = 0;
+        for (short value : buffer) {
+            sum += value;
+        }
+        return (short) (sum / buffer.length);
+    }
 	// Watch Dog thread class
 	private class WatchDog extends Thread {
 
