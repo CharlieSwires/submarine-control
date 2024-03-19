@@ -162,7 +162,7 @@ public class Dive {
 
 
 					// Calculate dive angle
-					return (int) diveAngle;
+					return (int) -diveAngle;
 
 				} else {
 					try {
@@ -176,13 +176,6 @@ public class Dive {
 			} catch (IOException e) {
 				log.error("Error reading accelerometer data", e);
 				throw new RuntimeException("Error reading accelerometer data", e);
-			}finally{
-				try {
-					if (xAccl == 0 && yAccl == 0 && zAccl == 0) Thread.sleep(10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		}
 		return 0;
