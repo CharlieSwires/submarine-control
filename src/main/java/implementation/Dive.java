@@ -100,7 +100,7 @@ public class Dive {
 		watchDogThread = new WatchDog();
 		watchDogThread.start();
 		firstTime = false;
-		return 0;
+		return -1000;
 	}
 
 	public Integer getDiveAngle() {
