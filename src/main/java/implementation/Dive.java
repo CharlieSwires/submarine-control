@@ -244,7 +244,7 @@ public class Dive {
 					.build();
 			deviceDepth = i2CProvider.create(configDepth);
 	        // Reset the device
-	        deviceDepth.writeRegister(0x1E, (byte)0x00);
+	        deviceDepth.writeRegister(0x1E, (byte)0x35);
 	        Thread.sleep(10);			// Assuming deviceDepth is already calibrated, if not, implement calibration here
 	        // Read calibration coefficients
 	        for (int i = 0; i < calibrationCoefficients.length; i++) {
