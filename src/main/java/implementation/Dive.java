@@ -265,6 +265,7 @@ public class Dive {
 	        Thread.sleep(100); // Wait for sensor settings to take effect
 	    } catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
+	        throw new RuntimeException("Error initializing I2C devices", e);
 		}
 	}
 
