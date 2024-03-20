@@ -74,6 +74,8 @@ package implementation;
 //	}
 //
 
+import java.util.Arrays;
+
 //
 //	public Integer getDiveAngle() {
 //		log.debug("getDiveAngle");
@@ -212,6 +214,7 @@ public class Dive {
 	private Context pi4j;
 	private WatchDog watchDogThread;
 	private static boolean firstTime = true;
+	private int[] calibrationCoefficients = new int[6];
 
 	@PostConstruct
 	public void init() {
@@ -240,7 +243,17 @@ public class Dive {
 					.device(0x76)  // MS5837 default I2C address
 					.build();
 			deviceDepth = i2CProvider.create(configDepth);
-			// Assuming deviceDepth is already calibrated, if not, implement calibration here
+	        // Reset the device
+	        deviceDepth.writeRegister(0x1E, (byte)0x00);
+	        Thread.sleep(10);			// Assuming deviceDepth is already calibrated, if not, implement calibration here
+	        // Read calibration coefficients
+	        for (int i = 0; i < calibrationCoefficients.length; i++) {
+	            byte[] data = new byte[2];
+	            deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
+	            calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
+	        }
+
+	        log.info("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
 			Thread.sleep(100); // Wait for sensor settings to take effect
 		} catch (Exception e) {
@@ -321,7 +334,7 @@ public class Dive {
 	        watchDogThread = new WatchDog();
 	        watchDogThread.start();
 	        firstTime = false;
-	        
+	        // Depth and temperature reading sequence...
 	        // Initiate pressure and temperature reading sequence
 	        deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
 	        Thread.sleep(10); // Wait for reset to complete
@@ -329,16 +342,31 @@ public class Dive {
 	        Thread.sleep(20); // Wait for conversion to complete
 	        byte[] pressureData = new byte[3];
 	        deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
+	        long D1 = ((pressureData[0] & 0xFF) << 16) | ((pressureData[1] & 0xFF) << 8) | (pressureData[2] & 0xFF);// Read pressure data as before...
 	        deviceDepth.writeRegister(0x50, (byte)0x0A); // Start temperature conversion
 	        Thread.sleep(20); // Wait for conversion to complete
 	        byte[] tempData = new byte[3];
 	        deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
 
-	        int pressure = ((pressureData[0] & 0xFF) << 16) | ((pressureData[1] & 0xFF) << 8) | (pressureData[2] & 0xFF);
 	        int temperature = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
+	        long D2 = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
+
+
+	        // Apply conversion formulae using calibration coefficients
+	        double dT = D2 - calibrationCoefficients[4] * Math.pow(2, 8);
+	        double TEMP = 2000 + dT * calibrationCoefficients[5] / Math.pow(2, 23);
+	        double OFF = calibrationCoefficients[1] * Math.pow(2, 17) + (calibrationCoefficients[3] * dT) / Math.pow(2, 6);
+	        double SENS = calibrationCoefficients[0] * Math.pow(2, 16) + (calibrationCoefficients[2] * dT) / Math.pow(2, 7);
+	        double P = (D1 * SENS / Math.pow(2, 21) - OFF) / Math.pow(2, 15);
+
+	        // Depth calculation using the corrected pressure value...
+
+	        log.info("Pressure: " + P + " mbar, Temperature: " + TEMP + " °C");
+	        
+	        double pressure = P;
 
 	        // Convert temperature to degrees Celsius
-	        double tempCelsius = temperature / 100.0;
+	        double tempCelsius = TEMP;
 
 	        // Apply temperature compensation to pressure
 	        double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
