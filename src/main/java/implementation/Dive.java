@@ -310,34 +310,46 @@ public class Dive {
 	}
 
 	public Integer getDepth() {
-		log.debug("getDepth");
-		try {
-			if (!firstTime) {
-				// Stop the watch dog thread
-				watchDogThread.interrupt();
-			}
-			// Restart the watch dog thread
-			watchDogThread = new WatchDog();
-			watchDogThread.start();
-			firstTime = false;
-			
-			// Assuming MS5837 is configured and ready to read
-			// Replace with actual read sequence and conversion logic based on MS5837 datasheet
-			byte[] depthData = new byte[3];
-			deviceDepth.readRegister(0x00, depthData, 0, 3); // 0x00: Read pressure command
+	    log.debug("getDepth");
+	    try {
+	        if (!firstTime) {
+	            // Stop the watch dog thread
+	            watchDogThread.interrupt();
+	        }
+	        // Restart the watch dog thread
+	        watchDogThread = new WatchDog();
+	        watchDogThread.start();
+	        firstTime = false;
+	        
+	        // Initiate pressure and temperature reading sequence
+	        deviceDepth.writeRegister(0x1E, (byte)0); // Reset command
+	        Thread.sleep(10); // Wait for reset to complete
+	        deviceDepth.writeRegister(0x40, (byte)0); // Start pressure conversion
+	        Thread.sleep(10); // Wait for conversion to complete
+	        byte[] pressureData = new byte[3];
+	        deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
+	        deviceDepth.writeRegister(0x50, (byte)0); // Start temperature conversion
+	        Thread.sleep(10); // Wait for conversion to complete
+	        byte[] tempData = new byte[3];
+	        deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
 
-			// Convert read bytes to pressure in mbar
-			int pressure = ((depthData[0] & 0xFF) << 16) | ((depthData[1] & 0xFF) << 8) | (depthData[2] & 0xFF);
+	        int pressure = ((pressureData[0] & 0xFF) << 16) | ((pressureData[1] & 0xFF) << 8) | (pressureData[2] & 0xFF);
+	        int temperature = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
 
-			// Convert pressure to depth in fresh water and return in millimeters
-			// Fresh water density approximately 1000 kg/m^3
-			// 1 mbar = 100 Pa, Pressure = density * g * height => height = Pressure / (density * g)
-			double depthMeters = pressure / (1000.0 * 9.80665);
-			return (int) (-depthMeters * 1000); // Convert meters to millimeters
-		} catch (IOException e) {
-			log.error("Error reading depth sensor data", e);
-			throw new RuntimeException("Error reading depth sensor data", e);
-		}
+	        // Convert temperature to degrees Celsius
+	        double tempCelsius = temperature / 100.0;
+
+	        // Apply temperature compensation to pressure
+	        double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
+	                + 1.001685e-4 * Math.pow(tempCelsius, 3) - 1.120083e-6 * Math.pow(tempCelsius, 4)
+	                + 6.536332e-9 * Math.pow(tempCelsius, 5);
+	        
+	        double depthMeters = pressure / (density * 9.80665);
+	        return (int) (-depthMeters * 1000); // Convert meters to millimeters
+	    } catch (IOException | InterruptedException e) {
+	        log.error("Error reading depth sensor data", e);
+	        throw new RuntimeException("Error reading depth sensor data", e);
+	    }
 	}
 
 }
