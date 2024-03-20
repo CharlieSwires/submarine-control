@@ -374,10 +374,10 @@ public class Dive {
 
 			log.info("Pressure: " + P + " mbar, Temperature: " + TEMP + " °C");
 
-			double pressure = P;
+			double pressure = 1025.0*P/ 109995.54106639235;
 
 			// Convert temperature to degrees Celsius
-			double tempCelsius = TEMP;
+			double tempCelsius = 19.0 * TEMP/8143.355641007423;
 
 			// Apply temperature compensation to pressure
 			double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
