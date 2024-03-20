@@ -214,8 +214,9 @@ public class Dive {
 	private static boolean firstTime = true;
 	private int[] calibrationCoefficients = new int[6];
 
-	public void Dive() {
+	public Dive() {
 		try {
+	        log.info("Starting init method.");
 			pi4j = Pi4J.newAutoContext();
 			log.info("Pi4J context initialized.");
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");

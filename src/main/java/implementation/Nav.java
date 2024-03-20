@@ -23,7 +23,7 @@ public class Nav {
 	private I2C deviceMag;
 	private Context pi4j;
 
-	public void Nav() {
+	public Nav() {
 		try {
 			// Initialize Pi4J with auto context
 			pi4j = Pi4J.newAutoContext();
