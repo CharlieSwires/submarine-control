@@ -249,7 +249,7 @@ public class Dive {
 			// Reset the device
 			log.info("Sending reset command to the depth sensor.");
 			deviceDepth.writeRegister(0x1E, (byte)0x78);
-			Thread.sleep(20);
+			Thread.sleep(100);
 			log.info("Depth sensor reset.");
 
 			// Read calibration coefficients
@@ -346,7 +346,7 @@ public class Dive {
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
 			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
-			Thread.sleep(20); // Wait for reset to complete
+			Thread.sleep(100); // Wait for reset to complete
 			deviceDepth.writeRegister(0x40, (byte)0x02); // Start pressure conversion was 0x02
 			Thread.sleep(20); // Wait for conversion to complete
 			byte[] pressureData = new byte[3];
