@@ -219,18 +219,18 @@ public class Dive {
 			pi4j = Pi4J.newAutoContext();
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
 
-			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
-					.id("LSM6DSO32-Gyro")
-					.name("LSM6DSO32 Gyroscope")
-					.bus(1)
-					.device(0x6B)  // Adjust if using a different I2C address
-					.build();
-
-			deviceGyro = i2CProvider.create(configGyro);
-
-			// Gyroscope initialization
-			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
-			Thread.sleep(100); // Wait for gyro settings to take effect
+//			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
+//					.id("LSM6DSO32-Gyro")
+//					.name("LSM6DSO32 Gyroscope")
+//					.bus(1)
+//					.device(0x6B)  // Adjust if using a different I2C address
+//					.build();
+//
+//			deviceGyro = i2CProvider.create(configGyro);
+//
+//			// Gyroscope initialization
+//			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
+//			Thread.sleep(100); // Wait for gyro settings to take effect
 
 			// Initialize Depth Sensor
 			I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
@@ -249,21 +249,22 @@ public class Dive {
 	}
 
 	public Integer getDiveAngle() {
-		try {
-			byte[] gyroData = new byte[6];
-			deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
-
-			short gyroX = (short) ((gyroData[0] & 0xFF) | (gyroData[1] << 8));
-			short gyroY = (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8));
-			short gyroZ = (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
-
-			Double pitch = Math.atan2(gyroY, gyroZ) * (180 / Math.PI);
-			log.info("Pitch: " + pitch);
-			return pitch.intValue();
-		} catch (IOException e) {
-			log.error("Error reading gyroscope data", e);
-			throw new RuntimeException("Error reading gyroscope data", e);
-		}
+//		try {
+//			byte[] gyroData = new byte[6];
+//			deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
+//
+//			short gyroX = (short) ((gyroData[0] & 0xFF) | (gyroData[1] << 8));
+//			short gyroY = (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8));
+//			short gyroZ = (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
+//
+//			Double pitch = Math.atan2(gyroY, gyroZ) * (180 / Math.PI);
+//			log.info("Pitch: " + pitch);
+//			return pitch.intValue();
+//		} catch (IOException e) {
+//			log.error("Error reading gyroscope data", e);
+//			throw new RuntimeException("Error reading gyroscope data", e);
+//		}
+		return -1000;
 	}
 
 	// Watch Dog thread class
