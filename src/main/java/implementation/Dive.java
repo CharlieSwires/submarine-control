@@ -201,8 +201,6 @@ import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
 
-import jakarta.annotation.PostConstruct;
-
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Dive {
@@ -216,8 +214,7 @@ public class Dive {
 	private static boolean firstTime = true;
 	private int[] calibrationCoefficients = new int[6];
 
-	@PostConstruct
-	public void init() {
+	public void Dive() {
 		try {
 			pi4j = Pi4J.newAutoContext();
 			log.info("Pi4J context initialized.");

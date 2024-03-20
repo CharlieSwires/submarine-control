@@ -14,7 +14,6 @@ import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
 
-import jakarta.annotation.PostConstruct;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -24,8 +23,7 @@ public class Nav {
 	private I2C deviceMag;
 	private Context pi4j;
 
-	@PostConstruct
-	public void init() {
+	public void Nav() {
 		try {
 			// Initialize Pi4J with auto context
 			pi4j = Pi4J.newAutoContext();
