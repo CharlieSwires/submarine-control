@@ -219,9 +219,12 @@ public class Dive {
 	@PostConstruct
 	public void init() {
 		try {
-			pi4j = Pi4J.newAutoContext();
-			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
+		      pi4j = Pi4J.newAutoContext();
+		        log.info("Pi4J context initialized.");
+		        I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
+		        log.info("I2C provider obtained.");
 
+		        
 //			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
 //					.id("LSM6DSO32-Gyro")
 //					.name("LSM6DSO32 Gyroscope")
@@ -247,7 +250,7 @@ public class Dive {
 
 	        // Reset the device
 	        log.info("Sending reset command to the depth sensor.");
-	        deviceDepth.writeRegister(0x1E, (byte) 0x00);
+	        deviceDepth.writeRegister(0x1E, (byte)0x78);
 	        Thread.sleep(10);
 	        log.info("Depth sensor reset.");
 
