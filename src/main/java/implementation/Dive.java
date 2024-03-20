@@ -235,29 +235,35 @@ public class Dive {
 //			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
 //			Thread.sleep(100); // Wait for gyro settings to take effect
 
-			// Initialize Depth Sensor
-			I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
-					.id("MS5837")
-					.name("MS5837 Depth Sensor")
-					.bus(1)
-					.device(0x76)  // MS5837 default I2C address
-					.build();
-			deviceDepth = i2CProvider.create(configDepth);
-            // Reset the device
-            deviceDepth.writeRegister(0x1E, (byte) 0x00);
-            Thread.sleep(10);
+		       // Initialize Depth Sensor
+	        I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
+	                .id("MS5837")
+	                .name("MS5837 Depth Sensor")
+	                .bus(1)
+	                .device(0x76)  // MS5837 default I2C address
+	                .build();
+	        deviceDepth = i2CProvider.create(configDepth);
+	        log.info("Depth sensor initialized.");
 
-            // Read calibration coefficients
-            for (int i = 0; i < calibrationCoefficients.length; i++) {
-                byte[] data = new byte[2];
-                deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
-                calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
-            }
+	        // Reset the device
+	        log.info("Sending reset command to the depth sensor.");
+	        deviceDepth.writeRegister(0x1E, (byte) 0x00);
+	        Thread.sleep(10);
+	        log.info("Depth sensor reset.");
+
+	        // Read calibration coefficients
+	        log.info("Reading calibration coefficients.");
+	        for (int i = 0; i < calibrationCoefficients.length; i++) {
+	            byte[] data = new byte[2];
+	            deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
+	            calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
+	            log.info("Coefficient C" + (i+1) + ": " + calibrationCoefficients[i]);
+	        }
 
 	        log.info("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
-			Thread.sleep(100); // Wait for sensor settings to take effect
-		} catch (Exception e) {
+	        Thread.sleep(100); // Wait for sensor settings to take effect
+	    } catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 		}
 	}
