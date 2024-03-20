@@ -349,7 +349,7 @@ public class Dive {
 	        // Initiate pressure and temperature reading sequence
 	        deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
 	        Thread.sleep(10); // Wait for reset to complete
-	        deviceDepth.writeRegister(0x40, (byte)0x02); // Start pressure conversion
+	        deviceDepth.writeRegister(0x40, (byte)0x00); // Start pressure conversion was 0x02
 	        Thread.sleep(20); // Wait for conversion to complete
 	        byte[] pressureData = new byte[3];
 	        deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
