@@ -343,6 +343,8 @@ public class Dive {
 			watchDogThread = new WatchDog();
 			watchDogThread.start();
 			firstTime = false;
+			log.info("Calibration Coefficients2: " + Arrays.toString(calibrationCoefficients));
+
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
 			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
