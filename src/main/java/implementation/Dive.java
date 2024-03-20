@@ -243,15 +243,16 @@ public class Dive {
 					.device(0x76)  // MS5837 default I2C address
 					.build();
 			deviceDepth = i2CProvider.create(configDepth);
-	        // Reset the device
-	        deviceDepth.writeRegister(0x1E, (byte)0x35);
-	        Thread.sleep(10);			// Assuming deviceDepth is already calibrated, if not, implement calibration here
-	        // Read calibration coefficients
-	        for (int i = 0; i < calibrationCoefficients.length; i++) {
-	            byte[] data = new byte[2];
-	            deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
-	            calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
-	        }
+            // Reset the device
+            deviceDepth.writeRegister(0x1E, (byte) 0x00);
+            Thread.sleep(10);
+
+            // Read calibration coefficients
+            for (int i = 0; i < calibrationCoefficients.length; i++) {
+                byte[] data = new byte[2];
+                deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
+                calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
+            }
 
 	        log.info("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
