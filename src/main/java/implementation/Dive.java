@@ -264,7 +264,7 @@ public class Dive {
 //			log.error("Error reading gyroscope data", e);
 //			throw new RuntimeException("Error reading gyroscope data", e);
 //		}
-		return -1000;
+		return 0;
 	}
 
 	// Watch Dog thread class
@@ -323,13 +323,13 @@ public class Dive {
 	        firstTime = false;
 	        
 	        // Initiate pressure and temperature reading sequence
-	        deviceDepth.writeRegister(0x1E, (byte)0); // Reset command
+	        deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
 	        Thread.sleep(10); // Wait for reset to complete
-	        deviceDepth.writeRegister(0x40, (byte)0); // Start pressure conversion
+	        deviceDepth.writeRegister(0x40, (byte)0x02); // Start pressure conversion
 	        Thread.sleep(20); // Wait for conversion to complete
 	        byte[] pressureData = new byte[3];
 	        deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
-	        deviceDepth.writeRegister(0x50, (byte)0); // Start temperature conversion
+	        deviceDepth.writeRegister(0x50, (byte)0x0A); // Start temperature conversion
 	        Thread.sleep(20); // Wait for conversion to complete
 	        byte[] tempData = new byte[3];
 	        deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
@@ -346,6 +346,8 @@ public class Dive {
 	                + 6.536332e-9 * Math.pow(tempCelsius, 5);
 	        
 	        double depthMeters = pressure / (density * 9.80665);
+		    log.info("pressure = "+pressure+" temperature = "+temperature+" depth = "+depthMeters+" density = "+density);
+
 	        return (int) (-depthMeters * 1000); // Convert meters to millimeters
 	    } catch (IOException | InterruptedException e) {
 	        log.error("Error reading depth sensor data", e);
