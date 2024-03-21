@@ -380,21 +380,43 @@ public class Dive {
 			long D2 = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
 
 
-			// Apply conversion formulae using calibration coefficients
-			double dT = D2 - calibrationCoefficients[4] * Math.pow(2, 8);
-			double TEMP = 2000 + dT * calibrationCoefficients[5] / Math.pow(2, 23);
-			double OFF = calibrationCoefficients[1] * Math.pow(2, 17) + (calibrationCoefficients[3] * dT) / Math.pow(2, 6);
-			double SENS = calibrationCoefficients[0] * Math.pow(2, 16) + (calibrationCoefficients[2] * dT) / Math.pow(2, 7);
-			double P = (D1 * SENS / Math.pow(2, 21) - OFF) / Math.pow(2, 15);
+			long dT = D2 - calibrationCoefficients[4] * 256;
+			long TEMP = 2000 + dT * calibrationCoefficients[5] / (long)8388608;
+			long OFF = calibrationCoefficients[1] * 65536L + (calibrationCoefficients[3] * dT) / 128L;
+			long SENS = calibrationCoefficients[0] * 32768L + (calibrationCoefficients[2] * dT) / 256L;
+			long T2 = 0;
+			long OFF2 = 0;
+			long SENS2 = 0;
 
+			if(TEMP >= 2000)
+			{
+				T2 = 2 * (dT * dT) / 137438953472L;
+				OFF2 = ((TEMP - 2000) * (TEMP - 2000)) / 16;
+				SENS2 = 0;
+			}
+			else if(TEMP < 2000)
+			{
+				T2 = 3 * (dT * dT) / 8589934592L;
+				OFF2 = 3 * ((TEMP - 2000) * (TEMP - 2000)) / 2;
+				SENS2 = 5 * ((TEMP - 2000) * (TEMP - 2000)) / 8;
+				if(TEMP < -1500)
+				{
+					OFF2 = OFF2 + 7 * ((TEMP + 1500) * (TEMP + 1500));
+					SENS2 = SENS2 + 4 * ((TEMP + 1500) * (TEMP + 1500));
+				}
+			}
+
+			TEMP = TEMP - T2;
+			OFF = OFF - OFF2;
+			SENS = SENS - SENS2;
+			double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
+			double tempCelsius = TEMP / 100.0;
 			// Depth calculation using the corrected pressure value...
 
-			log.debug("Pressure: " + P + " mbar, Temperature: " + TEMP + " °C");
-
-			double pressure = 1025.0*P/ 109995.54106639235; //mPa
-
-			// Convert temperature to degrees Celsius
-			double tempCelsius = 19.0 * TEMP/8143.355641007423; //Celcius
+//			double pressure = 1025.0*P/ 109995.54106639235; //mPa
+//
+//			// Convert temperature to degrees Celsius
+//			double tempCelsius = 19.0 * TEMP/8143.355641007423; //Celcius
 
 			// Apply temperature compensation to pressure
 			double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
