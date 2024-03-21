@@ -415,7 +415,7 @@ public class Dive {
 			pressure = 1025.0*pressure/ 21729.3; //mPa
 //
 //			// Convert temperature to degrees Celsius
-			tempCelsius = 19.0 * TEMP/82.18; //Celcius
+			tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
 
 			// Apply temperature compensation to pressure
 			double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
