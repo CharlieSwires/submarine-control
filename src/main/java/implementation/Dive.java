@@ -196,7 +196,6 @@ import org.springframework.stereotype.Component;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.io.exception.IOException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -390,7 +389,7 @@ public class Dive {
 			log.debug("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
 
 			return (int) (-depthMeters * 1000 - offsetDepth); // Convert meters to millimeters
-		} catch (IOException | InterruptedException e) {
+		} catch (Exception e) {
 			log.error("Error reading depth sensor data", e);
 			return -999 - offsetDepth;
 		}
