@@ -272,6 +272,8 @@ public class Dive {
 				try {
 					getDepth();
 					Thread.sleep(50);
+					log.info("getDepth() called");
+
 				}catch (Exception e) {
 					log.info("exception raised ignoring!!");
 				}
