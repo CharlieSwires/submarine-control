@@ -333,7 +333,7 @@ public class Dive {
 
 				} else {
 					try {
-						WatchDog.sleep(100);
+						WatchDog.sleep(500);
 					} catch (InterruptedException e) {
 					}
 				}
