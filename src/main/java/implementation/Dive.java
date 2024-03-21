@@ -396,7 +396,7 @@ public class Dive {
 		}
 	}
 
-	public Integer getDepth(Integer offset) {
+	public Integer zeroOffsets() {
 		Dive.offsetDepth = 0;
 		Dive.offsetDepth = getDepth();
 		Dive.offsetPitch = 0;
