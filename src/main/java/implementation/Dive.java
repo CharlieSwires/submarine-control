@@ -252,7 +252,7 @@ public class Dive {
 			// Reset the device
 			log.debug("Sending reset command to the depth sensor.");
 			deviceDepth.writeRegister(0x1E, (byte)0x78);
-			Thread.sleep(20);
+			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
 			log.debug("Depth sensor reset.");
 
 			// Read calibration coefficients
@@ -266,7 +266,7 @@ public class Dive {
 
 			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
-			Thread.sleep(100); // Wait for sensor settings to take effect
+			try { Thread.sleep(100); } catch (Exception e) {} // Wait for conversion to complete
 //			disabled  = true;
 //			for (int i = 0; i < 5; i++) {
 //				try {
@@ -367,12 +367,12 @@ public class Dive {
 //			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
 //			Thread.sleep(50); // Wait for reset to complete
 			deviceDepth.writeRegister(0x40, (byte)0x12); // Start pressure conversion was 0x02
-			Thread.sleep(20); // Wait for conversion to complete
+			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
 			byte[] pressureData = new byte[3];
 			deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
 			long D1 = ((pressureData[0] & 0xFF) << 16) | ((pressureData[1] & 0xFF) << 8) | (pressureData[2] & 0xFF);// Read pressure data as before...
 			deviceDepth.writeRegister(0x50, (byte)0x1C); // Start temperature conversion was 0x0A
-			Thread.sleep(20); // Wait for conversion to complete
+			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
 			byte[] tempData = new byte[3];
 			deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
 
