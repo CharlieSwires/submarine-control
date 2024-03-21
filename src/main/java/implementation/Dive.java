@@ -314,7 +314,7 @@ public class Dive {
 	}
 	// Method to trigger emergency surface event
 	private void emergencySurface() {
-		log.debug("emergencySurface");
+		log.error("emergencySurface");
 		setFillTank(false);
 	}
 	public Integer setFrontAngle(Integer angle) {
