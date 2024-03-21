@@ -222,67 +222,67 @@ public class Dive {
 	public Dive() {
 		try {
 			log.info("Starting Dive method.");
-//			pi4j = Pi4J.newAutoContext();
-//			log.debug("Pi4J context initialized.");
-//			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
-//			log.debug("I2C provider obtained.");
-//
-//
-//			//			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
-//			//					.id("LSM6DSO32-Gyro")
-//			//					.name("LSM6DSO32 Gyroscope")
-//			//					.bus(1)
-//			//					.device(0x6B)  // Adjust if using a different I2C address
-//			//					.build();
-//			//
-//			//			deviceGyro = i2CProvider.create(configGyro);
-//			//
-//			//			// Gyroscope initialization
-//			//			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
-//			//			Thread.sleep(100); // Wait for gyro settings to take effect
-//
-//			// Initialize Depth Sensor
-//			I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
-//					.id("MS5837")
-//					.name("MS5837 Depth Sensor")
-//					.bus(1)
-//					.device(0x76)  // MS5837 default I2C address
-//					.build();
-//			deviceDepth = i2CProvider.create(configDepth);
-//			log.debug("Depth sensor initialized.");
-//
-//			// Reset the device
-//			log.debug("Sending reset command to the depth sensor.");
-//			deviceDepth.writeRegister(0x1E, (byte)0x78);
-//			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
-//			log.debug("Depth sensor reset.");
-//
-//			// Read calibration coefficients
-//			log.debug("Reading calibration coefficients.");
-//			for (int i = 0; i < calibrationCoefficients.length; i++) {
-//				byte[] data = new byte[2];
-//				deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
-//				calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
-//				log.info("Coefficient C" + (i+1) + ": " + calibrationCoefficients[i]);
-//			}
-//
-//			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
-//
-//			try { Thread.sleep(100); } catch (Exception e) {} // Wait for conversion to complete
-//			//			disabled  = true;
-//			//			for (int i = 0; i < 5; i++) {
-//			//				try {
-//			//					getDepth();
-//			//					Thread.sleep(50);
-//			//					log.info("getDepth() called");
-//			//
-//			//				}catch (Exception e) {
-//			//					log.info("exception raised ignoring!!");
-//			//				}
-//			//			}
-//			watchDogThread = new WatchDog();
-//			watchDogThread.start();
-			disabled = true;
+			pi4j = Pi4J.newAutoContext();
+			log.debug("Pi4J context initialized.");
+			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
+			log.debug("I2C provider obtained.");
+
+
+			//			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
+			//					.id("LSM6DSO32-Gyro")
+			//					.name("LSM6DSO32 Gyroscope")
+			//					.bus(1)
+			//					.device(0x6B)  // Adjust if using a different I2C address
+			//					.build();
+			//
+			//			deviceGyro = i2CProvider.create(configGyro);
+			//
+			//			// Gyroscope initialization
+			//			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
+			//			Thread.sleep(100); // Wait for gyro settings to take effect
+
+			// Initialize Depth Sensor
+			I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
+					.id("MS5837")
+					.name("MS5837 Depth Sensor")
+					.bus(1)
+					.device(0x76)  // MS5837 default I2C address
+					.build();
+			deviceDepth = i2CProvider.create(configDepth);
+			log.debug("Depth sensor initialized.");
+
+			// Reset the device
+			log.debug("Sending reset command to the depth sensor.");
+			deviceDepth.writeRegister(0x1E, (byte)0x78);
+			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
+			log.debug("Depth sensor reset.");
+
+			// Read calibration coefficients
+			log.debug("Reading calibration coefficients.");
+			for (int i = 0; i < calibrationCoefficients.length; i++) {
+				byte[] data = new byte[2];
+				deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
+				calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
+				log.info("Coefficient C" + (i+1) + ": " + calibrationCoefficients[i]);
+			}
+
+			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
+
+			try { Thread.sleep(100); } catch (Exception e) {} // Wait for conversion to complete
+			//			disabled  = true;
+			//			for (int i = 0; i < 5; i++) {
+			//				try {
+			//					getDepth();
+			//					Thread.sleep(50);
+			//					log.info("getDepth() called");
+			//
+			//				}catch (Exception e) {
+			//					log.info("exception raised ignoring!!");
+			//				}
+			//			}
+			watchDogThread = new WatchDog();
+			watchDogThread.start();
+			disabled = false;
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 			throw new RuntimeException("Error initializing I2C devices", e);
