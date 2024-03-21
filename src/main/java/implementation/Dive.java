@@ -438,7 +438,7 @@ public class Dive {
 
 			return (int) (-depthMeters * 1000 - offsetDepth); // Convert meters to millimeters
 		} catch (Exception e) {
-			log.error("Error reading depth sensor data", e);
+			log.error("Error reading depth sensor data");
 			return -999 - offsetDepth;
 		}
 	}
