@@ -219,9 +219,9 @@ public class Dive {
 		try {
 	        log.info("Starting init method.");
 			pi4j = Pi4J.newAutoContext();
-			log.info("Pi4J context initialized.");
+			log.debug("Pi4J context initialized.");
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
-			log.info("I2C provider obtained.");
+			log.debug("I2C provider obtained.");
 
 
 			//			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
@@ -245,24 +245,24 @@ public class Dive {
 					.device(0x76)  // MS5837 default I2C address
 					.build();
 			deviceDepth = i2CProvider.create(configDepth);
-			log.info("Depth sensor initialized.");
+			log.debug("Depth sensor initialized.");
 
 			// Reset the device
-			log.info("Sending reset command to the depth sensor.");
+			log.debug("Sending reset command to the depth sensor.");
 			deviceDepth.writeRegister(0x1E, (byte)0x78);
 			Thread.sleep(20);
-			log.info("Depth sensor reset.");
+			log.debug("Depth sensor reset.");
 
 			// Read calibration coefficients
-			log.info("Reading calibration coefficients.");
+			log.debug("Reading calibration coefficients.");
 			for (int i = 0; i < calibrationCoefficients.length; i++) {
 				byte[] data = new byte[2];
 				deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
 				calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
-				log.info("Coefficient C" + (i+1) + ": " + calibrationCoefficients[i]);
+				log.debug("Coefficient C" + (i+1) + ": " + calibrationCoefficients[i]);
 			}
 
-			log.info("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
+			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
 			Thread.sleep(100); // Wait for sensor settings to take effect
 		} catch (Exception e) {
@@ -281,7 +281,7 @@ public class Dive {
 		//			short gyroZ = (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
 		//
 		//			Double pitch = Math.atan2(gyroY, gyroZ) * (180 / Math.PI);
-		//			log.info("Pitch: " + pitch);
+		//			log.debug("Pitch: " + pitch);
 		//			return pitch.intValue();
 		//		} catch (IOException e) {
 		//			log.error("Error reading gyroscope data", e);
@@ -314,27 +314,27 @@ public class Dive {
 	}
 	// Method to trigger emergency surface event
 	private void emergencySurface() {
-		log.info("emergencySurface");
+		log.debug("emergencySurface");
 		setFillTank(false);
 	}
 	public Integer setFrontAngle(Integer angle) {
-		log.info("setFrontAngle:"+angle);
+		log.debug("setFrontAngle:"+angle);
 		return angle;
 	}
 
 	public Integer setBackAngle(Integer angle) {
-		log.info("setBackAngle:"+angle);
+		log.debug("setBackAngle:"+angle);
 		return angle;
 	}
 
 	public Integer setFillTank(Boolean action) {
-		log.info("setFillTank:"+action);
+		log.debug("setFillTank:"+action);
 
 		return action?1:0;
 	}
 
 	public Integer getDepth() {
-		log.info("getDepth");
+		log.debug("getDepth");
 		try {
 			if (!firstTime) {
 				// Stop the watch dog thread
@@ -344,7 +344,7 @@ public class Dive {
 			watchDogThread = new WatchDog();
 			watchDogThread.start();
 			firstTime = false;
-			log.info("Calibration Coefficients2: " + Arrays.toString(calibrationCoefficients));
+			log.debug("Calibration Coefficients2: " + Arrays.toString(calibrationCoefficients));
 
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
@@ -373,7 +373,7 @@ public class Dive {
 
 			// Depth calculation using the corrected pressure value...
 
-			log.info("Pressure: " + P + " mbar, Temperature: " + TEMP + " °C");
+			log.debug("Pressure: " + P + " mbar, Temperature: " + TEMP + " °C");
 
 			double pressure = 1025.0*P/ 109995.54106639235;
 
@@ -386,7 +386,7 @@ public class Dive {
 			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
 
 			double depthMeters = pressure / (density * 9.80665);
-			log.info("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
+			log.debug("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
 
 			return (int) (-depthMeters * 1000 - offset); // Convert meters to millimeters
 		} catch (IOException | InterruptedException e) {
