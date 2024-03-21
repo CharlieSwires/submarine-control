@@ -315,6 +315,7 @@ public class Dive {
 					if (watchDogThread != null && !watchDogThread.isInterrupted()) emergencySurface();
 					
 				} catch (InterruptedException e) {
+					log.info("InterruptedException");
 					// Thread interrupted, exit the loop
 					break;
 				}
