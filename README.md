@@ -56,7 +56,9 @@ DiveControl
 <p>http://192.168.137.205:8080/submarine/dive/dive-angle</p>
 <p>returns angleDegrees</p>
 <p>http://192.168.137.205:8080/submarine/dive/depth</p>
-<p>returns integer mm</p>
+<p>returns integer mm - offset</p>
+<p>http://192.168.137.205:8080/submarine/dive/depth/{offset}</p>
+<p>returns integer mm - offset</p>
 
 NavigationControl
 -----------------
