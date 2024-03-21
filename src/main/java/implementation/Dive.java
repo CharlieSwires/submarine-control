@@ -265,6 +265,16 @@ public class Dive {
 			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
 			Thread.sleep(100); // Wait for sensor settings to take effect
+			
+			for (int i = 0; i < 5; i++) {
+				try {
+					getDepth();
+					Thread.sleep(50);
+				}catch (Exception e) {
+					log.info("exception raised ignoring!!");
+				}
+			}
+			
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 			throw new RuntimeException("Error initializing I2C devices", e);
