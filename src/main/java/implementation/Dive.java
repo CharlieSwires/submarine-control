@@ -308,7 +308,7 @@ public class Dive {
 
 		@Override
 		public void run() {
-			while (!Thread.currentThread().isInterrupted()) {
+			while (watchDogThread != null && !watchDogThread.isInterrupted()) {
 				try {
 					// Sleep for 5seconds
 					Thread.sleep(10000);
