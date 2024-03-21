@@ -212,6 +212,8 @@ public class Dive {
 	private WatchDog watchDogThread;
 	private static boolean firstTime = true;
 	private int[] calibrationCoefficients = new int[6];
+
+	private static boolean disabled = true;
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
 
@@ -265,7 +267,7 @@ public class Dive {
 			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
 			Thread.sleep(100); // Wait for sensor settings to take effect
-			
+			disabled  = true;
 			for (int i = 0; i < 5; i++) {
 				try {
 					getDepth();
@@ -274,7 +276,7 @@ public class Dive {
 					log.info("exception raised ignoring!!");
 				}
 			}
-			
+			disabled = false;
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 			throw new RuntimeException("Error initializing I2C devices", e);
@@ -346,6 +348,8 @@ public class Dive {
 	public Integer getDepth() {
 		log.debug("getDepth");
 		try {
+			if (!disabled) {
+				
 			if (!firstTime) {
 				// Stop the watch dog thread
 				watchDogThread.interrupt();
@@ -354,6 +358,8 @@ public class Dive {
 			watchDogThread = new WatchDog();
 			watchDogThread.start();
 			firstTime = false;
+			}
+
 			log.debug("Calibration Coefficients2: " + Arrays.toString(calibrationCoefficients));
 
 			// Depth and temperature reading sequence...
