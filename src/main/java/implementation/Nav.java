@@ -44,7 +44,7 @@ public class Nav {
 
 			// Initialize magnetometer
 			deviceMag.writeRegister(0x60, (byte) 0x8C); // Continuous conversion mode
-			deviceMag.writeRegister(0x61, (byte) 0x02); // Data output rate = 15Hz
+			deviceMag.writeRegister(0x61, (byte) 0x02); // Data output rate = 100Hz
 			deviceMag.writeRegister(0x62, (byte) 0x10); // Set gain = +/- 1.3g
 
 			Thread.sleep(500); // Wait for settings to take effect
