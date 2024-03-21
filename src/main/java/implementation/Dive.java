@@ -312,8 +312,9 @@ public class Dive {
 
 		@Override
 		public void run() {
-			while (!startTimer) {
+			while (true) {
 				if (startTimer) {
+
 					while (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer) {
 						try {
 							// Sleep for 5seconds
@@ -328,12 +329,13 @@ public class Dive {
 							startTimer = false;
 						}
 					}
-				}
-				try {
-					WatchDog.sleep(100);
-				} catch (InterruptedException e) {
-				}
 
+				} else {
+					try {
+						WatchDog.sleep(100);
+					} catch (InterruptedException e) {
+					}
+				}
 			}
 		}
 	}
