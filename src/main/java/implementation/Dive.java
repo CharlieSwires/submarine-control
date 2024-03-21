@@ -209,7 +209,7 @@ public class Dive {
 	private I2C deviceGyro;
 	private I2C deviceDepth;
 	private Context pi4j;
-	private WatchDog watchDogThread;
+	private static WatchDog watchDogThread;
 	private static boolean firstTime = true;
 	private int[] calibrationCoefficients = new int[6];
 
