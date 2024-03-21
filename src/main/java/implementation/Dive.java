@@ -196,6 +196,7 @@ import org.springframework.stereotype.Component;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
+import com.pi4j.exception.Pi4JException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -367,7 +368,7 @@ public class Dive {
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
 			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
-			Thread.sleep(20); // Wait for reset to complete
+			Thread.sleep(50); // Wait for reset to complete
 			deviceDepth.writeRegister(0x48, (byte)0x12); // Start pressure conversion was 0x02
 			Thread.sleep(20); // Wait for conversion to complete
 			byte[] pressureData = new byte[3];
