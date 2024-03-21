@@ -312,7 +312,7 @@ public class Dive {
 				try {
 					// Sleep for 5seconds
 					Thread.sleep(10000);
-					if (watchDogThread != null) emergencySurface();
+					if (watchDogThread != null && !watchDogThread.isInterrupted()) emergencySurface();
 					
 				} catch (InterruptedException e) {
 					// Thread interrupted, exit the loop
