@@ -75,6 +75,7 @@ package implementation;
 //
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 //
 //	public Integer getDiveAngle() {
@@ -212,7 +213,7 @@ public class Dive {
 	private static WatchDog watchDogThread = null;
 	private int[] calibrationCoefficients = new int[6];
 
-	public boolean startTimer = false;
+	public AtomicBoolean startTimer = new AtomicBoolean(false);
 
 	private static boolean disabled = true;
 	private static int offsetDepth = 0;
@@ -313,20 +314,20 @@ public class Dive {
 		@Override
 		public void run() {
 			while (true) {
-				if (startTimer) {
+				if (startTimer.get()) {
 
-					while (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer) {
+					while (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer.get()) {
 						try {
 							// Sleep for 5seconds
 							WatchDog.sleep(10000);
-							if (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer) emergencySurface();
+							if (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer.get()) emergencySurface();
 
 						} catch (InterruptedException e) {
 							log.debug("InterruptedException");
 							// Thread interrupted, exit the loop
 							break;
 						} finally {
-							startTimer = false;
+							startTimer.set(false);
 						}
 					}
 
@@ -369,7 +370,7 @@ public class Dive {
 					watchDogThread.interrupt();
 				}
 				// Restart the watch dog thread
-				startTimer = true;
+				startTimer.set(true);
 			}
 
 			// Depth and temperature reading sequence...
