@@ -268,7 +268,7 @@ public class Dive {
 			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
 			Thread.sleep(100); // Wait for sensor settings to take effect
-			disabled  = true;
+//			disabled  = true;
 //			for (int i = 0; i < 5; i++) {
 //				try {
 //					getDepth();
@@ -279,7 +279,7 @@ public class Dive {
 //					log.info("exception raised ignoring!!");
 //				}
 //			}
-//			disabled = false;
+			disabled = false;
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 			throw new RuntimeException("Error initializing I2C devices", e);
@@ -349,7 +349,7 @@ public class Dive {
 	}
 
 	public Integer getDepth() {
-		log.info("getDepth");
+		log.debug("getDepth");
 		try {
 			if (!disabled) {
 
@@ -403,7 +403,7 @@ public class Dive {
 			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
 
 			double depthMeters = pressure / (density * 9.80665 * 1000.0);//mPa /1000
-			log.debug("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
+			log.info("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
 
 			return (int) (-depthMeters * 1000 - offsetDepth); // Convert meters to millimeters
 		} catch (Exception e) {
