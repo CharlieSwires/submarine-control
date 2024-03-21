@@ -387,9 +387,7 @@ public class Dive {
 			byte[] tempData = new byte[3];
 			deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
 
-			int temperature = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
 			long D2 = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
-
 
 			long dT = D2 - calibrationCoefficients[4] * 256;
 			long TEMP = 2000 + dT * calibrationCoefficients[5] / (long)8388608;
