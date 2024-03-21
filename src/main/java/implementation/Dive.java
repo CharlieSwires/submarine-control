@@ -213,7 +213,8 @@ public class Dive {
 	private WatchDog watchDogThread;
 	private static boolean firstTime = true;
 	private int[] calibrationCoefficients = new int[6];
-	private static int offset = 0;
+	private static int offsetDepth = 0;
+	private static int offsetPitch = 0;
 
 	public Dive() {
 		try {
@@ -280,14 +281,14 @@ public class Dive {
 		//			short gyroY = (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8));
 		//			short gyroZ = (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
 		//
-		//			Double pitch = Math.atan2(gyroY, gyroZ) * (180 / Math.PI);
+		//			Double pitch = Math.atan2(gyroZ, gyroX) * (180 / Math.PI);
 		//			log.debug("Pitch: " + pitch);
-		//			return pitch.intValue();
+		//			return pitch.intValue() - offsetPitch;
 		//		} catch (IOException e) {
 		//			log.error("Error reading gyroscope data", e);
 		//			throw new RuntimeException("Error reading gyroscope data", e);
 		//		}
-		return 0;
+		return 10 - offsetPitch;
 	}
 
 	// Watch Dog thread class
@@ -375,20 +376,20 @@ public class Dive {
 
 			log.debug("Pressure: " + P + " mbar, Temperature: " + TEMP + " °C");
 
-			double pressure = 1025.0*P/ 109995.54106639235;
+			double pressure = 1025.0*P/ 109995.54106639235; //mPa
 
 			// Convert temperature to degrees Celsius
-			double tempCelsius = 19.0 * TEMP/8143.355641007423;
+			double tempCelsius = 19.0 * TEMP/8143.355641007423; //Celcius
 
 			// Apply temperature compensation to pressure
 			double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
 			+ 1.001685e-4 * Math.pow(tempCelsius, 3) - 1.120083e-6 * Math.pow(tempCelsius, 4)
 			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
 
-			double depthMeters = pressure / (density * 9.80665);
+			double depthMeters = pressure / (density * 9.80665 * 1000.0);//mPa /1000
 			log.debug("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
 
-			return (int) (-depthMeters * 1000 - offset); // Convert meters to millimeters
+			return (int) (-depthMeters * 1000 - offsetDepth); // Convert meters to millimeters
 		} catch (IOException | InterruptedException e) {
 			log.error("Error reading depth sensor data", e);
 			throw new RuntimeException("Error reading depth sensor data", e);
@@ -396,8 +397,11 @@ public class Dive {
 	}
 
 	public Integer getDepth(Integer offset) {
-		Dive.offset = offset;
-		return getDepth();
+		Dive.offsetDepth = 0;
+		Dive.offsetDepth = getDepth();
+		Dive.offsetPitch = 0;
+		Dive.offsetPitch = getDiveAngle();
+		return 0;
 	}
 
 }
