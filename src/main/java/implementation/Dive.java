@@ -349,7 +349,7 @@ public class Dive {
 	}
 
 	public Integer getDepth() {
-		log.debug("getDepth");
+		log.info("getDepth");
 		try {
 			if (!disabled) {
 
@@ -365,14 +365,14 @@ public class Dive {
 
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
-			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
-			Thread.sleep(50); // Wait for reset to complete
-			deviceDepth.writeRegister(0x48, (byte)0x12); // Start pressure conversion was 0x02
+//			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
+//			Thread.sleep(50); // Wait for reset to complete
+			deviceDepth.writeRegister(0x40, (byte)0x12); // Start pressure conversion was 0x02
 			Thread.sleep(20); // Wait for conversion to complete
 			byte[] pressureData = new byte[3];
 			deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
 			long D1 = ((pressureData[0] & 0xFF) << 16) | ((pressureData[1] & 0xFF) << 8) | (pressureData[2] & 0xFF);// Read pressure data as before...
-			deviceDepth.writeRegister(0x58, (byte)0x1C); // Start temperature conversion was 0x0A
+			deviceDepth.writeRegister(0x50, (byte)0x1C); // Start temperature conversion was 0x0A
 			Thread.sleep(20); // Wait for conversion to complete
 			byte[] tempData = new byte[3];
 			deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
