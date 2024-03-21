@@ -396,7 +396,7 @@ public class Dive {
 	}
 
 	public Integer getDepth(Integer offset) {
-		this.offset = offset;
+		Dive.offset = offset;
 		return offset;
 	}
 
