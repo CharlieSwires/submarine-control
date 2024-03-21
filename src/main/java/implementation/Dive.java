@@ -209,8 +209,7 @@ public class Dive {
 	private I2C deviceGyro;
 	private I2C deviceDepth;
 	private Context pi4j;
-	private static WatchDog watchDogThread;
-	private static boolean firstTime = true;
+	private static WatchDog watchDogThread = null;
 	private int[] calibrationCoefficients = new int[6];
 
 	private static boolean disabled = true;
@@ -313,12 +312,8 @@ public class Dive {
 				try {
 					// Sleep for 5seconds
 					Thread.sleep(10000);
-
-					// Check if getDepth method hasn't been called within 1000ms
-					if (!Thread.currentThread().isInterrupted()) {
-						// Trigger emergency surface event
-						emergencySurface();
-					}
+					if (watchDogThread != null) emergencySurface();
+					
 				} catch (InterruptedException e) {
 					// Thread interrupted, exit the loop
 					break;
@@ -351,15 +346,15 @@ public class Dive {
 		log.debug("getDepth");
 		try {
 			if (!disabled) {
-
-				if (!firstTime) {
+				if (watchDogThread != null) {
 					// Stop the watch dog thread
 					watchDogThread.interrupt();
+					watchDogThread = null;
+					System.gc();
 				}
 				// Restart the watch dog thread
 				watchDogThread = new WatchDog();
 				watchDogThread.start();
-				firstTime = false;
 			}
 
 			// Depth and temperature reading sequence...
