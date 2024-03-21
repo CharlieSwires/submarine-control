@@ -220,7 +220,7 @@ public class Dive {
 
 	public Dive() {
 		try {
-	        log.info("Starting Dive method.");
+			log.info("Starting Dive method.");
 			pi4j = Pi4J.newAutoContext();
 			log.debug("Pi4J context initialized.");
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
@@ -269,17 +269,17 @@ public class Dive {
 
 			Thread.sleep(100); // Wait for sensor settings to take effect
 			disabled  = true;
-			for (int i = 0; i < 5; i++) {
-				try {
-					getDepth();
-					Thread.sleep(50);
-					log.info("getDepth() called");
-
-				}catch (Exception e) {
-					log.info("exception raised ignoring!!");
-				}
-			}
-			disabled = false;
+//			for (int i = 0; i < 5; i++) {
+//				try {
+//					getDepth();
+//					Thread.sleep(50);
+//					log.info("getDepth() called");
+//
+//				}catch (Exception e) {
+//					log.info("exception raised ignoring!!");
+//				}
+//			}
+//			disabled = false;
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 			throw new RuntimeException("Error initializing I2C devices", e);
@@ -352,18 +352,16 @@ public class Dive {
 		log.debug("getDepth");
 		try {
 			if (!disabled) {
-				
-			if (!firstTime) {
-				// Stop the watch dog thread
-				watchDogThread.interrupt();
-			}
-			// Restart the watch dog thread
-			watchDogThread = new WatchDog();
-			watchDogThread.start();
-			firstTime = false;
-			}
 
-			log.debug("Calibration Coefficients2: " + Arrays.toString(calibrationCoefficients));
+				if (!firstTime) {
+					// Stop the watch dog thread
+					watchDogThread.interrupt();
+				}
+				// Restart the watch dog thread
+				watchDogThread = new WatchDog();
+				watchDogThread.start();
+				firstTime = false;
+			}
 
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
