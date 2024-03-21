@@ -40,6 +40,8 @@ public class Eng {
 
 	public Eng() {
 		try {
+	        log.info("Starting Eng method.");
+
 			// Initialize Pi4J with auto context
 			pi4j = Pi4J.newAutoContext();
 

@@ -217,7 +217,7 @@ public class Dive {
 
 	public Dive() {
 		try {
-	        log.info("Starting init method.");
+	        log.info("Starting Dive method.");
 			pi4j = Pi4J.newAutoContext();
 			log.debug("Pi4J context initialized.");
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
@@ -259,7 +259,7 @@ public class Dive {
 				byte[] data = new byte[2];
 				deviceDepth.readRegister(0xA0 + (i * 2), data, 0, 2); // Each coefficient is 2 bytes, starting at 0xA0
 				calibrationCoefficients[i] = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
-				log.debug("Coefficient C" + (i+1) + ": " + calibrationCoefficients[i]);
+				log.info("Coefficient C" + (i+1) + ": " + calibrationCoefficients[i]);
 			}
 
 			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));

@@ -25,6 +25,7 @@ public class Nav {
 
 	public Nav() {
 		try {
+	        log.info("Starting Nav method.");
 			// Initialize Pi4J with auto context
 			pi4j = Pi4J.newAutoContext();
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
