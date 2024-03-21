@@ -213,6 +213,7 @@ public class Dive {
 	private WatchDog watchDogThread;
 	private static boolean firstTime = true;
 	private int[] calibrationCoefficients = new int[6];
+	private static int offset = 0;
 
 	public Dive() {
 		try {
@@ -387,11 +388,16 @@ public class Dive {
 			double depthMeters = pressure / (density * 9.80665);
 			log.debug("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
 
-			return (int) (-depthMeters * 1000); // Convert meters to millimeters
+			return (int) (-depthMeters * 1000 - offset); // Convert meters to millimeters
 		} catch (IOException | InterruptedException e) {
 			log.error("Error reading depth sensor data", e);
 			throw new RuntimeException("Error reading depth sensor data", e);
 		}
+	}
+
+	public Integer getDepth(Integer offset) {
+		this.offset = offset;
+		return offset;
 	}
 
 }
