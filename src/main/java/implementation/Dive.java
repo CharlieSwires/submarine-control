@@ -412,11 +412,10 @@ public class Dive {
 			double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
 			double tempCelsius = TEMP / 100.0;
 			// Depth calculation using the corrected pressure value...
-
-//			double pressure = 1025.0*P/ 109995.54106639235; //mPa
+			pressure = 1025.0*pressure/ 21729.3; //mPa
 //
 //			// Convert temperature to degrees Celsius
-//			double tempCelsius = 19.0 * TEMP/8143.355641007423; //Celcius
+			tempCelsius = 19.0 * TEMP/82.18; //Celcius
 
 			// Apply temperature compensation to pressure
 			double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
