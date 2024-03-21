@@ -196,7 +196,6 @@ import org.springframework.stereotype.Component;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.exception.Pi4JException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -313,7 +312,7 @@ public class Dive {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
 					// Sleep for 5seconds
-					Thread.sleep(5000);
+					Thread.sleep(10000);
 
 					// Check if getDepth method hasn't been called within 1000ms
 					if (!Thread.currentThread().isInterrupted()) {
