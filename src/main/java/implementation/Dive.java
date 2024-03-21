@@ -212,6 +212,8 @@ public class Dive {
 	private static WatchDog watchDogThread = null;
 	private int[] calibrationCoefficients = new int[6];
 
+	public boolean startTimer = false;
+
 	private static boolean disabled = true;
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
@@ -266,17 +268,19 @@ public class Dive {
 			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
 			try { Thread.sleep(100); } catch (Exception e) {} // Wait for conversion to complete
-//			disabled  = true;
-//			for (int i = 0; i < 5; i++) {
-//				try {
-//					getDepth();
-//					Thread.sleep(50);
-//					log.info("getDepth() called");
-//
-//				}catch (Exception e) {
-//					log.info("exception raised ignoring!!");
-//				}
-//			}
+			//			disabled  = true;
+			//			for (int i = 0; i < 5; i++) {
+			//				try {
+			//					getDepth();
+			//					Thread.sleep(50);
+			//					log.info("getDepth() called");
+			//
+			//				}catch (Exception e) {
+			//					log.info("exception raised ignoring!!");
+			//				}
+			//			}
+			watchDogThread = new WatchDog();
+			watchDogThread.start();
 			disabled = false;
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
@@ -308,17 +312,28 @@ public class Dive {
 
 		@Override
 		public void run() {
-			while (watchDogThread != null && !watchDogThread.isInterrupted()) {
-				try {
-					// Sleep for 5seconds
-					WatchDog.sleep(10000);
-					if (watchDogThread != null && !watchDogThread.isInterrupted()) emergencySurface();
-					
-				} catch (InterruptedException e) {
-					log.info("InterruptedException");
-					// Thread interrupted, exit the loop
-					break;
+			while (!startTimer) {
+				if (startTimer) {
+					while (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer) {
+						try {
+							// Sleep for 5seconds
+							WatchDog.sleep(10000);
+							if (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer) emergencySurface();
+
+						} catch (InterruptedException e) {
+							log.debug("InterruptedException");
+							// Thread interrupted, exit the loop
+							break;
+						} finally {
+							startTimer = false;
+						}
+					}
 				}
+				try {
+					WatchDog.sleep(100);
+				} catch (InterruptedException e) {
+				}
+
 			}
 		}
 	}
@@ -350,18 +365,15 @@ public class Dive {
 				if (watchDogThread != null) {
 					// Stop the watch dog thread
 					watchDogThread.interrupt();
-					watchDogThread = null;
-					System.gc();
 				}
 				// Restart the watch dog thread
-				watchDogThread = new WatchDog();
-				watchDogThread.start();
+				startTimer = true;
 			}
 
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
-//			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
-//			Thread.sleep(50); // Wait for reset to complete
+			//			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
+			//			Thread.sleep(50); // Wait for reset to complete
 			deviceDepth.writeRegister(0x40, (byte)0x12); // Start pressure conversion was 0x02
 			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
 			byte[] pressureData = new byte[3];
@@ -409,8 +421,8 @@ public class Dive {
 			double tempCelsius = TEMP / 100.0;
 			// Depth calculation using the corrected pressure value...
 			pressure = 1025.0*pressure/ 21729.3; //mPa
-//
-//			// Convert temperature to degrees Celsius
+			//
+			//			// Convert temperature to degrees Celsius
 			tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
 
 			// Apply temperature compensation to pressure
