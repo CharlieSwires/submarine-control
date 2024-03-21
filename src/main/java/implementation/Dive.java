@@ -311,7 +311,7 @@ public class Dive {
 			while (watchDogThread != null && !watchDogThread.isInterrupted()) {
 				try {
 					// Sleep for 5seconds
-					Thread.sleep(10000);
+					WatchDog.sleep(10000);
 					if (watchDogThread != null && !watchDogThread.isInterrupted()) emergencySurface();
 					
 				} catch (InterruptedException e) {
