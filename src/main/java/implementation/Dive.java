@@ -431,10 +431,10 @@ public class Dive {
 			+ 1.001685e-4 * Math.pow(tempCelsius, 3) - 1.120083e-6 * Math.pow(tempCelsius, 4)
 			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
 
-			double depthMeters = pressure / (density * 9.80665 * 1000.0);//mPa /1000
-			log.info("pressure = "+pressure+" tempCelsius = "+tempCelsius+" depth = "+depthMeters+" density = "+density);
+			double depthmm = 1000.0 * pressure / (density * 9.80665 * 1000.0);//mPa /1000
+			log.info("pressure(mPa) = "+pressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
 
-			return (int) (-depthMeters * 1000 - offsetDepth); // Convert meters to millimeters
+			return (int) (-depthmm - offsetDepth); // Convert meters to millimeters
 		} catch (Exception e) {
 			log.error("Error reading depth sensor data");
 			return -999 - offsetDepth;
