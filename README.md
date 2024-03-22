@@ -48,9 +48,9 @@ RESTful
 EngineControl
 -------------
 
-<p>http://192.168.137.205:8080/submarine/engine/left/{percentPower}</p>
-<p>http://192.168.137.205:8080/submarine/engine/right/{percentPower}</p>
-<p>http://192.168.137.205:8080/submarine/engine/cpu-temp</p>
+<p>http://192.168.137.205:8080/submarine/engine/left/{percentPower} - done</p>
+<p>http://192.168.137.205:8080/submarine/engine/right/{percentPower} - done</p>
+<p>http://192.168.137.205:8080/submarine/engine/cpu-temp - done</p>
 <p>returns integer Celcius * 10</p>
 
 DiveControl
@@ -62,15 +62,15 @@ DiveControl
 <p>http://192.168.137.205:8080/submarine/dive/fill-tank/false</p>
 <p>http://192.168.137.205:8080/submarine/dive/dive-angle</p>
 <p>returns angleDegrees - offset</p>
-<p>http://192.168.137.205:8080/submarine/dive/depth</p>
+<p>http://192.168.137.205:8080/submarine/dive/depth - done</p>
 <p>returns integer mm - offset</p>
-<p>http://192.168.137.205:8080/submarine/dive/depth/zero - sets the 
+<p>http://192.168.137.205:8080/submarine/dive/depth/zero - done - sets the 
 offset for diveAngle and depth</p>
 
 NavigationControl
 -----------------
 
-<p>http://192.168.137.205:8080/submarine/navigation/bearing</p>
+<p>http://192.168.137.205:8080/submarine/navigation/bearing - done</p>
 <p>returns angleDegrees
 <p>http://192.168.137.205:8080/submarine/navigation/rudder/{angleDegrees}</p>
 
