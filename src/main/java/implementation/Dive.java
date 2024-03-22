@@ -421,7 +421,7 @@ public class Dive {
 			double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
 			double tempCelsius = TEMP / 100.0;
 			// Depth calculation using the corrected pressure value...
-			pressure = 1025.0*pressure/ 21729.3; //mPa
+			double correctedPressure = 1025.0*pressure/ 21729.3; //mPa
 			//
 			//			// Convert temperature to degrees Celsius
 			tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
@@ -432,7 +432,7 @@ public class Dive {
 			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
 
 			double depthmm = 1000.0 * pressure / (density * 9.80665 * 1000.0);//mPa /1000
-			log.info("pressure(mPa) = "+pressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
+			log.info("pressure = "+pressure+" pressure(mPa) = "+correctedPressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
 
 			return (int) (-depthmm - offsetDepth); // Convert meters to millimeters
 		} catch (Exception e) {
