@@ -215,7 +215,8 @@ public class Dive {
 
 	public AtomicBoolean startTimer = new AtomicBoolean(false);
 
-	private static boolean disabled = true;
+	private static boolean disabled = (System.getenv("WATCHDOG_ENABLED") != null && 
+			System.getenv("WATCHDOG_ENABLED").equals("true")? true: false);
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
 
