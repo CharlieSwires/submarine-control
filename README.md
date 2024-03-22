@@ -27,6 +27,8 @@ This is for the first time or after you make a change in your repo.</p>
 <p>type for SD: ~/submarine-control/runner.sh</p>
 <p>or type for HD not both: ~/submarine-control/runnerHD.sh</p>
 <p> I put the cd's and chmod's into the .bashrc just so logging in corrects the permissions.</p>
+<p> In the .bashrc you will need: export WATCHDOG_ENABLED="true" if you wish for emergency 
+surface on loss of contact.</p>
 <p> running the runner from .bashrc doesn't work fully: the java works but not the libcam.</p>
 
 Playing the Video Stream
@@ -57,8 +59,10 @@ DiveControl
 <p>returns angleDegrees</p>
 <p>http://192.168.137.205:8080/submarine/dive/depth</p>
 <p>returns integer mm - offset</p>
-<p>http://192.168.137.205:8080/submarine/dive/depth/{offset}</p>
+<p>http://192.168.137.205:8080/submarine/dive/depth/{any number}</p>
 <p>returns integer mm - offset</p>
+<p>http://192.168.137.205:8080/submarine/dive/depth/zero - sets the 
+offset for diveAngle and depth</p>
 
 NavigationControl
 -----------------
