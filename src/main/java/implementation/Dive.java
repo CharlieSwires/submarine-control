@@ -281,7 +281,8 @@ public class Dive {
 			//				}
 			//			}
 			disabled = (System.getenv("WATCHDOG_ENABLED") != null && 
-					System.getenv("WATCHDOG_ENABLED").equals("true")? true: false);
+					System.getenv("WATCHDOG_ENABLED").equals("true")? false: true);
+			log.info("Watchdog disabled = " + disabled);
 			watchDogThread = new WatchDog();
 			watchDogThread.start();
 		} catch (Exception e) {
@@ -331,7 +332,6 @@ public class Dive {
 						WatchDog.sleep(500);
 					} catch (InterruptedException e) {
 						log.debug("InterruptedException false");
-						watchDogThread.interrupt();
 						continue;
 					}
 				}
