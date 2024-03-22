@@ -29,7 +29,8 @@ This is for the first time or after you make a change in your repo.</p>
 <p> I put the cd's and chmod's into the .bashrc just so logging in corrects the permissions.</p>
 <p> In the .bashrc you will need: export WATCHDOG_ENABLED="true" if you wish for emergency 
 surface on loss of contact.</p>
-<p> running the runner from .bashrc doesn't work fully: the java works but not the libcam.</p>
+<p> running the runner from .bashrc doesn't work fully: the java works but not the libcam.
+So you need to SSH in from the PC and run the runner.sh which will kick off the java and libcam.</p>
 
 Playing the Video Stream
 ------------------------
