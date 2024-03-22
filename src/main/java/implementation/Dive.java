@@ -432,7 +432,7 @@ public class Dive {
 			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
 
 			double depthmm = 1000.0 * pressure / (density * 9.80665 * 1000.0);//mPa /1000
-			log.info("pressure = "+pressure+" pressure(mPa) = "+correctedPressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
+			log.debug("pressure = "+pressure+" pressure(mPa) = "+correctedPressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
 
 			return (int) (-depthmm - offsetDepth); // Convert meters to millimeters
 		} catch (Exception e) {
