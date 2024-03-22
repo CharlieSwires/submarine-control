@@ -3,7 +3,9 @@ submarine-control
 <p>in git bash</p>
 <p>git clone https://github.com/CharlieSwires/submarine-control</p>
 
-<p>This contains both the Java and Bash</p>
+<p>This contains both the Java and Bash. Note: if you want to be sure 
+that you have the latest code delete the submarine-control directory and re clone,
+git pull isn't reliable.</p>
 
 build
 -----
