@@ -88,18 +88,16 @@ public class Nav {
 					return (int) -bearing;
 				}
 			} catch (IOException e) {
-				log.error("Error reading magnetometer data", e);
-				throw new RuntimeException("Error reading magnetometer data", e);
-			} finally{
+				log.error("Error reading magnetometer data", e.getMessage());
+				continue;
+			} finally {
 				try {
-					if (xMag == 0 && yMag == 0 && zMag == 0) Thread.sleep(100);
+					Thread.sleep(20);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		}
-		return 0;
+		return -999;
 	}
 
 	public Integer setRudder(Integer angle) {
