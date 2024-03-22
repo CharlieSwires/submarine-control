@@ -215,8 +215,7 @@ public class Dive {
 
 	public AtomicBoolean startTimer = new AtomicBoolean(false);
 
-	private static boolean disabled = (System.getenv("WATCHDOG_ENABLED") != null && 
-			System.getenv("WATCHDOG_ENABLED").equals("true")? true: false);
+	private static boolean disabled = true;
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
 
@@ -281,9 +280,10 @@ public class Dive {
 			//					log.info("exception raised ignoring!!");
 			//				}
 			//			}
+			disabled = (System.getenv("WATCHDOG_ENABLED") != null && 
+					System.getenv("WATCHDOG_ENABLED").equals("true")? true: false);
 			watchDogThread = new WatchDog();
 			watchDogThread.start();
-			disabled = false;
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
 			throw new RuntimeException("Error initializing I2C devices", e);
@@ -368,14 +368,14 @@ public class Dive {
 					startTimer.set(true);
 					watchDogThread.interrupt();
 				}
-				
+
 			} else {
 				if (watchDogThread != null) {
 					startTimer.set(false);
 					watchDogThread.interrupt();
 				}
 			}
-			
+
 
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
