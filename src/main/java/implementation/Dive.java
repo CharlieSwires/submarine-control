@@ -283,6 +283,7 @@ public class Dive {
 			disabled = (System.getenv("WATCHDOG_ENABLED") != null && 
 					System.getenv("WATCHDOG_ENABLED").equals("true")? false: true);
 			log.info("Watchdog disabled = " + disabled);
+			log.info("WATCHDOG_ENABLED = " + System.getenv("WATCHDOG_ENABLED"));
 			watchDogThread = new WatchDog();
 			watchDogThread.start();
 		} catch (Exception e) {
