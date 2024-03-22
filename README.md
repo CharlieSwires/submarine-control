@@ -39,7 +39,7 @@ So you need to SSH in from the PC and run the runner.sh which will kick off the 
 Playing the Video Stream
 ------------------------
 
-<p>On your PC which is sharing it's WiFi hotspot with the Pi
+<p>On your PC which is sharing it's WiFi hotspot with the Pi 
 connect to rtsp://192.168.137.205:8554/ on VLC. Your IP address may be different.</p>
 
 RESTful
