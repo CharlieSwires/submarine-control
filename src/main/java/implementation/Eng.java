@@ -127,7 +127,6 @@ public class Eng {
                 return tempDouble.intValue();
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        }
+        	log.error("Problem getting temperature.");        }
         return -999; 
     }}
