@@ -322,7 +322,6 @@ public class Dive {
 
 					} catch (InterruptedException e) {
 						log.debug("InterruptedException true");
-						startTimer.set(false);
 						continue;
 					}
 
@@ -365,13 +364,17 @@ public class Dive {
 			if (!disabled) {
 				if (watchDogThread != null) {
 					// Stop the watch dog thread
-					synchronized(watchDogThread) {
-						watchDogThread.interrupt();
-						startTimer.set(true);
-					}
-
+					startTimer.set(true);
+					watchDogThread.interrupt();
+				}
+				
+			} else {
+				if (watchDogThread != null) {
+					startTimer.set(false);
+					watchDogThread.interrupt();
 				}
 			}
+			
 
 			// Depth and temperature reading sequence...
 			// Initiate pressure and temperature reading sequence
