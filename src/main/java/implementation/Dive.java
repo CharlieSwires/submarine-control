@@ -315,26 +315,24 @@ public class Dive {
 		public void run() {
 			while (true) {
 				if (startTimer.get()) {
+					try {
+						// Sleep for 10seconds
+						WatchDog.sleep(10000);
+						emergencySurface();
 
-					while (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer.get()) {
-						try {
-							// Sleep for 5seconds
-							WatchDog.sleep(10000);
-							if (watchDogThread != null && !watchDogThread.isInterrupted() && startTimer.get()) emergencySurface();
-
-						} catch (InterruptedException e) {
-							log.debug("InterruptedException");
-							// Thread interrupted, exit the loop
-							break;
-						} finally {
-							startTimer.set(false);
-						}
+					} catch (InterruptedException e) {
+						log.debug("InterruptedException true");
+						continue;
+					} finally {
+						startTimer.set(false);
 					}
 
 				} else {
 					try {
 						WatchDog.sleep(500);
 					} catch (InterruptedException e) {
+						log.debug("InterruptedException false");
+						continue;
 					}
 				}
 			}
