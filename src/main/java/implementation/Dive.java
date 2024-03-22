@@ -364,10 +364,12 @@ public class Dive {
 			if (!disabled) {
 				if (watchDogThread != null) {
 					// Stop the watch dog thread
-					watchDogThread.interrupt();
+					synchronized(watchDogThread) {
+						watchDogThread.interrupt();
+						startTimer.set(true);
+					}
+
 				}
-				// Restart the watch dog thread
-				startTimer.set(true);
 			}
 
 			// Depth and temperature reading sequence...
