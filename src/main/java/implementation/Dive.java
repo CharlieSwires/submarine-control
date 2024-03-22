@@ -331,6 +331,7 @@ public class Dive {
 						WatchDog.sleep(500);
 					} catch (InterruptedException e) {
 						log.debug("InterruptedException false");
+						watchDogThread.interrupt();
 						continue;
 					}
 				}
