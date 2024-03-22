@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.io.exception.IOException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -87,7 +86,7 @@ public class Nav {
 				if (xMag != 0 || yMag != 0 || zMag != 0) {
 					return (int) -bearing;
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				log.error("Error reading magnetometer data", e.getMessage());
 				continue;
 			} finally {
