@@ -322,9 +322,8 @@ public class Dive {
 
 					} catch (InterruptedException e) {
 						log.debug("InterruptedException true");
-						continue;
-					} finally {
 						startTimer.set(false);
+						continue;
 					}
 
 				} else {
