@@ -421,7 +421,7 @@ public class Dive {
 			double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
 			double tempCelsius = TEMP / 100.0;
 			// Depth calculation using the corrected pressure value...
-			double correctedPressure = 1025.0*pressure/ 21729.3; //mPa
+			double correctedPressure = 1025.0*pressure/ 22093.3; //mPa
 			//
 			//			// Convert temperature to degrees Celsius
 			tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
