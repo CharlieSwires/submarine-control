@@ -228,18 +228,18 @@ public class Dive {
 			log.debug("I2C provider obtained.");
 
 
-			//			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
-			//					.id("LSM6DSO32-Gyro")
-			//					.name("LSM6DSO32 Gyroscope")
-			//					.bus(1)
-			//					.device(0x6B)  // Adjust if using a different I2C address
-			//					.build();
-			//
-			//			deviceGyro = i2CProvider.create(configGyro);
-			//
-			//			// Gyroscope initialization
-			//			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
-			//			Thread.sleep(100); // Wait for gyro settings to take effect
+			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
+					.id("LSM6DSO32-Gyro")
+					.name("LSM6DSO32 Gyroscope")
+					.bus(1)
+					.device(0x6B)  // Adjust if using a different I2C address
+					.build();
+
+			deviceGyro = i2CProvider.create(configGyro);
+
+			// Gyroscope initialization
+			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
+			Thread.sleep(100); // Wait for gyro settings to take effect
 
 			// Initialize Depth Sensor
 			I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
@@ -269,17 +269,6 @@ public class Dive {
 			log.debug("Calibration Coefficients: " + Arrays.toString(calibrationCoefficients));
 
 			try { Thread.sleep(100); } catch (Exception e) {} // Wait for conversion to complete
-			//			disabled  = true;
-			//			for (int i = 0; i < 5; i++) {
-			//				try {
-			//					getDepth();
-			//					Thread.sleep(50);
-			//					log.info("getDepth() called");
-			//
-			//				}catch (Exception e) {
-			//					log.info("exception raised ignoring!!");
-			//				}
-			//			}
 			disabled = (System.getenv("WATCHDOG_ENABLED") != null && 
 					System.getenv("WATCHDOG_ENABLED").equals("true")? false: true);
 			log.info("Watchdog disabled = " + disabled);
@@ -293,21 +282,20 @@ public class Dive {
 	}
 
 	public Integer getDiveAngle() {
-		//		try {
-		//			byte[] gyroData = new byte[6];
-		//			deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
-		//
-		//			short gyroX = (short) ((gyroData[0] & 0xFF) | (gyroData[1] << 8));
-		//			short gyroY = (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8));
-		//			short gyroZ = (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
-		//
-		//			Double pitch = Math.atan2(gyroZ, gyroX) * (180 / Math.PI);
-		//			log.debug("Pitch: " + pitch);
-		//			return pitch.intValue() - offsetPitch;
-		//		} catch (IOException e) {
-		//			log.error("Error reading gyroscope data", e);
-		//			throw new RuntimeException("Error reading gyroscope data", e);
-		//		}
+		try {
+			byte[] gyroData = new byte[6];
+			deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
+
+			short gyroX = (short) ((gyroData[0] & 0xFF) | (gyroData[1] << 8));
+			short gyroY = (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8));
+			short gyroZ = (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
+
+			Double pitch = Math.atan2(gyroZ, gyroX) * (180 / Math.PI);
+			log.debug("Pitch: " + pitch);
+			return pitch.intValue() - offsetPitch;
+		} catch (Exception e) {
+			log.error("Error reading gyroscope data", e);
+		}
 		return 10 - offsetPitch;
 	}
 
