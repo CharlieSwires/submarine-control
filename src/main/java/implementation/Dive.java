@@ -239,8 +239,7 @@ public class Dive {
 
 			deviceGyro = i2CProvider.create(configGyro);
 			// Gyroscope initialization
-			deviceGyro.writeRegister(0x11, (byte) 0x42); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
-			deviceGyro.writeRegister(0x15, (byte) 0x07); //low pass filter
+			deviceGyro.writeRegister(0x11, (byte) 0xAC); // CTRL2_G: 6.66kHz, 2000 dps, gyro full-scale
 			Thread.sleep(100); // Wait for gyro settings to take effect
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
@@ -289,13 +288,16 @@ public class Dive {
 	public Integer getDiveAngle() {
 		try {
 			byte[] gyroData = new byte[6];
-			deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
-
-			short gyroX = (short) ((gyroData[0] & 0xFF) | (gyroData[1] << 8));
-			short gyroY = (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8));
-			short gyroZ = (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
-
-			Double pitch = Math.atan2(gyroZ, gyroX) * (180 / Math.PI);
+			long sumGyroX = 0;
+			long sumGyroY = 0;
+			long sumGyroZ = 0;
+			for(int i = 0; i < 32; i++) {
+				deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
+				sumGyroX += (short) ((gyroData[0] & 0xFF) | (gyroData[1] << 8));
+				sumGyroY += (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8));
+				sumGyroZ += (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8));
+			}
+			Double pitch = Math.atan2(sumGyroZ/32.0, sumGyroX/32.0) * (180 / Math.PI);
 			log.debug("Pitch: " + pitch);
 			return pitch.intValue() - offsetPitch;
 		} catch (Exception e) {
