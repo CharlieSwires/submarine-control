@@ -306,7 +306,7 @@ public class Dive {
 				sumGyroZ += (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8))+ 
 						(short) ((accelData[4] & 0xFF) | (accelData[5] << 8));
 			}
-			Double pitch = Math.atan2(sumGyroZ/32.0, sumGyroX/32.0) * (180 / Math.PI);
+			Double pitch = Math.atan2(-sumGyroZ/32.0, sumGyroX/32.0) * (180 / Math.PI);
 			log.debug("Pitch: " + pitch);
 			return pitch.intValue() - offsetPitch;
 		} catch (Exception e) {
