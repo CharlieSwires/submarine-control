@@ -238,11 +238,9 @@ public class Dive {
 					.build();
 
 			deviceGyro = i2CProvider.create(configGyro);
-//			Thread.sleep(100); // Wait for gyro settings to take effect
-//			deviceGyro.writeRegister(0x01, (byte) 0x00); 
-			deviceGyro.writeRegister(0x15, (byte) 0x07); 
 			// Gyroscope initialization
-			deviceGyro.writeRegister(0x11, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
+			deviceGyro.writeRegister(0x11, (byte) 0x42); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
+			deviceGyro.writeRegister(0x15, (byte) 0x07); //low pass filter
 			Thread.sleep(100); // Wait for gyro settings to take effect
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
