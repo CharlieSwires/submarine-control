@@ -234,13 +234,13 @@ public class Dive {
 					.id("LSM6DSO32-Gyro")
 					.name("LSM6DSO32 Gyroscope")
 					.bus(1)
-					.device(0x6B)  // Adjust if using a different I2C address
+					.device(0x6A)  // Adjust if using a different I2C address
 					.build();
 
 			deviceGyro = i2CProvider.create(configGyro);
-			Thread.sleep(100); // Wait for gyro settings to take effect
-			deviceGyro.writeRegister(0x01, (byte) 0x00); 
-			deviceGyro.writeRegister(0x02, (byte) 0x3F); 
+//			Thread.sleep(100); // Wait for gyro settings to take effect
+//			deviceGyro.writeRegister(0x01, (byte) 0x00); 
+//			deviceGyro.writeRegister(0x02, (byte) 0x3F); 
 			// Gyroscope initialization
 			deviceGyro.writeRegister(0x11, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
 			Thread.sleep(100); // Wait for gyro settings to take effect
