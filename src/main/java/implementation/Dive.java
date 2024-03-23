@@ -293,9 +293,6 @@ public class Dive {
 			long sumGyroX = 0;
 			long sumGyroY = 0;
 			long sumGyroZ = 0;
-			long sumAccelX = 0;
-			long sumAccelY = 0;
-			long sumAccelZ = 0;
 			for(int i = 0; i < 32; i++) {
 				deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
 				deviceGyro.readRegister(0x28, accelData, 0, 6); // OUTX_L_A register address
