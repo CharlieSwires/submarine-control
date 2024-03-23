@@ -240,7 +240,7 @@ public class Dive {
 			deviceGyro = i2CProvider.create(configGyro);
 //			Thread.sleep(100); // Wait for gyro settings to take effect
 //			deviceGyro.writeRegister(0x01, (byte) 0x00); 
-//			deviceGyro.writeRegister(0x02, (byte) 0x3F); 
+			deviceGyro.writeRegister(0x15, (byte) 0x07); 
 			// Gyroscope initialization
 			deviceGyro.writeRegister(0x11, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
 			Thread.sleep(100); // Wait for gyro settings to take effect
