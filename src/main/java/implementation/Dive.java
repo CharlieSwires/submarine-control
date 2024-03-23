@@ -220,13 +220,15 @@ public class Dive {
 	private static int offsetPitch = 0;
 
 	public Dive() {
+		I2CProvider i2CProvider = null;
 		try {
 			log.info("Starting Dive method.");
 			pi4j = Pi4J.newAutoContext();
 			log.debug("Pi4J context initialized.");
-			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
+			i2CProvider = pi4j.provider("linuxfs-i2c");
 			log.debug("I2C provider obtained.");
 
+			log.info("Starting Gyro method.");
 
 			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
 					.id("LSM6DSO32-Gyro")
@@ -240,7 +242,11 @@ public class Dive {
 			// Gyroscope initialization
 			deviceGyro.writeRegister(0x10, (byte) 0x4C); // CTRL2_G: 104 Hz, 2000 dps, gyro full-scale
 			Thread.sleep(100); // Wait for gyro settings to take effect
-
+		} catch (Exception e) {
+			log.error("Error initializing I2C devices", e);
+		}
+		try {
+			log.info("Starting Depth method.");
 			// Initialize Depth Sensor
 			I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
 					.id("MS5837")
@@ -277,7 +283,6 @@ public class Dive {
 			watchDogThread.start();
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
-			throw new RuntimeException("Error initializing I2C devices", e);
 		}
 	}
 
