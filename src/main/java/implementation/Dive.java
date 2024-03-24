@@ -227,7 +227,7 @@ public class Dive {
 	private static final int LED0_ON_H = 0x07;
 	private static final int LED0_OFF_L = 0x08;
 	private static final int LED0_OFF_H = 0x09;
-	
+
 	public Dive() {
 		I2CProvider i2CProvider = null;
 		try {
@@ -295,41 +295,41 @@ public class Dive {
 		}
 		try {
 			log.info("Starting Servos method.");
-	        // Assuming you've already initialized 'pi4j' and 'i2CProvider' like you did for the other devices
-	        // Here, we're setting up the I2C configuration for the PCA9685
-	        I2CConfig configPCA9685 = I2C.newConfigBuilder(pi4j)
-	                .id("PCA9685")
-	                .name("PCA9685 PWM Controller")
-	                .bus(1)  // This is the I2C bus. The Raspberry Pi has multiple I2C buses (0, 1), check which one you're using.
-	                .device(0x40)  // This is the default I2C address for the PCA9685, change if you've set a different address.
-	                .build();
+			// Assuming you've already initialized 'pi4j' and 'i2CProvider' like you did for the other devices
+			// Here, we're setting up the I2C configuration for the PCA9685
+			I2CConfig configPCA9685 = I2C.newConfigBuilder(pi4j)
+					.id("PCA9685")
+					.name("PCA9685 PWM Controller")
+					.bus(1)  // This is the I2C bus. The Raspberry Pi has multiple I2C buses (0, 1), check which one you're using.
+					.device(0x40)  // This is the default I2C address for the PCA9685, change if you've set a different address.
+					.build();
 
-	        // Create the I2C device for the PCA9685 using the configuration
-	        devicePCA9685 = i2CProvider.create(configPCA9685);
-	        devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
-		    Thread.sleep(50);
-	        setPWMFreq(50.0); // 50Hz for servos
-		    Thread.sleep(40);
+			// Create the I2C device for the PCA9685 using the configuration
+			devicePCA9685 = i2CProvider.create(configPCA9685);
+			devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
+			Thread.sleep(50);
+			setPWMFreq(50.0); // 50Hz for servos
+			Thread.sleep(40);
 
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices Servo", e);
 		}
 	}
 	private void setPWMFreq(double freq) throws Exception {
-	    int prescale = calculatePrescale(freq);
-	    byte oldmode = (byte) devicePCA9685.readRegister(PCA9685_MODE1); // Read MODE1 register
-	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
-//	    devicePCA9685.writeRegister(PCA9685_MODE1, newmode); // go to sleep
-	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
-//	    devicePCA9685.writeRegister(PCA9685_MODE1, oldmode);
-//	    Thread.sleep(5);
-//	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+		int prescale = calculatePrescale(freq);
+		byte oldmode = (byte) devicePCA9685.readRegister(PCA9685_MODE1); // Read MODE1 register
+		byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
+		//	    devicePCA9685.writeRegister(PCA9685_MODE1, newmode); // go to sleep
+		devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
+		//	    devicePCA9685.writeRegister(PCA9685_MODE1, oldmode);
+		//	    Thread.sleep(5);
+		//	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
 	}
 	private int calculatePrescale(double freq) {
-	    double prescaleval = 25000000.0; // 25,000,000 Hz
-	    prescaleval /= 4096.0;           // 12-bit
-	    prescaleval /= freq;
-	    return (int) Math.round(prescaleval) - 1;
+		double prescaleval = 25000000.0; // 25,000,000 Hz
+		prescaleval /= 4096.0;           // 12-bit
+		prescaleval /= freq;
+		return (int) Math.round(prescaleval) - 1;
 	}
 
 	public Integer getDiveAngle() {
@@ -390,47 +390,51 @@ public class Dive {
 	}
 	// Method to convert servo angle to PWM value
 	private double angleToDutyCycle(int angle) {
-	    return 100.0 * (angle / 180.0);
+		return 100.0 * (angle / 180.0);
 	}
 
 	// Set the angle for the front servo
 	public Integer setFrontAngle(int angle) {
 		angle += 90;
-	    double dutyCycle = angleToDutyCycle(angle);
-	    // Assuming channel 0 for the front servo
-	    setPWM(0, dutyCycle);
-	    log.debug("setFrontAngle: " + angle);
-	    return angle;
+		double dutyCycle = angleToDutyCycle(angle);
+		// Assuming channel 0 for the front servo
+		setPWM(0, dutyCycle);
+		log.debug("setFrontAngle: " + angle);
+		return angle;
 	}
 
 	// Set the angle for the back servo
 	public Integer setBackAngle(int angle) {
 		angle += 90;
-	    double dutyCycle = angleToDutyCycle(angle);
-	    // Assuming channel 1 for the back servo
-	    setPWM(1, dutyCycle);
-	    log.debug("setBackAngle: " + angle);
-	    return angle;
+		double dutyCycle = angleToDutyCycle(angle);
+		// Assuming channel 1 for the back servo
+		setPWM(1, dutyCycle);
+		log.debug("setBackAngle: " + angle);
+		return angle;
 	}
 
 	// Assuming you have a method like this to send PWM signals
 	private void setPWM(int channel, double dutyCycle) {
-	    int onCount = (int) (PWM_MIN);
-	    int offCount = (int) (PWM_MIN + (4096* (dutyCycle) / 100.0));
-	    if (offCount >= 4096) {
-	        offCount -= 4096; // Adjust for next frame if necessary
-	    }
+		try {
+			int onCount = (int) (PWM_MIN);
+			int offCount = (int) (PWM_MIN + (4096* (dutyCycle) / 100.0));
+			if (offCount >= 4096) {
+				offCount -= 4096; // Adjust for next frame if necessary
+			}
 
-	    int onLow = onCount & 0xFF;
-	    int onHigh = (onCount >> 8) & 0xFF;
-	    int offLow = offCount & 0xFF;
-	    int offHigh = (offCount >> 8) & 0xFF;
+			int onLow = onCount & 0xFF;
+			int onHigh = (onCount >> 8) & 0xFF;
+			int offLow = offCount & 0xFF;
+			int offHigh = (offCount >> 8) & 0xFF;
 
-	    log.info("onCount = " + onCount + " offCount = " + offCount);
-	    devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
-	    devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
-	    devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
-	    devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, offHigh);
+			log.info("onCount = " + onCount + " offCount = " + offCount);
+			devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
+			devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
+			devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
+			devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, offHigh);
+		} catch (Exception e) {
+			log.error("Error setting Servo = " + channel + " duty cycle = " + dutyCycle);
+		}
 	}
 
 	public Integer setFillTank(Boolean action) {
@@ -534,11 +538,11 @@ public class Dive {
 	}
 	public Integer setRudder(Integer angle) {
 		angle += 90;
-	    double dutyCycle = angleToDutyCycle(angle);
-	    // Assuming channel 1 for the back servo
-	    setPWM(2, dutyCycle);
-	    log.debug("setRudder: " + angle);
-	    return angle;
+		double dutyCycle = angleToDutyCycle(angle);
+		// Assuming channel 1 for the back servo
+		setPWM(2, dutyCycle);
+		log.debug("setRudder: " + angle);
+		return angle;
 	}
 
 }
