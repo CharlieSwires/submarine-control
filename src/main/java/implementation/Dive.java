@@ -315,8 +315,7 @@ public class Dive {
 	}
 	private void setPWMFreq(int freq) throws Exception {
 	    int prescale = calculatePrescale(freq);
-	    byte oldmode = 0;
-	    devicePCA9685.readRegister(0x00); // Read MODE1 register
+	    byte oldmode = (byte) devicePCA9685.readRegister(0x00); // Read MODE1 register
 	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
 	    devicePCA9685.writeRegister(0x00, newmode); // go to sleep
 	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
