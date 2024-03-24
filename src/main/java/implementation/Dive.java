@@ -395,7 +395,7 @@ public class Dive {
 	// Set the angle for the front servo
 	public Integer setFrontAngle(int angle) {
 		angle += 90;
-	    int dutyCycle = (int) angleToDutyCycle(angle);
+	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 0 for the front servo
 	    setPWM(0, dutyCycle);
 	    log.debug("setFrontAngle: " + angle);
@@ -405,7 +405,7 @@ public class Dive {
 	// Set the angle for the back servo
 	public Integer setBackAngle(int angle) {
 		angle += 90;
-	    int dutyCycle = (int) angleToDutyCycle(angle);
+	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(1, dutyCycle);
 	    log.debug("setBackAngle: " + angle);
@@ -413,9 +413,9 @@ public class Dive {
 	}
 
 	// Assuming you have a method like this to send PWM signals
-	private void setPWM(int channel, int dutyCycle) {
-	    int onCount = (int) ((4096 * (10 / 100.0)) - 1);
-	    int offCount = onCount + (int) (4096 * (dutyCycle / 100.0));
+	private void setPWM(int channel, double dutyCycle) {
+	    int onCount = (int) ((4096 * (10.0 / 100.0)) - 1);
+	    int offCount = onCount + (int) ((4096 - onCount) * (dutyCycle / 100.0));
 	    if (offCount >= 4096) {
 	        offCount -= 4096; // Adjust for next frame if necessary
 	    }
@@ -425,6 +425,7 @@ public class Dive {
 	    int offLow = offCount & 0xFF;
 	    int offHigh = (offCount >> 8) & 0xFF;
 
+	    log.info("onCount = " + onCount + " offCount = " + offCount);
 	    devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
 	    devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
 	    devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
@@ -532,7 +533,7 @@ public class Dive {
 	}
 	public Integer setRudder(Integer angle) {
 		angle += 90;
-	    int dutyCycle = (int) angleToDutyCycle(angle);
+	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(2, dutyCycle);
 	    log.debug("setRudder: " + angle);
