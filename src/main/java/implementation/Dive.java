@@ -322,14 +322,13 @@ public class Dive {
 	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
 //	    devicePCA9685.writeRegister(0x00, oldmode);
 //	    Thread.sleep(5);
-	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+//	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
 	}
 	private int calculatePrescale(double freq) {
 	    double prescaleval = 25000000.0; // 25,000,000 Hz
 	    prescaleval /= 4096.0;           // 12-bit
 	    prescaleval /= freq;
-	    prescaleval -= 1.0;
-	    return (int) Math.ceil(prescaleval);
+	    return (int) Math.round(prescaleval) - 1;
 	}
 
 	public Integer getDiveAngle() {
