@@ -414,8 +414,8 @@ public class Dive {
 
 	// Assuming you have a method like this to send PWM signals
 	private void setPWM(int channel, double dutyCycle) {
-	    int onCount = (int) (0);
-	    int offCount = (int) (PWM_MIN + ((4096)* ((dutyCycle) / 100.0)));
+	    int onCount = (int) (PWM_MIN);
+	    int offCount = (int) (PWM_MIN + (4096* (dutyCycle) / 100.0));
 	    if (offCount >= 4096) {
 	        offCount -= 4096; // Adjust for next frame if necessary
 	    }
@@ -426,8 +426,10 @@ public class Dive {
 	    int offHigh = (offCount >> 8) & 0xFF;
 
 	    log.info("onCount = " + onCount + " offCount = " + offCount);
-	    byte[] buffer = {(byte)onLow,(byte)onHigh,(byte)offLow,(byte)offHigh};
-	    devicePCA9685.writeRegister(LED0_ON_L + buffer.length * channel,buffer,  0);
+	    devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
+	    devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
+	    devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
+	    devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, offHigh);
 	}
 
 	public Integer setFillTank(Boolean action) {
