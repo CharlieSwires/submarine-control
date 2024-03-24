@@ -389,12 +389,12 @@ public class Dive {
 	}
 	// Method to convert servo angle to PWM value
 	private double angleToDutyCycle(int angle) {
-	    return 100.0 * (angle / 180.0);
+	    return 100.0 * (angle / 90.0);
 	}
 
 	// Set the angle for the front servo
 	public Integer setFrontAngle(int angle) {
-		angle += 90;
+		angle += 45;
 	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 0 for the front servo
 	    setPWM(0, dutyCycle);
@@ -404,7 +404,7 @@ public class Dive {
 
 	// Set the angle for the back servo
 	public Integer setBackAngle(int angle) {
-		angle += 90;
+		angle += 45;
 	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(1, dutyCycle);
@@ -532,7 +532,7 @@ public class Dive {
 		return 0;
 	}
 	public Integer setRudder(Integer angle) {
-		angle += 90;
+		angle += 45;
 	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(2, dutyCycle);
