@@ -336,15 +336,12 @@ public class Dive {
 			byte[] gyroData = new byte[6];
 			byte[] accelData = new byte[6];
 			long sumGyroX = 0;
-			long sumGyroY = 0;
 			long sumGyroZ = 0;
 			for(int i = 0; i < 32; i++) {
 				deviceGyro.readRegister(0x22, gyroData, 0, 6); // OUTX_L_G register address
 				deviceGyro.readRegister(0x28, accelData, 0, 6); // OUTX_L_A register address
 				sumGyroX += (short) ((gyroData[0] & 0xFF) | (gyroData[1] << 8)) + 
 						(short) ((accelData[0] & 0xFF) | (accelData[1] << 8));
-				sumGyroY += (short) ((gyroData[2] & 0xFF) | (gyroData[3] << 8))+ 
-						(short) ((accelData[2] & 0xFF) | (accelData[3] << 8));
 				sumGyroZ += (short) ((gyroData[4] & 0xFF) | (gyroData[5] << 8))+ 
 						(short) ((accelData[4] & 0xFF) | (accelData[5] << 8));
 			}
@@ -391,14 +388,14 @@ public class Dive {
 		setFillTank(false);
 	}
 	// Method to convert servo angle to PWM value
-	private int angleToDutyCycle(int angle) {
-	    return 100 * (angle / 180);
+	private double angleToDutyCycle(int angle) {
+	    return 100.0 * (angle / 180.0);
 	}
 
 	// Set the angle for the front servo
 	public Integer setFrontAngle(int angle) {
 		angle += 90;
-	    int dutyCycle = angleToDutyCycle(angle);
+	    int dutyCycle = (int) angleToDutyCycle(angle);
 	    // Assuming channel 0 for the front servo
 	    setPWM(0, dutyCycle);
 	    log.debug("setFrontAngle: " + angle);
@@ -408,7 +405,7 @@ public class Dive {
 	// Set the angle for the back servo
 	public Integer setBackAngle(int angle) {
 		angle += 90;
-	    int dutyCycle = angleToDutyCycle(angle);
+	    int dutyCycle = (int) angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(1, dutyCycle);
 	    log.debug("setBackAngle: " + angle);
@@ -535,7 +532,7 @@ public class Dive {
 	}
 	public Integer setRudder(Integer angle) {
 		angle += 90;
-	    int dutyCycle = angleToDutyCycle(angle);
+	    int dutyCycle = (int) angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(2, dutyCycle);
 	    log.debug("setRudder: " + angle);
