@@ -426,10 +426,8 @@ public class Dive {
 	    int offHigh = (offCount >> 8) & 0xFF;
 
 	    log.info("onCount = " + onCount + " offCount = " + offCount);
-	    devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
-	    devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
-	    devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
-	    devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, offHigh);
+	    byte[] buffer = {(byte)onLow,(byte)onHigh,(byte)offLow,(byte)offHigh};
+	    devicePCA9685.write(buffer, LED0_ON_L + buffer.length * channel, buffer.length);
 	}
 
 	public Integer setFillTank(Boolean action) {
