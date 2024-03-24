@@ -3,6 +3,7 @@ package implementation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,9 @@ public class Nav {
 	private I2C deviceMag;
 	private Context pi4j;
 
+	@Autowired
+	private Dive dive;
+	
 	public Nav() {
 		try {
 	        log.info("Starting Nav method.");
@@ -101,8 +105,7 @@ public class Nav {
 
 	public Integer setRudder(Integer angle) {
 		log.debug("setRudder:" + angle + " degrees");
-		// Code to set the rudder angle, if applicable
-		return angle;
+		return dive.setRudder(angle);
 	}
 
 

@@ -527,5 +527,13 @@ public class Dive {
 		Dive.offsetPitch = getDiveAngle();
 		return 0;
 	}
+	public Integer setRudder(Integer angle) {
+		angle += 90;
+	    int pwm = angleToPWM(angle);
+	    // Assuming channel 1 for the back servo
+	    setPWM(2, 0, pwm);
+	    log.debug("setRudder: " + angle);
+	    return angle;
+	}
 
 }
