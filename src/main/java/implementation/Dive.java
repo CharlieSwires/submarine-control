@@ -417,7 +417,7 @@ public class Dive {
 	    int onCount = (int) (409);
 	    int offCount = (int) (409 + ((4096 - 409)* ((dutyCycle) / 100.0)));
 	    if (offCount >= 4096) {
-	        offCount -= 4096; // Adjust for next frame if necessary
+	        offCount = 4095; // Adjust for next frame if necessary
 	    }
 
 	    int onLow = onCount & 0xFF;
