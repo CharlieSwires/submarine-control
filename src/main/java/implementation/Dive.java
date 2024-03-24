@@ -220,7 +220,7 @@ public class Dive {
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
 	// Constants for PWM range mapping
-	private static final int PWM_MIN = 1024; // Minimum PWM value for 0 degrees was 150
+	private static final int PWM_MIN = 409; // Minimum PWM value for 0 degrees was 150
 	private static final int PWM_MAX = 600; // Maximum PWM value for 180 degrees
 	private static final int PCA9685_MODE1 = 0x00;
 	private static final int LED0_ON_L = 0x06;
@@ -316,13 +316,13 @@ public class Dive {
 	}
 	private void setPWMFreq(double freq) throws Exception {
 	    int prescale = calculatePrescale(freq);
-	    byte oldmode = (byte) devicePCA9685.readRegister(0x00); // Read MODE1 register
+	    byte oldmode = (byte) devicePCA9685.readRegister(PCA9685_MODE1); // Read MODE1 register
 //	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
 //	    devicePCA9685.writeRegister(0x00, newmode); // go to sleep
 	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
 //	    devicePCA9685.writeRegister(0x00, oldmode);
 //	    Thread.sleep(5);
-//	    devicePCA9685.writeRegister(0x00, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
 	}
 	private int calculatePrescale(double freq) {
 	    double prescaleval = 25000000.0; // 25,000,000 Hz
@@ -390,12 +390,12 @@ public class Dive {
 	}
 	// Method to convert servo angle to PWM value
 	private double angleToDutyCycle(int angle) {
-	    return 100.0 * (angle / 90.0);
+	    return 100.0 * (angle / 180.0);
 	}
 
 	// Set the angle for the front servo
 	public Integer setFrontAngle(int angle) {
-		angle += 45;
+		angle += 90;
 	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 0 for the front servo
 	    setPWM(0, dutyCycle);
@@ -405,7 +405,7 @@ public class Dive {
 
 	// Set the angle for the back servo
 	public Integer setBackAngle(int angle) {
-		angle += 45;
+		angle += 90;
 	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(1, dutyCycle);
@@ -533,7 +533,7 @@ public class Dive {
 		return 0;
 	}
 	public Integer setRudder(Integer angle) {
-		angle += 45;
+		angle += 90;
 	    double dutyCycle = angleToDutyCycle(angle);
 	    // Assuming channel 1 for the back servo
 	    setPWM(2, dutyCycle);
