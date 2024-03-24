@@ -294,6 +294,7 @@ public class Dive {
 			log.error("Error initializing I2C devices Depth", e);
 		}
 		try {
+			log.info("Starting Servos method.");
 	        // Assuming you've already initialized 'pi4j' and 'i2CProvider' like you did for the other devices
 	        // Here, we're setting up the I2C configuration for the PCA9685
 	        I2CConfig configPCA9685 = I2C.newConfigBuilder(pi4j)
@@ -317,12 +318,12 @@ public class Dive {
 	private void setPWMFreq(double freq) throws Exception {
 	    int prescale = calculatePrescale(freq);
 	    byte oldmode = (byte) devicePCA9685.readRegister(PCA9685_MODE1); // Read MODE1 register
-//	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
-//	    devicePCA9685.writeRegister(0x00, newmode); // go to sleep
+	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
+	    devicePCA9685.writeRegister(PCA9685_MODE1, newmode); // go to sleep
 	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
-//	    devicePCA9685.writeRegister(0x00, oldmode);
+//	    devicePCA9685.writeRegister(PCA9685_MODE1, oldmode);
 //	    Thread.sleep(5);
-//	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
 	}
 	private int calculatePrescale(double freq) {
 	    double prescaleval = 25000000.0; // 25,000,000 Hz
