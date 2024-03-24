@@ -429,8 +429,10 @@ public class Dive {
 			byte offHigh = (byte)((offCount >> 8) & 0xFF);
 
 			log.info("onCount = " + onCount + " offCount = " + offCount);
-			byte[] buffer = {onLow, onHigh, offLow, offHigh};
-			devicePCA9685.writeRegister(LED0_ON_L + buffer.length * channel, buffer, buffer.length);
+			devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
+			devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
+			devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
+			devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, offHigh);
 		} catch (Exception e) {
 			log.error("Error setting Servo = " + channel + " duty cycle = " + dutyCycle);
 		}
