@@ -307,7 +307,7 @@ public class Dive {
 	        devicePCA9685 = i2CProvider.create(configPCA9685);
 	        devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
 		    Thread.sleep(5);
-	        setPWMFreq(60); // 50Hz for servos
+	        setPWMFreq(50); // 50Hz for servos
 		    Thread.sleep(5);
 
 		} catch (Exception e) {
@@ -329,7 +329,7 @@ public class Dive {
 	    prescaleval /= 4096.0;           // 12-bit
 	    prescaleval /= freq;
 	    prescaleval -= 1.0;
-	    return (int) Math.ceil(prescaleval);
+	    return (int) Math.round(prescaleval);
 	}
 
 	public Integer getDiveAngle() {
