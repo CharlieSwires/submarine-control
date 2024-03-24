@@ -423,16 +423,14 @@ public class Dive {
 				offCount -= 4096; // Adjust for next frame if necessary
 			}
 
-			int onLow = onCount & 0xFF;
-			int onHigh = (onCount >> 8) & 0xFF;
-			int offLow = offCount & 0xFF;
-			int offHigh = (offCount >> 8) & 0xFF;
+			byte onLow = (byte)(onCount & 0xFF);
+			byte onHigh = (byte)((onCount >> 8) & 0xFF);
+			byte offLow = (byte)(offCount & 0xFF);
+			byte offHigh = (byte)((offCount >> 8) & 0xFF);
 
 			log.info("onCount = " + onCount + " offCount = " + offCount);
-			devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
-			devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
-			devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
-			devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, offHigh);
+			byte[] buffer = {onLow, onHigh, offLow, offHigh};
+			devicePCA9685.writeRegister(LED0_ON_L + buffer.length * channel, buffer, buffer.length);
 		} catch (Exception e) {
 			log.error("Error setting Servo = " + channel + " duty cycle = " + dutyCycle);
 		}
