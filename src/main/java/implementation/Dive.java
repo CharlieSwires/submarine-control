@@ -220,15 +220,17 @@ public class Dive {
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
 	// Constants for PWM range mapping
-	private static final int PWM_MIN = 150; // Minimum PWM value for 0 degrees was 150
-	private static final int PWM_MAX = 600; // Maximum PWM value for 180 degrees
 	private static final int PCA9685_MODE1 = 0x00;
 	private static final int PRE_SCALE = 0xFE;
 	private static final int LED0_ON_L = 0x06;
 	private static final int LED0_ON_H = 0x07;
 	private static final int LED0_OFF_L = 0x08;
 	private static final int LED0_OFF_H = 0x09;
-
+	private static final int  MIN_PULSE_WIDTH = 544;
+	private static final int  MAX_PULSE_WIDTH = 2400;
+	private static final double TICK_PER_MICRO= 4096.0  / (50.0 * 1000000.0);
+	private static final int PWM_MIN = (int) Math.round(TICK_PER_MICRO * MIN_PULSE_WIDTH); // Minimum PWM value for 0 degrees was 150
+	private static final int PWM_MAX = (int) Math.round(TICK_PER_MICRO * MAX_PULSE_WIDTH); // Maximum PWM value for 180 degrees
 	public Dive() {
 		I2CProvider i2CProvider = null;
 		try {
@@ -417,8 +419,8 @@ public class Dive {
 	// Assuming you have a method like this to send PWM signals
 	private void setPWM(int channel, double dutyCycle) {
 		try {
-			int onCount = (int) (PWM_MIN);
-			int offCount = (int) (PWM_MIN + (4096.0 * dutyCycle / 100.0));
+			int onCount = (int) (0);
+			int offCount = (int) (PWM_MIN + ((PWM_MAX - PWM_MIN) * dutyCycle / 100.0));
 			if (offCount >= 4096) {
 				offCount -= 4096; // Adjust for next frame if necessary
 			}
