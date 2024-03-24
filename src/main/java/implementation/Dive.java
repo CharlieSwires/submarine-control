@@ -418,7 +418,7 @@ public class Dive {
 	private void setPWM(int channel, double dutyCycle) {
 		try {
 			int onCount = (int) (PWM_MIN);
-			int offCount = (int) (PWM_MIN + (4096* (dutyCycle) / 100.0));
+			int offCount = (int) (PWM_MIN + (4096.0 * dutyCycle / 100.0));
 			if (offCount >= 4096) {
 				offCount -= 4096; // Adjust for next frame if necessary
 			}
@@ -429,10 +429,11 @@ public class Dive {
 			byte offHigh = (byte)((offCount >> 8) & 0xFF);
 
 			log.info("onCount = " + onCount + " offCount = " + offCount);
-			devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, onLow);
-			devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, onHigh);
-			devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, offLow);
-			devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, offHigh);
+			int offset = 4 * channel;
+			devicePCA9685.writeRegister(LED0_ON_L + offset, onLow);
+			devicePCA9685.writeRegister(LED0_ON_H + offset, onHigh);
+			devicePCA9685.writeRegister(LED0_OFF_L + offset, offLow);
+			devicePCA9685.writeRegister(LED0_OFF_H + offset, offHigh);
 		} catch (Exception e) {
 			log.error("Error setting Servo = " + channel + " duty cycle = " + dutyCycle);
 		}
