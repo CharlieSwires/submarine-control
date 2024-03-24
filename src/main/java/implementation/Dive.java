@@ -419,8 +419,8 @@ public class Dive {
 	// Assuming you have a method like this to send PWM signals
 	private void setPWM(int channel, int on, int off) {
 	    try {
-	        devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, (PWM_MAX - off) & 0xFF);
-	        devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, (PWM_MAX - off) >> 8);
+	        devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, (on) & 0xFF);
+	        devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, (on) >> 8);
 	        devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, off & 0xFF);
 	        devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, off >> 8);
 	        log.debug("Set PWM - Channel: {}, ON: {}, OFF: {}", channel, on, off);
