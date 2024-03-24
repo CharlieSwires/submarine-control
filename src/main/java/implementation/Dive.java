@@ -322,7 +322,7 @@ public class Dive {
 	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
 //	    devicePCA9685.writeRegister(0x00, oldmode);
 //	    Thread.sleep(5);
-//	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
 	}
 	private int calculatePrescale(double freq) {
 	    double prescaleval = 25000000.0; // 25,000,000 Hz
