@@ -209,6 +209,7 @@ public class Dive {
 
 	private I2C deviceGyro;
 	private I2C deviceDepth;
+	private I2C devicePCA9685;
 	private Context pi4j;
 	private static WatchDog watchDogThread = null;
 	private int[] calibrationCoefficients = new int[6];
@@ -218,7 +219,15 @@ public class Dive {
 	private static boolean disabled = true;
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
-
+	// Constants for PWM range mapping
+	private static final int PWM_MIN = 150; // Minimum PWM value for 0 degrees
+	private static final int PWM_MAX = 600; // Maximum PWM value for 180 degrees
+	private static final int PCA9685_MODE1 = 0x00;
+	private static final int LED0_ON_L = 0x06;
+	private static final int LED0_ON_H = 0x07;
+	private static final int LED0_OFF_L = 0x08;
+	private static final int LED0_OFF_H = 0x09;
+	
 	public Dive() {
 		I2CProvider i2CProvider = null;
 		try {
@@ -243,7 +252,7 @@ public class Dive {
 			deviceGyro.writeRegister(0x11, (byte) 0xA2); // CTRL2_G: 6.66kHz, 2000 dps, gyro full-scale
 			Thread.sleep(100); // Wait for gyro settings to take effect
 		} catch (Exception e) {
-			log.error("Error initializing I2C devices", e);
+			log.error("Error initializing I2C devices Gyro", e);
 		}
 		try {
 			log.info("Starting Depth method.");
@@ -282,8 +291,44 @@ public class Dive {
 			watchDogThread = new WatchDog();
 			watchDogThread.start();
 		} catch (Exception e) {
-			log.error("Error initializing I2C devices", e);
+			log.error("Error initializing I2C devices Depth", e);
 		}
+		try {
+	        // Assuming you've already initialized 'pi4j' and 'i2CProvider' like you did for the other devices
+	        // Here, we're setting up the I2C configuration for the PCA9685
+	        I2CConfig configPCA9685 = I2C.newConfigBuilder(pi4j)
+	                .id("PCA9685")
+	                .name("PCA9685 PWM Controller")
+	                .bus(1)  // This is the I2C bus. The Raspberry Pi has multiple I2C buses (0, 1), check which one you're using.
+	                .device(0x40)  // This is the default I2C address for the PCA9685, change if you've set a different address.
+	                .build();
+
+	        // Create the I2C device for the PCA9685 using the configuration
+	        devicePCA9685 = i2CProvider.create(configPCA9685);
+	        devicePCA9685.writeRegister(PCA9685_MODE1, 0x88);
+	        setPWMFreq(50); // 50Hz for servos
+
+		} catch (Exception e) {
+			log.error("Error initializing I2C devices Servo", e);
+		}
+	}
+	private void setPWMFreq(int freq) throws Exception {
+	    int prescale = calculatePrescale(freq);
+	    byte oldmode = 0;
+	    devicePCA9685.readRegister(0x00); // Read MODE1 register
+	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
+	    devicePCA9685.writeRegister(0x00, newmode); // go to sleep
+	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
+	    devicePCA9685.writeRegister(0x00, oldmode);
+	    Thread.sleep(5);
+	    devicePCA9685.writeRegister(0x00, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+	}
+	private int calculatePrescale(double freq) {
+	    double prescaleval = 25000000.0; // 25,000,000 Hz
+	    prescaleval /= 4096.0;           // 12-bit
+	    prescaleval /= freq;
+	    prescaleval -= 1.0;
+	    return (int) Math.ceil(prescaleval);
 	}
 
 	public Integer getDiveAngle() {
@@ -345,16 +390,40 @@ public class Dive {
 		log.error("emergencySurface");
 		setFillTank(false);
 	}
-	public Integer setFrontAngle(Integer angle) {
-		log.debug("setFrontAngle:"+angle);
-		return angle;
+	// Method to convert servo angle to PWM value
+	private int angleToPWM(int angle) {
+	    return PWM_MIN + (angle * (PWM_MAX - PWM_MIN) / 180);
 	}
 
-	public Integer setBackAngle(Integer angle) {
-		log.debug("setBackAngle:"+angle);
-		return angle;
+	// Set the angle for the front servo
+	public Integer setFrontAngle(int angle) {
+		angle += 90;
+	    int pwm = angleToPWM(angle);
+	    // Assuming channel 0 for the front servo
+	    setPWM(0, 0, pwm);
+	    log.debug("setFrontAngle: " + angle);
+	    return angle;
 	}
 
+	// Set the angle for the back servo
+	public Integer setBackAngle(int angle) {
+		angle += 90;
+	    int pwm = angleToPWM(angle);
+	    // Assuming channel 1 for the back servo
+	    setPWM(1, 0, pwm);
+	    log.debug("setBackAngle: " + angle);
+	    return angle;
+	}
+
+	// Assuming you have a method like this to send PWM signals
+	private void setPWM(int channel, int on, int off) {
+	    // Write to PCA9685 registers to set the PWM signal for the given channel
+	    // This is a pseudo-code example
+	    devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, on & 0xFF);
+	    devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, on >> 8);
+	    devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, off & 0xFF);
+	    devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, off >> 8);
+	}
 	public Integer setFillTank(Boolean action) {
 		log.debug("setFillTank:"+action);
 
