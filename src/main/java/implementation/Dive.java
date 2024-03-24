@@ -418,12 +418,15 @@ public class Dive {
 
 	// Assuming you have a method like this to send PWM signals
 	private void setPWM(int channel, int on, int off) {
-	    // Write to PCA9685 registers to set the PWM signal for the given channel
-	    // This is a pseudo-code example
-	    devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, on & 0xFF);
-	    devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, on >> 8);
-	    devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, off & 0xFF);
-	    devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, off >> 8);
+	    try {
+	        devicePCA9685.writeRegister(LED0_ON_L + 4 * channel, on & 0xFF);
+	        devicePCA9685.writeRegister(LED0_ON_H + 4 * channel, on >> 8);
+	        devicePCA9685.writeRegister(LED0_OFF_L + 4 * channel, off & 0xFF);
+	        devicePCA9685.writeRegister(LED0_OFF_H + 4 * channel, off >> 8);
+	        log.debug("Set PWM - Channel: {}, ON: {}, OFF: {}", channel, on, off);
+	    } catch (Exception e) {
+	        log.error("Error setting PWM - Channel: {}, ON: {}, OFF: {}", channel, on, off, e);
+	    }
 	}
 	public Integer setFillTank(Boolean action) {
 		log.debug("setFillTank:"+action);
