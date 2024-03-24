@@ -307,14 +307,14 @@ public class Dive {
 	        devicePCA9685 = i2CProvider.create(configPCA9685);
 	        devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
 		    Thread.sleep(5);
-	        setPWMFreq(50); // 50Hz for servos
+	        setPWMFreq(50.0); // 50Hz for servos
 		    Thread.sleep(5);
 
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices Servo", e);
 		}
 	}
-	private void setPWMFreq(int freq) throws Exception {
+	private void setPWMFreq(double freq) throws Exception {
 	    int prescale = calculatePrescale(freq);
 	    byte oldmode = (byte) devicePCA9685.readRegister(0x00); // Read MODE1 register
 	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
@@ -329,7 +329,7 @@ public class Dive {
 	    prescaleval /= 4096.0;           // 12-bit
 	    prescaleval /= freq;
 	    prescaleval -= 1.0;
-	    return (int) Math.round(prescaleval);
+	    return (int) Math.ceil(prescaleval);
 	}
 
 	public Integer getDiveAngle() {
