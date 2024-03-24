@@ -220,7 +220,7 @@ public class Dive {
 	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
 	// Constants for PWM range mapping
-	private static final int PWM_MIN = 150; // Minimum PWM value for 0 degrees
+	private static final int PWM_MIN = 614; // Minimum PWM value for 0 degrees was 150
 	private static final int PWM_MAX = 600; // Maximum PWM value for 180 degrees
 	private static final int PCA9685_MODE1 = 0x00;
 	private static final int LED0_ON_L = 0x06;
@@ -414,8 +414,8 @@ public class Dive {
 
 	// Assuming you have a method like this to send PWM signals
 	private void setPWM(int channel, double dutyCycle) {
-	    int onCount = (int) (409);
-	    int offCount = (int) (409 + ((4096 - 409)* ((dutyCycle) / 100.0)));
+	    int onCount = (int) (PWM_MIN);
+	    int offCount = (int) (PWM_MIN + ((4096 - PWM_MIN)* ((dutyCycle) / 100.0)));
 	    if (offCount >= 4096) {
 	        offCount = 4095; // Adjust for next frame if necessary
 	    }
