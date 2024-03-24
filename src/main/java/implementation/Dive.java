@@ -223,6 +223,7 @@ public class Dive {
 	private static final int PWM_MIN = 150; // Minimum PWM value for 0 degrees was 150
 	private static final int PWM_MAX = 600; // Maximum PWM value for 180 degrees
 	private static final int PCA9685_MODE1 = 0x00;
+	private static final int PRE_SCALE = 0xFE;
 	private static final int LED0_ON_L = 0x06;
 	private static final int LED0_ON_H = 0x07;
 	private static final int LED0_OFF_L = 0x08;
@@ -320,7 +321,7 @@ public class Dive {
 		byte oldmode = (byte) devicePCA9685.readRegister(PCA9685_MODE1); // Read MODE1 register
 		byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
 		//	    devicePCA9685.writeRegister(PCA9685_MODE1, newmode); // go to sleep
-		devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
+		devicePCA9685.writeRegister(PRE_SCALE, (byte) prescale); // set the prescaler
 		//	    devicePCA9685.writeRegister(PCA9685_MODE1, oldmode);
 		//	    Thread.sleep(5);
 		//	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
