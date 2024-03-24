@@ -305,7 +305,7 @@ public class Dive {
 
 	        // Create the I2C device for the PCA9685 using the configuration
 	        devicePCA9685 = i2CProvider.create(configPCA9685);
-	        devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
+	        devicePCA9685.writeRegister(PCA9685_MODE1, 0xA1);
 		    Thread.sleep(5);
 	        setPWMFreq(50.0); // 50Hz for servos
 		    Thread.sleep(5);
