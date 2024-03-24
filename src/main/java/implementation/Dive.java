@@ -415,7 +415,7 @@ public class Dive {
 	// Assuming you have a method like this to send PWM signals
 	private void setPWM(int channel, double dutyCycle) {
 	    int onCount = (int) (409);
-	    int offCount = (int) (409 + ((4096 - 409)* ((100.0 - dutyCycle) / 100.0)));
+	    int offCount = (int) (409 + ((4096 - 409)* ((dutyCycle) / 100.0)));
 	    if (offCount >= 4096) {
 	        offCount -= 4096; // Adjust for next frame if necessary
 	    }
