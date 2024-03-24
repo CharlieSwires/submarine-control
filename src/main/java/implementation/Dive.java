@@ -317,12 +317,12 @@ public class Dive {
 	private void setPWMFreq(double freq) throws Exception {
 	    int prescale = calculatePrescale(freq);
 	    byte oldmode = (byte) devicePCA9685.readRegister(0x00); // Read MODE1 register
-	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
-	    devicePCA9685.writeRegister(0x00, newmode); // go to sleep
+//	    byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
+//	    devicePCA9685.writeRegister(0x00, newmode); // go to sleep
 	    devicePCA9685.writeRegister(0xFE, (byte) prescale); // set the prescaler
-	    devicePCA9685.writeRegister(0x00, oldmode);
-	    Thread.sleep(5);
-	    devicePCA9685.writeRegister(0x00, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+//	    devicePCA9685.writeRegister(0x00, oldmode);
+//	    Thread.sleep(5);
+//	    devicePCA9685.writeRegister(0x00, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
 	}
 	private int calculatePrescale(double freq) {
 	    double prescaleval = 25000000.0; // 25,000,000 Hz
