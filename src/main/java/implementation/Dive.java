@@ -297,7 +297,7 @@ public class Dive {
 			log.error("Error initializing I2C devices Depth", e);
 		}
 		try {
-			log.info("Starting Servos method.");
+			log.info("Starting Servos method. PWM_MIN, PWM_MAX:" +PWM_MIN + ", " +PWM_MAX);
 			// Assuming you've already initialized 'pi4j' and 'i2CProvider' like you did for the other devices
 			// Here, we're setting up the I2C configuration for the PCA9685
 			I2CConfig configPCA9685 = I2C.newConfigBuilder(pi4j)
@@ -392,16 +392,16 @@ public class Dive {
 		setFillTank(false);
 	}
 	// Method to convert servo angle to PWM value
-	private double angleToDutyCycle(int angle) {
-		return 100.0 * (angle / 180.0);
+	private int angleToPWM(int angle) {
+		return (int)Math.round(PWM_MIN + (angle * (PWM_MAX - PWM_MIN)) / 180.0);
 	}
 
 	// Set the angle for the front servo
 	public Integer setFrontAngle(int angle) {
 		angle += 90;
-		double dutyCycle = angleToDutyCycle(angle);
+		int pwm = angleToPWM(angle);
 		// Assuming channel 0 for the front servo
-		setPWM(0, dutyCycle);
+		setPWM(0, pwm);
 		log.debug("setFrontAngle: " + angle);
 		return angle;
 	}
@@ -409,18 +409,18 @@ public class Dive {
 	// Set the angle for the back servo
 	public Integer setBackAngle(int angle) {
 		angle += 90;
-		double dutyCycle = angleToDutyCycle(angle);
+		int pwm = angleToPWM(angle);
 		// Assuming channel 1 for the back servo
-		setPWM(1, dutyCycle);
+		setPWM(1, pwm);
 		log.debug("setBackAngle: " + angle);
 		return angle;
 	}
 
 	// Assuming you have a method like this to send PWM signals
-	private void setPWM(int channel, double dutyCycle) {
+	private void setPWM(int channel, int pwm) {
 		try {
-			int onCount = (int) (0);
-			int offCount = (int) (PWM_MIN + ((PWM_MAX - PWM_MIN) * dutyCycle / 100.0));
+			int onCount = (int) 0;
+			int offCount = (int)  pwm;
 			if (offCount >= 4096) {
 				offCount -= 4096; // Adjust for next frame if necessary
 			}
@@ -437,7 +437,7 @@ public class Dive {
 			devicePCA9685.writeRegister(LED0_OFF_L + offset, offLow);
 			devicePCA9685.writeRegister(LED0_OFF_H + offset, offHigh);
 		} catch (Exception e) {
-			log.error("Error setting Servo = " + channel + " duty cycle = " + dutyCycle);
+			log.error("Error setting Servo = " + channel + " duty cycle = " + pwm);
 		}
 	}
 
@@ -542,9 +542,9 @@ public class Dive {
 	}
 	public Integer setRudder(Integer angle) {
 		angle += 90;
-		double dutyCycle = angleToDutyCycle(angle);
+		int pwm = angleToPWM(angle);
 		// Assuming channel 1 for the back servo
-		setPWM(2, dutyCycle);
+		setPWM(2, pwm);
 		log.debug("setRudder: " + angle);
 		return angle;
 	}
