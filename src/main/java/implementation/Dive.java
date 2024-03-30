@@ -513,7 +513,7 @@ public class Dive {
 			double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
 			double tempCelsius = TEMP / 100.0;
 			// Depth calculation using the corrected pressure value...
-			double correctedPressure = 1025.0*pressure/ 22093.3; //mPa
+			double correctedPressure = 1025.0*pressure/ 22093.3; //hPa
 			//
 			//			// Convert temperature to degrees Celsius
 			tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
@@ -523,10 +523,10 @@ public class Dive {
 			+ 1.001685e-4 * Math.pow(tempCelsius, 3) - 1.120083e-6 * Math.pow(tempCelsius, 4)
 			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
 
-			double depthmm = 1000.0 * pressure / (density * 9.80665 * 1000.0);//mPa /1000
+			double depthmm = 1000.0 * pressure / (density * 9.80665 * 100.0);// * 1000 for mm and hPa /100
 			log.debug("pressure = "+pressure+" pressure(mPa) = "+correctedPressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
 
-			return (int) (-depthmm - offsetDepth); // Convert meters to millimeters
+			return (int) (-depthmm - offsetDepth);
 		} catch (Exception e) {
 			log.error("Error reading depth sensor data");
 			return -999 - offsetDepth;
