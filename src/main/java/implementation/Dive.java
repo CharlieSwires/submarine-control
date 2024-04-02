@@ -449,88 +449,93 @@ public class Dive {
 
 	public Integer getDepth() {
 		log.debug("getDepth");
-		try {
-			if (!disabled) {
-				if (watchDogThread != null) {
-					// Stop the watch dog thread
-					startTimer.set(true);
-					watchDogThread.interrupt();
+		int retry = 0;
+		while(retry < 3) {
+			try {
+				if (!disabled) {
+					if (watchDogThread != null) {
+						// Stop the watch dog thread
+						startTimer.set(true);
+						watchDogThread.interrupt();
+					}
+
+				} else {
+					if (watchDogThread != null) {
+						startTimer.set(false);
+						watchDogThread.interrupt();
+					}
 				}
 
-			} else {
-				if (watchDogThread != null) {
-					startTimer.set(false);
-					watchDogThread.interrupt();
-				}
-			}
 
+				// Depth and temperature reading sequence...
+				// Initiate pressure and temperature reading sequence
+				//			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
+				//			Thread.sleep(50); // Wait for reset to complete
+				deviceDepth.writeRegister(0x40, (byte)0x12); // Start pressure conversion was 0x02
+				try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
+				byte[] pressureData = new byte[3];
+				deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
+				long D1 = ((pressureData[0] & 0xFF) << 16) | ((pressureData[1] & 0xFF) << 8) | (pressureData[2] & 0xFF);// Read pressure data as before...
+				deviceDepth.writeRegister(0x50, (byte)0x1C); // Start temperature conversion was 0x0A
+				try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
+				byte[] tempData = new byte[3];
+				deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
 
-			// Depth and temperature reading sequence...
-			// Initiate pressure and temperature reading sequence
-			//			deviceDepth.writeRegister(0x1E, (byte)0x78); // Reset command
-			//			Thread.sleep(50); // Wait for reset to complete
-			deviceDepth.writeRegister(0x40, (byte)0x12); // Start pressure conversion was 0x02
-			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
-			byte[] pressureData = new byte[3];
-			deviceDepth.readRegister(0x00, pressureData, 0, 3); // Read pressure data
-			long D1 = ((pressureData[0] & 0xFF) << 16) | ((pressureData[1] & 0xFF) << 8) | (pressureData[2] & 0xFF);// Read pressure data as before...
-			deviceDepth.writeRegister(0x50, (byte)0x1C); // Start temperature conversion was 0x0A
-			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
-			byte[] tempData = new byte[3];
-			deviceDepth.readRegister(0x00, tempData, 0, 3); // Read temperature data
+				long D2 = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
 
-			long D2 = ((tempData[0] & 0xFF) << 16) | ((tempData[1] & 0xFF) << 8) | (tempData[2] & 0xFF);
+				long dT = D2 - calibrationCoefficients[4] * 256;
+				long TEMP = 2000 + dT * calibrationCoefficients[5] / (long)8388608;
+				long OFF = calibrationCoefficients[1] * 65536L + (calibrationCoefficients[3] * dT) / 128L;
+				long SENS = calibrationCoefficients[0] * 32768L + (calibrationCoefficients[2] * dT) / 256L;
+				long T2 = 0;
+				long OFF2 = 0;
+				long SENS2 = 0;
 
-			long dT = D2 - calibrationCoefficients[4] * 256;
-			long TEMP = 2000 + dT * calibrationCoefficients[5] / (long)8388608;
-			long OFF = calibrationCoefficients[1] * 65536L + (calibrationCoefficients[3] * dT) / 128L;
-			long SENS = calibrationCoefficients[0] * 32768L + (calibrationCoefficients[2] * dT) / 256L;
-			long T2 = 0;
-			long OFF2 = 0;
-			long SENS2 = 0;
-
-			if(TEMP >= 2000)
-			{
-				T2 = 2 * (dT * dT) / 137438953472L;
-				OFF2 = ((TEMP - 2000) * (TEMP - 2000)) / 16;
-				SENS2 = 0;
-			}
-			else if(TEMP < 2000)
-			{
-				T2 = 3 * (dT * dT) / 8589934592L;
-				OFF2 = 3 * ((TEMP - 2000) * (TEMP - 2000)) / 2;
-				SENS2 = 5 * ((TEMP - 2000) * (TEMP - 2000)) / 8;
-				if(TEMP < -1500)
+				if(TEMP >= 2000)
 				{
-					OFF2 = OFF2 + 7 * ((TEMP + 1500) * (TEMP + 1500));
-					SENS2 = SENS2 + 4 * ((TEMP + 1500) * (TEMP + 1500));
+					T2 = 2 * (dT * dT) / 137438953472L;
+					OFF2 = ((TEMP - 2000) * (TEMP - 2000)) / 16;
+					SENS2 = 0;
 				}
+				else if(TEMP < 2000)
+				{
+					T2 = 3 * (dT * dT) / 8589934592L;
+					OFF2 = 3 * ((TEMP - 2000) * (TEMP - 2000)) / 2;
+					SENS2 = 5 * ((TEMP - 2000) * (TEMP - 2000)) / 8;
+					if(TEMP < -1500)
+					{
+						OFF2 = OFF2 + 7 * ((TEMP + 1500) * (TEMP + 1500));
+						SENS2 = SENS2 + 4 * ((TEMP + 1500) * (TEMP + 1500));
+					}
+				}
+
+				TEMP = TEMP - T2;
+				OFF = OFF - OFF2;
+				SENS = SENS - SENS2;
+				double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
+				double tempCelsius = TEMP / 100.0;
+				// Depth calculation using the corrected pressure value...
+				double correctedPressure = 1025.0*pressure/ 22093.3; //hPa
+				//
+				//			// Convert temperature to degrees Celsius
+				tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
+
+				// Apply temperature compensation to pressure
+				double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
+				+ 1.001685e-4 * Math.pow(tempCelsius, 3) - 1.120083e-6 * Math.pow(tempCelsius, 4)
+				+ 6.536332e-9 * Math.pow(tempCelsius, 5);
+
+				double depthmm = 1000.0 * pressure / (density * 9.80665 * 100.0);// * 1000 for mm and hPa /100
+				log.debug("pressure = "+pressure+" pressure(mPa) = "+correctedPressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
+
+				return (int) (-depthmm - offsetDepth);
+			} catch (Exception e) {
+				retry++;
+				continue;
 			}
-
-			TEMP = TEMP - T2;
-			OFF = OFF - OFF2;
-			SENS = SENS - SENS2;
-			double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
-			double tempCelsius = TEMP / 100.0;
-			// Depth calculation using the corrected pressure value...
-			double correctedPressure = 1025.0*pressure/ 22093.3; //hPa
-			//
-			//			// Convert temperature to degrees Celsius
-			tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
-
-			// Apply temperature compensation to pressure
-			double density = 999.842594 + 6.793952e-2 * tempCelsius - 9.09529e-3 * Math.pow(tempCelsius, 2)
-			+ 1.001685e-4 * Math.pow(tempCelsius, 3) - 1.120083e-6 * Math.pow(tempCelsius, 4)
-			+ 6.536332e-9 * Math.pow(tempCelsius, 5);
-
-			double depthmm = 1000.0 * pressure / (density * 9.80665 * 100.0);// * 1000 for mm and hPa /100
-			log.debug("pressure = "+pressure+" pressure(mPa) = "+correctedPressure+" tempCelsius = "+tempCelsius+" depth(mm) = "+depthmm+" density(Kg/m^3) = "+density);
-
-			return (int) (-depthmm - offsetDepth);
-		} catch (Exception e) {
-			log.error("Error reading depth sensor data");
-			return -999 - offsetDepth;
 		}
+		log.error("Error reading depth sensor retries exhausted");
+		return -999999;
 	}
 
 	public Integer zeroOffsets() {
