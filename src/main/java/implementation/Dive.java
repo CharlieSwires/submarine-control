@@ -531,6 +531,7 @@ public class Dive {
 				return (int) (-depthmm - offsetDepth);
 			} catch (Exception e) {
 				retry++;
+				try { Thread.sleep(20); } catch (Exception e2) {}
 				continue;
 			}
 		}
