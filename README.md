@@ -56,11 +56,11 @@ EngineControl
 DiveControl
 -----------
 
-<p>http://192.168.137.205:8080/submarine/dive/front/{angleDegrees}</p>
-<p>http://192.168.137.205:8080/submarine/dive/back/{angleDegrees}</p>
+<p>http://192.168.137.205:8080/submarine/dive/front/{angleDegrees} - done</p>
+<p>http://192.168.137.205:8080/submarine/dive/back/{angleDegrees} - done</p>
 <p>http://192.168.137.205:8080/submarine/dive/fill-tank/true</p>
 <p>http://192.168.137.205:8080/submarine/dive/fill-tank/false</p>
-<p>http://192.168.137.205:8080/submarine/dive/dive-angle</p>
+<p>http://192.168.137.205:8080/submarine/dive/dive-angle - done</p>
 <p>returns angleDegrees - offset</p>
 <p>http://192.168.137.205:8080/submarine/dive/depth - done</p>
 <p>returns integer mm - offset</p>
@@ -72,5 +72,5 @@ NavigationControl
 
 <p>http://192.168.137.205:8080/submarine/navigation/bearing - done</p>
 <p>returns angleDegrees
-<p>http://192.168.137.205:8080/submarine/navigation/rudder/{angleDegrees}</p>
+<p>http://192.168.137.205:8080/submarine/navigation/rudder/{angleDegrees} - done</p>
 
