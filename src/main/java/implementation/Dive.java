@@ -450,7 +450,7 @@ public class Dive {
 	public Integer getDepth() {
 		log.debug("getDepth");
 		int retry = 0;
-		while(retry < 3) {
+		while(retry < 5) {
 			try {
 				if (!disabled) {
 					if (watchDogThread != null) {
@@ -531,7 +531,7 @@ public class Dive {
 				return (int) (-depthmm - offsetDepth);
 			} catch (Exception e) {
 				retry++;
-				try { Thread.sleep(20); } catch (Exception e2) {}
+				try { Thread.sleep(50); } catch (Exception e2) {}
 				continue;
 			}
 		}
