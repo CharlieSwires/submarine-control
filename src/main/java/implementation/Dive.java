@@ -430,7 +430,7 @@ public class Dive {
 			byte offLow = (byte)(offCount & 0xFF);
 			byte offHigh = (byte)((offCount >> 8) & 0xFF);
 
-			log.info("onCount = " + onCount + " offCount = " + offCount);
+			log.debug("onCount = " + onCount + " offCount = " + offCount);
 			int offset = 4 * channel;
 			devicePCA9685.writeRegister(LED0_ON_L + offset, onLow);
 			devicePCA9685.writeRegister(LED0_ON_H + offset, onHigh);
