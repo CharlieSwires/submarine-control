@@ -74,3 +74,9 @@ NavigationControl
 <p>returns angleDegrees
 <p>http://192.168.137.205:8080/submarine/navigation/rudder/{angleDegrees} - done</p>
 
+WiFi Dongle
+-----------
+
+<p>https://thepihut.com/blogs/raspberry-pi-tutorials/how-to-setup-a-rtl881cu-usb-wifi-adapter-with-the-raspberry-pi-4</p>
+<p>added rfkill block 0 to runner.sh and runnerHD.sh</p>
+
