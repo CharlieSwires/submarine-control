@@ -34,7 +34,10 @@ public class Eng {
 	private static final int MOTOR_2_PIN_A = 5; // Direction pin A for right motor
 	private static final int MOTOR_2_PIN_B = 6; // Direction pin B for right motor
 
-	private DigitalOutput motor1pinA, motor1pinB, motor2pinA, motor2pinB;
+	private static final int MOTOR_3_PIN_A = 25;
+	private static final int MOTOR_3_PIN_B = 26;
+
+	private DigitalOutput motor1pinA, motor1pinB, motor2pinA, motor2pinB, pumpsPinA, pumpsPinB;
 	private Pwm motor1pinE, motor2pinE;
 	private Context pi4j;
 
@@ -50,6 +53,8 @@ public class Eng {
 			motor1pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_B, "M1B"));
 			motor2pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_A, "M2A"));
 			motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
+			pumpsPinA = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_A, "M3A"));
+			pumpsPinB = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_B, "M3B"));
 
 			// Initialize PWM pins for motor speed control
 			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
@@ -129,4 +134,11 @@ public class Eng {
         } catch (IOException e) {
         	log.error("Problem getting temperature.");        }
         return -999; 
-    }}
+    }
+
+	public void setDirection(Boolean action) {
+		// TODO Auto-generated method stub
+		pumpsPinA.setState(action);
+		pumpsPinB.setState(!action);
+	
+	}}

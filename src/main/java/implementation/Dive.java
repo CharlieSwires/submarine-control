@@ -191,6 +191,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -207,6 +208,9 @@ public class Dive {
 
 	Logger log = LoggerFactory.getLogger(Dive.class);
 
+	@Autowired
+	private Eng eng;
+	
 	private I2C deviceGyro;
 	private I2C deviceDepth;
 	private I2C devicePCA9685;
@@ -443,7 +447,9 @@ public class Dive {
 
 	public Integer setFillTank(Boolean action) {
 		log.debug("setFillTank:"+action);
-
+		int pwm = 4096;
+		eng.setDirection(action);
+		setPWM(3, pwm);
 		return action?1:0;
 	}
 
