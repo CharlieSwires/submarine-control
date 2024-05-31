@@ -447,7 +447,7 @@ public class Dive {
 
 	public Integer setFillTank(Boolean action) {
 		log.debug("setFillTank:"+action);
-		int pwm = 4096;
+		int pwm = 4095;
 		eng.setDirection(action);
 		setPWM(3, pwm);
 		return action?1:0;
