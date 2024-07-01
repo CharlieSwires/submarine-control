@@ -275,7 +275,8 @@ public class Dive {
 
 			// Reset the device
 			log.debug("Sending reset command to the depth sensor.");
-			deviceDepth.writeRegister(0x1E, (byte)0x78);
+//			deviceDepth.writeRegister(0x1E, (byte)0x78);
+            deviceDepth.writeRegister(0x1E, (byte) 0x00); // Use correct reset command format
 			try { Thread.sleep(20); } catch (Exception e) {} // Wait for conversion to complete
 			log.debug("Depth sensor reset.");
 
