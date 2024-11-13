@@ -202,6 +202,8 @@ import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
 
+import Const.Constant;
+
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Dive {
@@ -521,7 +523,7 @@ public class Dive {
 				double pressure = ((((D1 * SENS) / 2097152) - OFF) / 8192) / 10.0;
 				double tempCelsius = TEMP / 100.0;
 				// Depth calculation using the corrected pressure value...
-				double correctedPressure = 1025.0*pressure/ 22093.3; //hPa
+				double correctedPressure = 1025.0*pressure/ 22093.3; //hPa ******************************<<<======
 				//
 				//			// Convert temperature to degrees Celsius
 				tempCelsius = 19.0 * tempCelsius/82.18; //Celcius
@@ -542,7 +544,7 @@ public class Dive {
 			}
 		}
 		log.error("Error reading depth sensor retries exhausted");
-		return -999999;
+		return Constant.ERROR;
 	}
 
 	public Integer zeroOffsets() {

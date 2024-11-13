@@ -19,6 +19,8 @@ import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
 import com.pi4j.io.pwm.PwmType;
 
+import Const.Constant;
+
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Eng {
@@ -133,7 +135,7 @@ public class Eng {
             }
         } catch (IOException e) {
         	log.error("Problem getting temperature.");        }
-        return -999; 
+        return Constant.ERROR; 
     }
 
 	public void setDirection(Boolean action) {

@@ -14,6 +14,8 @@ import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
 
+import Const.Constant;
+
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -100,7 +102,7 @@ public class Nav {
 				}
 			}
 		}
-		return -999;
+		return Constant.ERROR;
 	}
 
 	public Integer setRudder(Integer angle) {

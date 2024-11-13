@@ -36,12 +36,6 @@
     <version>2.0.12</version>
 </dependency>
 
-<!-- https://mvnrepository.com/artifact/org.freedesktop.gstreamer/gst1-java-core -->
-<dependency>
-    <groupId>org.freedesktop.gstreamer</groupId>
-    <artifactId>gst1-java-core</artifactId>
-    <version>1.4.0</version>
-</dependency>
 <!-- https://mvnrepository.com/artifact/com.googlecode.gstreamer-java/gstreamer-java 
 <dependency>
     <groupId>com.googlecode.gstreamer-java</groupId>
