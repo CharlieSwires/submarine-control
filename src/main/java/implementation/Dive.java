@@ -407,9 +407,10 @@ public class Dive {
 		angle += 90;
 		int pwm = angleToPWM(angle);
 		// Assuming channel 0 for the front servo
-		setPWM(0, pwm);
-		log.debug("setFrontAngle: " + angle);
-		return angle;
+		if (setPWM(0, pwm) != Constant.ERROR) {
+			log.debug("setFrontAngle: " + angle);
+			return angle;
+		} else return Constant.ERROR;
 	}
 
 	// Set the angle for the back servo
@@ -417,13 +418,14 @@ public class Dive {
 		angle += 90;
 		int pwm = angleToPWM(angle);
 		// Assuming channel 1 for the back servo
-		setPWM(1, pwm);
-		log.debug("setBackAngle: " + angle);
-		return angle;
+		if (setPWM(1, pwm) != Constant.ERROR) {
+			log.debug("setBackAngle: " + angle);
+			return angle;
+		} else return Constant.ERROR;
 	}
 
 	// Assuming you have a method like this to send PWM signals
-	private void setPWM(int channel, int pwm) {
+	private int setPWM(int channel, int pwm) {
 		try {
 			int onCount = (int) 0;
 			int offCount = (int)  pwm;
@@ -442,8 +444,10 @@ public class Dive {
 			devicePCA9685.writeRegister(LED0_ON_H + offset, onHigh);
 			devicePCA9685.writeRegister(LED0_OFF_L + offset, offLow);
 			devicePCA9685.writeRegister(LED0_OFF_H + offset, offHigh);
+			return 0;
 		} catch (Exception e) {
 			log.error("Error setting Servo = " + channel + " duty cycle = " + pwm);
+			return Constant.ERROR;
 		}
 	}
 
@@ -451,8 +455,10 @@ public class Dive {
 		log.debug("setFillTank:"+action);
 		int pwm = 4095;
 		eng.setDirection(action);
-		setPWM(3, pwm);
-		return action?1:0;
+		if (setPWM(3, pwm) != Constant.ERROR)
+			return action?1:0;
+		else
+			return Constant.ERROR;
 	}
 
 	public Integer getDepth() {
@@ -559,8 +565,12 @@ public class Dive {
 		int pwm = angleToPWM(angle);
 		// Assuming channel 1 for the back servo
 		setPWM(2, pwm);
-		log.debug("setRudder: " + angle);
-		return angle;
+		if (setPWM(2, pwm) != Constant.ERROR) {
+			log.debug("setRudder: " + angle);
+			return angle;
+		} else
+			return Constant.ERROR;
+
 	}
 
 }
