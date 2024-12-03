@@ -87,7 +87,7 @@ public class Nav {
 				log.debug("readBearing: x = " + xMag + " y = " + yMag+ " z = " + zMag);
 
 				// Calculate bearing
-				double bearing = Math.atan2(xMag, yMag) * (180 / Math.PI);
+				double bearing = Math.atan2(-yMag, -xMag) * (180 / Math.PI);
 
 				if (xMag != 0 || yMag != 0 || zMag != 0) {
 					return (int) -bearing;
