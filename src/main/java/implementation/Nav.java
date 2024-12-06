@@ -88,7 +88,13 @@ public class Nav {
 					tempxMag = ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
 					tempyMag = ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
 					tempzMag = ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
-
+					if ((""+tempxMag).equals("0.0") && (""+tempyMag).equals("0.0") && (""+tempzMag).equals("0.0")) {
+						try {
+							Thread.sleep(20);
+						} catch (InterruptedException e) {
+							
+						}
+					}
 				} while ((""+tempxMag).equals("0.0") && (""+tempyMag).equals("0.0") && (""+tempzMag).equals("0.0") && count++ < 20);
 				xMag += tempxMag;
 				yMag += tempyMag;
