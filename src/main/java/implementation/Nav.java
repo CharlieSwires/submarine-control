@@ -100,7 +100,7 @@ public class Nav {
 			double bearing = Math.atan2(yMag/32.0, xMag/32.0) * (180 / Math.PI);
 
 			if (!((""+xMag).equals("0.0") && (""+yMag).equals("0.0") && (""+zMag).equals("0.0"))) {
-				return (int) bearing;
+				return (int) -bearing;
 			}
 		} catch (Exception e) {
 			log.error("Error reading magnetometer data", e);
