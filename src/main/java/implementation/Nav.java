@@ -27,10 +27,10 @@ public class Nav {
 
 	@Autowired
 	private Dive dive;
-	
+
 	public Nav() {
 		try {
-	        log.info("Starting Nav method.");
+			log.info("Starting Nav method.");
 			// Initialize Pi4J with auto context
 			pi4j = Pi4J.newAutoContext();
 			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
@@ -72,35 +72,39 @@ public class Nav {
 
 	public Integer readBearing() {
 		log.debug("readBearing");
-		short xMag = 0;
-		short yMag = 0;
-		short zMag = 0;
+		double xMag = 0.0;
+		double yMag = 0.0;
+		double zMag = 0.0;
+		double tempxMag = 0.0;
+		double tempyMag = 0.0;
+		double tempzMag = 0.0;
 		int count = 0;
-		while (xMag == 0 && yMag == 0 && zMag == 0 && count++ < 20) {
-			try {
-				byte[] magData = new byte[6];
-				deviceMag.readRegister(0x68, magData, 0, 6);
+		try {
+			byte[] magData = new byte[6];
+			for(int i = 0; i < 32; i++) {
+				do {
+					deviceMag.readRegister(0x68, magData, 0, 6);
 
-				xMag = (short) ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
-				yMag = (short) ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
-				zMag = (short) ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
-				log.debug("readBearing: x = " + xMag + " y = " + yMag+ " z = " + zMag);
+					tempxMag = ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
+					tempyMag = ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
+					tempzMag = ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
 
-				// Calculate bearing
-				double bearing = Math.atan2(yMag, xMag) * (180 / Math.PI);
-
-				if (xMag != 0 || yMag != 0 || zMag != 0) {
-					return (int) -bearing;
-				}
-			} catch (Exception e) {
-				log.error("Error reading magnetometer data", e.getMessage());
-				continue;
-			} finally {
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {
-				}
+				} while ((""+tempxMag).equals("0.0") && (""+tempyMag).equals("0.0") && (""+tempzMag).equals("0.0") && count++ < 20);
+				xMag += tempxMag;
+				yMag += tempyMag;
+				zMag += tempzMag;
 			}
+			log.debug("readBearing: x = " + (xMag/32.0) + " y = " + (yMag/32.0)+ " z = " + (zMag/32.0));
+
+			// Calculate bearing
+			double bearing = Math.atan2(yMag/32.0, xMag/32.0) * (180 / Math.PI);
+
+			if (!((""+xMag).equals("0.0") && (""+yMag).equals("0.0") && (""+zMag).equals("0.0"))) {
+				return (int) bearing;
+			}
+		} catch (Exception e) {
+			log.error("Error reading magnetometer data", e);
+
 		}
 		return Constant.ERROR;
 	}

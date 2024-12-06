@@ -361,7 +361,7 @@ public class Dive {
 		} catch (Exception e) {
 			log.error("Error reading gyroscope data", e);
 		}
-		return 10 - offsetPitch;
+		return Constant.ERROR;
 	}
 
 	// Watch Dog thread class
