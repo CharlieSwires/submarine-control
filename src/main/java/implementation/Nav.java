@@ -81,29 +81,27 @@ public class Nav {
 		int count = 0;
 		try {
 			byte[] magData = new byte[6];
-			for(int i = 0; i < 32; i++) {
-				do {
-					deviceMag.readRegister(0x68, magData, 0, 6);
+			do {
+				deviceMag.readRegister(0x68, magData, 0, 6);
 
-					tempxMag = ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
-					tempyMag = ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
-					tempzMag = ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
-					if ((""+tempxMag).equals("0.0") && (""+tempyMag).equals("0.0") && (""+tempzMag).equals("0.0")) {
-						try {
-							Thread.sleep(20);
-						} catch (InterruptedException e) {
-							
-						}
+				tempxMag = ((magData[0] & 0xFF) | ((magData[1] & 0xFF) << 8));
+				tempyMag = ((magData[2] & 0xFF) | ((magData[3] & 0xFF) << 8));
+				tempzMag = ((magData[4] & 0xFF) | ((magData[5] & 0xFF) << 8));
+				if ((""+tempxMag).equals("0.0") && (""+tempyMag).equals("0.0") && (""+tempzMag).equals("0.0")) {
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+
 					}
-				} while ((""+tempxMag).equals("0.0") && (""+tempyMag).equals("0.0") && (""+tempzMag).equals("0.0") && count++ < 20);
-				xMag += tempxMag;
-				yMag += tempyMag;
-				zMag += tempzMag;
-			}
-			log.debug("readBearing: x = " + (xMag/32.0) + " y = " + (yMag/32.0)+ " z = " + (zMag/32.0));
+				}
+			} while ((""+tempxMag).equals("0.0") && (""+tempyMag).equals("0.0") && (""+tempzMag).equals("0.0") && count++ < 20);
+			xMag = tempxMag;
+			yMag = tempyMag;
+			zMag = tempzMag;
+			log.debug("readBearing: x = " + (xMag) + " y = " + (yMag)+ " z = " + (zMag));
 
 			// Calculate bearing
-			double bearing = Math.atan2(yMag/32.0, xMag/32.0) * (180 / Math.PI);
+			double bearing = Math.atan2(yMag, xMag) * (180 / Math.PI);
 
 			if (!((""+xMag).equals("0.0") && (""+yMag).equals("0.0") && (""+zMag).equals("0.0"))) {
 				return (int) -bearing;
