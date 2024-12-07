@@ -556,8 +556,11 @@ public class Dive {
 	public Integer zeroOffsets() {
 		Dive.offsetDepth = 0;
 		Dive.offsetDepth = getDepth();
+		if (Dive.offsetDepth == Constant.ERROR) Dive.offsetDepth = 0;
 		Dive.offsetPitch = 0;
 		Dive.offsetPitch = getDiveAngle();
+		if (Dive.offsetPitch == Constant.ERROR) Dive.offsetPitch = 0;
+
 		return 0;
 	}
 	public Integer setRudder(Integer angle) {
