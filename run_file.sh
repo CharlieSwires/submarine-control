@@ -8,4 +8,6 @@ done
 
 # Execute your file (replace 'your_command_here' with the actual command)
 echo "Wi-Fi connected. Running your file."
-./runnerHD.sh
+cd ~/submarine-control
+./runnerHD.sh&
+cd ~
