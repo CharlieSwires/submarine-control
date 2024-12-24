@@ -233,7 +233,7 @@ public class Dive {
 	private static final int LED0_OFF_L = 0x08;
 	private static final int LED0_OFF_H = 0x09;
 	private static final int  MIN_PULSE_WIDTH = 500;//us
-	private static final int  MAX_PULSE_WIDTH = 2500;//us
+	private static final int  MAX_PULSE_WIDTH = 3000;//us
 	private static final double TICK_PER_MICRO= 50.0 * 4096.0  / ( 1000000.0);
 	private static final int PWM_MIN = (int) Math.round(TICK_PER_MICRO * MIN_PULSE_WIDTH); // Minimum PWM value for 0 degrees was 150
 	private static final int PWM_MAX = (int) Math.round(TICK_PER_MICRO * MAX_PULSE_WIDTH); // Maximum PWM value for 180 degrees
