@@ -34,8 +34,9 @@ This is for the first time or after you make a change in your repo.</p>
 surface on loss of contact. If you don't want to alter your .bashrc for the watchdog 
 then you can do this in the runner.sh: sudo WATCHDOG_ENABLED="true" java -jar 
 ~/submarine-control/target/submarine-control.jar</p>
-<p> Running the runner from .bashrc doesn't work fully: the java works but not the libcam.
-So you need to SSH in from the PC and run the runner.sh which will kick off the java and libcam.</p>
+<p> crontab -e and add this line:</p>
+<p>@reboot /path/to/run_file.sh</p>
+<p>for auto run. </p>
 
 Playing the Video Stream
 ------------------------
