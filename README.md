@@ -25,6 +25,7 @@ This is for the first time or after you make a change in your repo.</p>
 <p>type: chmod 777 libcam.sh</p>
 <p>type: chmod 777 runnerHD.sh</p>
 <p>type: chmod 777 libcamHD.sh</p>
+<p>type: chmod 777 run_file.sh</p>
 <p>type: cd ..</p>
 <p>type for SD: ~/submarine-control/runner.sh</p>
 <p>or type for HD not both: ~/submarine-control/runnerHD.sh</p>
