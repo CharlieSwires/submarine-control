@@ -60,8 +60,7 @@ DiveControl
 
 <p>http://192.168.137.205:8080/submarine/dive/front/{angleDegrees} - done</p>
 <p>http://192.168.137.205:8080/submarine/dive/back/{angleDegrees} - done</p>
-<p>http://192.168.137.205:8080/submarine/dive/fill-tank/true - done</p>
-<p>http://192.168.137.205:8080/submarine/dive/fill-tank/false - done</p>
+<p>http://192.168.137.205:8080/submarine/dive/fill-tank/{percentPower} - done</p>
 <p>http://192.168.137.205:8080/submarine/dive/dive-angle - done</p>
 <p>returns angleDegrees - offset</p>
 <p>http://192.168.137.205:8080/submarine/dive/depth - done</p>

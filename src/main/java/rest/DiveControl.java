@@ -24,13 +24,9 @@ public class DiveControl {
     public ResponseEntity<Integer> getBack (@PathVariable("angle") Integer angle){
 		return new ResponseEntity<Integer>(dive.setBackAngle(angle),HttpStatus.OK);
     }
-    @GetMapping(path = "fill-tank/true", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Integer> getFillTankTrue (){
-		return new ResponseEntity<Integer>(dive.setFillTank(true),HttpStatus.OK);
-    }
-    @GetMapping(path = "fill-tank/false", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Integer> getFillTankFalse (){
-		return new ResponseEntity<Integer>(dive.setFillTank(false),HttpStatus.OK);
+    @GetMapping(path = "fill-tank/{percent}", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Integer> getFillTankFalse (@PathVariable("percent") Integer percent){
+		return new ResponseEntity<Integer>(dive.setFillTank(percent),HttpStatus.OK);
     }
     @GetMapping(path = "dive-angle", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Integer> getDiveAngle (){

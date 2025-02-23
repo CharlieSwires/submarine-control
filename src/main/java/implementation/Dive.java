@@ -237,6 +237,7 @@ public class Dive {
 	private static final double TICK_PER_MICRO= 50.0 * 4096.0  / ( 1000000.0);
 	private static final int PWM_MIN = (int) Math.round(TICK_PER_MICRO * MIN_PULSE_WIDTH); // Minimum PWM value for 0 degrees was 150
 	private static final int PWM_MAX = (int) Math.round(TICK_PER_MICRO * MAX_PULSE_WIDTH); // Maximum PWM value for 180 degrees
+	public static final Integer EMERGENCY_PUMP_POWER = 100;
 	public Dive() {
 		I2CProvider i2CProvider = null;
 		try {
@@ -395,7 +396,7 @@ public class Dive {
 	// Method to trigger emergency surface event
 	private void emergencySurface() {
 		log.error("emergencySurface");
-		setFillTank(false);
+		setFillTank(-EMERGENCY_PUMP_POWER);
 	}
 	// Method to convert servo angle to PWM value
 	private int angleToPWM(int angle) {
@@ -451,12 +452,12 @@ public class Dive {
 		}
 	}
 
-	public Integer setFillTank(Boolean action) {
-		log.debug("setFillTank:"+action);
-		int pwm = 4095;
-		eng.setDirection(action);
+	public Integer setFillTank(Integer percent) {
+		log.debug("setFillTank:"+percent);
+		int pwm = 4095*Math.abs(percent)/100;
+		eng.setDirection(percent > 0 ? true :false);
 		if (setPWM(3, pwm) != Constant.ERROR)
-			return action?1:0;
+			return percent;
 		else
 			return Constant.ERROR;
 	}
