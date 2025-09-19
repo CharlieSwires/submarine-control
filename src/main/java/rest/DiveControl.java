@@ -36,9 +36,10 @@ public class DiveControl {
     public ResponseEntity<Integer> getDepth (){
 		return new ResponseEntity<Integer>(dive.getDepth(), HttpStatus.OK);
     }
-    @GetMapping(path = "zero", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Integer> zero (){
-		return new ResponseEntity<Integer>(dive.zeroOffsets(), HttpStatus.OK);
+    @GetMapping(path = "zero", produces = "application/json")
+    public ResponseEntity<Integer> zero() {
+        int result = dive.zeroOffsets();
+        return ResponseEntity.ok(result);
     }
 
     
