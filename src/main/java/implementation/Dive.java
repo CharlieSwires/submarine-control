@@ -1,194 +1,6 @@
 package implementation;
-//
-//import java.util.HashSet;
-//import java.util.Set;
-//
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-//import org.springframework.context.annotation.Scope;
-//import org.springframework.stereotype.Component;
-//
-//import com.pi4j.Pi4J;
-//import com.pi4j.context.Context;
-//import com.pi4j.io.exception.IOException;
-//import com.pi4j.io.i2c.I2C;
-//import com.pi4j.io.i2c.I2CConfig;
-//import com.pi4j.io.i2c.I2CProvider;
-//
-//import jakarta.annotation.PostConstruct;
-//
-//
-//@Component
-//@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-//public class Dive {
-//
-//	Logger log = LoggerFactory.getLogger(Dive.class);
-//
-//	private WatchDog watchDogThread;
-//	private static boolean firstTime = true;
-//	private I2C deviceAccl;
-//	private Context pi4j;
-//	private static final int BUFFER_SIZE = 30;
-//	private short[] xBuffer = new short[BUFFER_SIZE];
-//	private short[] yBuffer = new short[BUFFER_SIZE];
-//	private short[] zBuffer = new short[BUFFER_SIZE];
-//	private int bufferIndex = 0;
-//	private static final int X_ID = 0;
-//	private static final int Y_ID = 1;
-//	private static final int Z_ID = 2;
-//	private static final int MSB = 1;
-//	private static final int LSB = 0;
-//	
-//	@PostConstruct
-//	public void init() {
-//		try {
-//			// Initialize Pi4J with auto context
-//			pi4j = Pi4J.newAutoContext();
-//			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
-//
-//			// Create I2C config for accelerometer (LSM303DLHC)
-//			I2CConfig configAccl = I2C.newConfigBuilder(pi4j)
-//					.id("LSM303AGR-Accl")
-//					.name("LSM303AGR Accelerometer")
-//					.bus(1)
-//					.device(0x19)
-//					.build();
-//
-//
-//			// Get I2C provider and create I2C instances
-//			deviceAccl = i2CProvider.create(configAccl);
-//
-//			// Initialize accelerometer
-//			deviceAccl.writeRegister(0x24, (byte) 0x80); //reset no fifo
-//			deviceAccl.writeRegister(0x21, (byte) 0x00); 
-//			deviceAccl.writeRegister(0x22, (byte) 0x00); 
-//			deviceAccl.writeRegister(0x23, (byte) 0x00); //continuous normal SPI disabled
-//			deviceAccl.writeRegister(0x20, (byte) 0x67); //normal power 200Hz xyz enabled
-//
-//
-//			Thread.sleep(500); // Wait for settings to take effect
-//		} catch (Exception e) {
-//			log.error("Error initializing I2C devices", e);
-//		}
-//	}
-//
 
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-//
-//	public Integer getDiveAngle() {
-//		log.info("getDiveAngle");
-//		short xAccl = 0;
-//		short yAccl = 0;
-//		short zAccl = 0;
-//		int count = 0;
-//		while (xAccl == 0 && yAccl == 0 && zAccl == 0 && count++ < 20) {
-//			try {
-//				byte[] ready = new byte[1];
-//				deviceAccl.readRegister(0x27, ready, 0, 1);
-//				log.info("ready = " + ready[0]);
-//				if ((ready[0] & 7) > 0) {
-//					byte[] acclDataX = new byte[2];
-//					byte[] acclDataY = new byte[2];
-//					byte[] acclDataZ = new byte[2];
-//					Set<String> set = new HashSet<String>();
-//					while(true) {
-//						if ((ready[0] & 1) == 1) {
-//							deviceAccl.readRegister(0x28, acclDataX, 0, 2);
-//							set.add("X");
-//						} 
-//						if ((ready[0] & 2) == 2) {
-//							deviceAccl.readRegister(0x2A, acclDataY, 0, 2);
-//							set.add("Y");
-//						}
-//						if ((ready[0] & 4) == 4) {
-//							deviceAccl.readRegister(0x2C, acclDataZ, 0, 2);
-//							set.add("Z");
-//						}
-//						if (set.size() == 3) {
-//							break;
-//						}
-//						try {
-//							Thread.sleep(10);
-//						} catch (InterruptedException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-//						ready = new byte[1];
-//						deviceAccl.readRegister(0x27, ready, 0, 1);
-//
-//					}
-//
-//					xAccl = (short) (((acclDataX[MSB] & 0xFF) << 8) | (acclDataX[LSB] & 0xFF));
-//					yAccl = (short) (((acclDataY[MSB] & 0xFF) << 8) | (acclDataY[LSB] & 0xFF));
-//					zAccl = (short) (((acclDataZ[MSB] & 0xFF) << 8) | (acclDataZ[LSB] & 0xFF));
-//					// Read and process each axis data
-//					updateBuffer(xBuffer, xAccl);
-//					updateBuffer(yBuffer, yAccl);
-//					updateBuffer(zBuffer, zAccl);
-//					bufferIndex++;
-//					if (bufferIndex == BUFFER_SIZE) {
-//						bufferIndex = 0;
-//					}
-//					// Calculate averages
-//					short[] average = calculateAverage(xBuffer, yBuffer, zBuffer);
-//
-//					log.info("Average: x = " + average[X_ID] + " y = " + average[Y_ID] + " z = " + average[Z_ID]);
-//
-//					// Calculate dive angle using averages
-//					double diveAngle = Math.atan2(-average[Z_ID], -average[X_ID]) * (180 / Math.PI);
-//
-//
-//					// Calculate dive angle
-//					return (int) diveAngle;
-//
-//				} else {
-//					try {
-//						Thread.sleep(10);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					continue;
-//				}
-//			} catch (IOException e) {
-//				log.error("Error reading accelerometer data", e);
-//				throw new RuntimeException("Error reading accelerometer data", e);
-//			}
-//		}
-//		return 0;
-//	}
-//	private void updateBuffer(short[] buffer, short data) {
-//		short value = data;
-//		buffer[bufferIndex] = value;
-//	}
-//
-//	private short[] calculateAverage(short[] bufferX,short[] bufferY,short[] bufferZ) {
-//		int sumX = 0;
-//		int sumY = 0;
-//		int sumZ = 0;
-//		int count = 0;
-//		for (int i = 0; i < bufferX.length; i++) {
-//			if (bufferX[i] != 0 || bufferY[i] != 0 || bufferZ[i] != 0) {
-//				sumX += bufferX[i];
-//				sumY += bufferY[i];
-//				sumZ += bufferZ[i];
-//				count++;
-//			}
-//		}
-//		if (count != 0) {
-//			short[] result = {(short)(sumX/count), (short)(sumY/count), (short)(sumZ/count)};
-//			return result;
-//		}
-//		short[] result = {(short)(1), (short)(1), (short)(1)};
-//		return result;
-//
-//	}
-
-//}
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,12 +30,9 @@ public class Dive {
 	private I2C devicePCA9685;
 	private Context pi4j;
 	private static WatchDog watchDogThread = null;
-	private int[] calibrationCoefficients = new int[6];
-
 	public AtomicBoolean startTimer = new AtomicBoolean(false);
 
 	private static boolean disabled = true;
-	private static int offsetDepth = 0;
 	private static int offsetPitch = 0;
 	// Constants for PWM range mapping
 	private static final int PCA9685_MODE1 = 0x00;
@@ -238,22 +47,32 @@ public class Dive {
 	private static final int PWM_MIN = (int) Math.round(TICK_PER_MICRO * MIN_PULSE_WIDTH); // Minimum PWM value for 0 degrees was 150
 	private static final int PWM_MAX = (int) Math.round(TICK_PER_MICRO * MAX_PULSE_WIDTH); // Maximum PWM value for 180 degrees
 	public static final Integer EMERGENCY_PUMP_POWER = 100;
-	// --- MS5837 (Bar02) constants ---
-	private static final int MS5837_ADDR = 0x76;
-	private static final int CMD_RESET = 0x1E;
+	// --- MS5837 (Blue Robotics Bar02) constants ---
+	private static final int MS5837_ADDR = 0x76;           // change to 0x77 if i2cdetect shows that
+	private static final int CMD_RESET   = 0x1E;
 	private static final int CMD_ADC_READ = 0x00;
-	private static final int CMD_CONVERT_D1 = 0x40; // Pressure base
-	private static final int CMD_CONVERT_D2 = 0x50; // Temperature base
-	private static final int OSR_8192 = 0x0A;       // Highest OSR for best precision
-	private static final int PROM_BASE = 0xA0;      // PROM word 0..7 at A0..AE
+	private static final int PROM_BASE   = 0xA0;           // PROM words 0..7 at A0..AE
 
-	private int[] prom = new int[8];                // PROM words (prom[1]..prom[6] => C1..C6)
-	private double p0Mbar = Double.NaN;             // session baseline pressure (zero at surface)
-	private static final double G = 9.80665;        // m/s^2
+	// OSR=8192 conversion commands (explicit bytes are clearest)
+	private static final int CMD_CONV_D1_OSR8192 = 0x4A;   // pressure
+	private static final int CMD_CONV_D2_OSR8192 = 0x5A;   // temperature
+	private static final int OSR_8192_DELAY_MS   = 20;
 
-	// Choose your fluid density. Fresh water ~ 997 kg/m^3 at ~25°C, seawater ~1025 kg/m^3.
-	// You can refine with temperature if you want; for now pick one:
-	private double fluidDensity = 997.0;           // kg/m^3 (set 997.0 for fresh 1025 for salt water)
+	private static final double G = 9.80665;
+	private static final double DEFAULT_FLUID_DENSITY = 997.0; // fresh water; ~1025 for sea
+
+	private final int[] prom = new int[8];                 // prom[1]..prom[6] => C1..C6
+	private double p0Mbar = Double.NaN;                    // baseline pressure (tare)
+	private double fluidDensity = DEFAULT_FLUID_DENSITY;
+	private static final class PressureTemp {
+	    final double pressureMbar;
+	    final double temperatureC;
+
+	    private PressureTemp(double pressureMbar, double temperatureC) {
+	        this.pressureMbar = pressureMbar;
+	        this.temperatureC = temperatureC;
+	    }
+	}
 	public Dive() {
 		I2CProvider i2CProvider = null;
 		try {
@@ -290,17 +109,17 @@ public class Dive {
 		            .build();
 		    deviceDepth = i2CProvider.create(configDepth);
 
-		    // RESET: send single command byte (no data)
-		    deviceDepth.write((byte) CMD_RESET);
-		    Thread.sleep(5); // datasheet: ~2.8ms; 5ms is safe
+		    // Reset sensor
+	        deviceDepth.write((byte) CMD_RESET);
+	        Thread.sleep(5);
 
-		    // Read PROM words 0..7 (A0..AE). C1..C6 are words 1..6.
-		    for (int i = 0; i < 8; i++) {
-		        byte[] two = new byte[2];
-		        deviceDepth.readRegister(PROM_BASE + (i * 2), two, 0, 2);
-		        prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
-		        log.debug("PROM[" + i + "] = " + prom[i]);
-		    }
+	        // Read PROM words 0..7
+	        for (int i = 0; i < 8; i++) {
+	            byte[] two = new byte[2];
+	            deviceDepth.readRegister(PROM_BASE + (i * 2), two, 0, 2);
+	            prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
+	            log.debug("MS5837 PROM[" + i + "]=" + prom[i]);
+	        }
 		    // (Optional) CRC check on PROM here if you want extra robustness.
 		} catch (Exception e) {
 		    log.error("Error initializing MS5837", e);
@@ -328,6 +147,75 @@ public class Dive {
 			log.error("Error initializing I2C devices Servo", e);
 		}
 	}
+	
+	private PressureTemp readPressureTemp() throws Exception {
+	    // --- Read D1 (pressure raw) ---
+	    deviceDepth.write((byte) CMD_CONV_D1_OSR8192);
+	    Thread.sleep(OSR_8192_DELAY_MS);
+
+	    byte[] buf = new byte[3];
+	    deviceDepth.readRegister(CMD_ADC_READ, buf, 0, 3);
+	    long D1 = ((long) (buf[0] & 0xFF) << 16)
+	            | ((long) (buf[1] & 0xFF) << 8)
+	            |  (long) (buf[2] & 0xFF);
+
+	    // --- Read D2 (temperature raw) ---
+	    deviceDepth.write((byte) CMD_CONV_D2_OSR8192);
+	    Thread.sleep(OSR_8192_DELAY_MS);
+
+	    deviceDepth.readRegister(CMD_ADC_READ, buf, 0, 3);
+	    long D2 = ((long) (buf[0] & 0xFF) << 16)
+	            | ((long) (buf[1] & 0xFF) << 8)
+	            |  (long) (buf[2] & 0xFF);
+
+	    // --- Calibration coefficients C1..C6 ---
+	    long C1 = prom[1], C2 = prom[2], C3 = prom[3],
+	         C4 = prom[4], C5 = prom[5], C6 = prom[6];
+
+	    // --- First-order compensation ---
+	    long dT   = D2 - (C5 << 8);
+	    long TEMP = 2000L + (dT * C6) / 8_388_608L;     // 0.01 °C
+
+	    long OFF  = (C2 * 65_536L) + ((C4 * dT) / 128L);
+	    long SENS = (C1 * 32_768L) + ((C3 * dT) / 256L);
+
+	    // --- Second-order compensation ---
+	    long T2 = 0, OFF2 = 0, SENS2 = 0;
+
+	    if (TEMP < 2000L) {
+	        long t = TEMP - 2000L;
+	        long t2 = t * t;
+
+	        T2    = (3L * dT * dT) / 8_589_934_592L;    // 2^33
+	        OFF2  = (3L * t2) / 2L;
+	        SENS2 = (5L * t2) / 8L;
+
+	        if (TEMP < -1500L) {
+	            long tt = TEMP + 1500L;
+	            long tt2 = tt * tt;
+	            OFF2  += 7L * tt2;
+	            SENS2 += 4L * tt2;
+	        }
+	    } else {
+	        T2 = (2L * dT * dT) / 137_438_953_472L;     // 2^37
+	        long t = TEMP - 2000L;
+	        OFF2 = (t * t) / 16L;
+	        // SENS2 stays 0
+	    }
+
+	    TEMP -= T2;
+	    OFF  -= OFF2;
+	    SENS -= SENS2;
+
+	    // --- Pressure (MS5837): result is 0.01 mbar ---
+	    long P01mbar = ((((D1 * SENS) / 2_097_152L) - OFF) / 32_768L);
+
+	    double pressureMbar = P01mbar / 100.0;
+	    double temperatureC = TEMP / 100.0;
+
+	    return new PressureTemp(pressureMbar, temperatureC);
+	}
+
 	private void setPWMFreq(double freq) throws Exception {
 		int prescale = calculatePrescale(freq);
 		byte oldmode = (byte) devicePCA9685.readRegister(PCA9685_MODE1); // Read MODE1 register
@@ -366,6 +254,24 @@ public class Dive {
 			log.error("Error reading gyroscope data", e);
 		}
 		return Constant.ERROR;
+	}
+	private void zeroPressureBaseline(int samples) throws Exception {
+	    double sum = 0.0;
+	    int good = 0;
+
+	    for (int i = 0; i < samples; i++) {
+	        PressureTemp r = readPressureTemp();
+	        sum += r.pressureMbar;
+	        good++;
+	        Thread.sleep(25);
+	    }
+
+	    if (good > 0) {
+	        p0Mbar = sum / good;
+	        log.info(String.format("MS5837 baseline set: P0=%.2f mbar (%d samples)", p0Mbar, good));
+	    } else {
+	        throw new IllegalStateException("No valid MS5837 samples for baseline");
+	    }
 	}
 
 	// Watch Dog thread class
@@ -467,8 +373,8 @@ public class Dive {
 
 
 	public Integer getDepth() {
-	    log.debug("getDepth()");
 	    int attempts = 0;
+
 	    while (attempts++ < 5) {
 	        try {
 	            // Kick watchdog exactly as you already do
@@ -484,103 +390,36 @@ public class Dive {
 	                }
 	            }
 
-	            // --- Start pressure conversion (D1) @ OSR=8192
-	            deviceDepth.write((byte) (CMD_CONVERT_D1 | OSR_8192));
-	            Thread.sleep(20); // per datasheet max conv time for OSR=8192 ~20ms
+	            PressureTemp r = readPressureTemp();
 
-	            byte[] buf = new byte[3];
-	            deviceDepth.readRegister(CMD_ADC_READ, buf, 0, 3);
-	            long D1 = ((long) (buf[0] & 0xFF) << 16) | ((long) (buf[1] & 0xFF) << 8) | (long) (buf[2] & 0xFF);
-
-	            // --- Start temperature conversion (D2) @ OSR=8192
-	            deviceDepth.write((byte) (CMD_CONVERT_D2 | OSR_8192));
-	            Thread.sleep(20);
-
-	            deviceDepth.readRegister(CMD_ADC_READ, buf, 0, 3);
-	            long D2 = ((long) (buf[0] & 0xFF) << 16) | ((long) (buf[1] & 0xFF) << 8) | (long) (buf[2] & 0xFF);
-
-	            // --- Calibration coefficients (C1..C6)
-	            long C1 = prom[1], C2 = prom[2], C3 = prom[3], C4 = prom[4], C5 = prom[5], C6 = prom[6];
-
-	            // --- First-order calculations (datasheet)
-	            long dT   = D2 - (C5 << 8);
-	            long TEMP = 2000 + (dT * C6) / 8388608L;                 // hundredths of °C
-	            long OFF  = (C2 * 65536L) + ((C4 * dT) / 128L);
-	            long SENS = (C1 * 32768L) + ((C3 * dT) / 256L);
-
-	            // --- Second-order temperature compensation
-	            long T2 = 0, OFF2 = 0, SENS2 = 0;
-	            if (TEMP < 2000) {
-	                // low temp
-	                long t = (TEMP - 2000);
-	                T2 = (3L * (dT * dT)) / 8589934592L;                 // 2^33
-	                OFF2 = (3L * t * t) / 2L;
-	                SENS2 = (5L * t * t) / 8L;
-	                if (TEMP < -1500) {
-	                    long tt = (TEMP + 1500);
-	                    OFF2 += 7L * tt * tt;
-	                    SENS2 += 4L * tt * tt;
-	                }
-	            } else {
-	                // high temp
-	                T2 = (2L * (dT * dT)) / 137438953472L;               // 2^37
-	                OFF2 = ((TEMP - 2000) * (TEMP - 2000)) / 16L;
-	            }
-
-	            TEMP -= T2;
-	            OFF  -= OFF2;
-	            SENS -= SENS2;
-
-	            // Pressure in 0.1 mbar (per MS5837/5611 family scaling)
-	            long P = ((D1 * SENS) / 2097152L - OFF) / 8192L;         // 2^21 and 2^13
-	            double pressure_mbar = P / 10.0;                         // mbar (hPa)
-	            double temp_C = TEMP / 100.0;                             // °C
-
-	            // Capture baseline if needed
 	            if (Double.isNaN(p0Mbar)) {
-	                p0Mbar = pressure_mbar;
+	                p0Mbar = r.pressureMbar; // first-ever baseline
 	            }
 
-	            // Depth in meters: ΔP (Pa) / (ρ g); 1 mbar = 100 Pa
-	            double depth_m = ((pressure_mbar - p0Mbar) * 100.0) / (fluidDensity * G);
-	            int depth_mm = (int) Math.round(depth_m * 1000.0);
+	            double depthM = ((r.pressureMbar - p0Mbar) * 100.0) / (fluidDensity * G);
+	            int depthMm = (int) Math.round(depthM * 1000.0);
 
-	            log.debug(String.format("P=%.2f mbar, T=%.2f °C, depth=%d mm (ρ=%.1f)", 
-	                    pressure_mbar, temp_C, depth_mm, fluidDensity));
+	            log.debug(String.format("P=%.2f mbar T=%.2f C depth=%d mm P0=%.2f rho=%.1f",
+	                    r.pressureMbar, r.temperatureC, depthMm, p0Mbar, fluidDensity));
 
-	            // If you prefer "down is negative", flip the sign here:
-	            return -depth_mm; // or: return -depth_mm;
+	            return -depthMm; // your convention: down negative
 
 	        } catch (Exception e) {
-	            log.warn("Depth read attempt " + attempts + " failed", e);
+	            log.warn("getDepth attempt " + attempts + " failed", e);
 	            try { Thread.sleep(50); } catch (InterruptedException ie) { /* ignore */ }
 	        }
 	    }
-	    log.error("Error reading depth sensor: retries exhausted");
+
 	    return Constant.ERROR;
 	}
 
+
 	public Integer zeroOffsets() {
-	    // Average a few samples for a clean P0 baseline
 	    try {
-	        double sum = 0;
-	        int n = 10;
-	        for (int i = 0; i < n; i++) {
-	            // take a raw pressure sample without changing p0Mbar mid-loop
-	            // Temporarily read once via getDepth() path but protect baseline.
-	            double saved = p0Mbar;
-	            p0Mbar = Double.NaN;                 // force fresh capture on next read
-	            getDepth();                          // primes p0Mbar to current pressure
-	            double p0 = p0Mbar;                  // captured
-	            p0Mbar = saved;                      // restore
-	            sum += p0;
-	            Thread.sleep(25);
-	        }
-	        p0Mbar = sum / n;
-	        offsetPitch = getDiveAngle();            // keep your pitch zeroing
+	        zeroPressureBaseline(12);   // call into your Depth bean
+	        offsetPitch = getDiveAngle();
 	        if (offsetPitch == Constant.ERROR) offsetPitch = 0;
-	        offsetDepth = 0;                         // no longer used for pressure; kept for compatibility
-	        log.info(String.format("Zeroed: P0=%.2f mbar, pitch0=%d", p0Mbar, offsetPitch));
+	        log.info("Zeroed offsets: pitch0=" + offsetPitch);
 	        return 0;
 	    } catch (Exception e) {
 	        log.error("zeroOffsets failed", e);

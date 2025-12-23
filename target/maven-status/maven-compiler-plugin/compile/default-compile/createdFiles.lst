@@ -1,6 +1,7 @@
 Const\Constant.class
 implementation\Eng.class
 rest\EngineControl.class
+implementation\Dive$PressureTemp.class
 implementation\Dive.class
 rest\ImageCaptureControl.class
 implementation\ImageCapture$Resolution.class
