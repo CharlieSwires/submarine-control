@@ -200,9 +200,9 @@ public class Dive {
 		        depthReady = false;
 
 		        // close the local I2C instance if we created it
-		        if (I2CSingle.i2c != null) {
+		        if (deviceDepth != null) {
 		            try {
-		                ((I2C) i2c).close();
+		                deviceDepth.close();
 		                Thread.sleep(100);
 		                I2CSingle.i2c=I2CSingle.i2c(I2CSingle.pi4j);
 		            } catch (Exception closeEx) {
