@@ -30,7 +30,7 @@ public class Dive {
 	private I2C deviceGyro;
 	private I2C deviceDepth;
 	private I2C devicePCA9685;
-	private Context pi4j;
+	private Context pi4j = I2CSingle.pi4j;
 	private static WatchDog watchDogThread = null;
 	public AtomicBoolean startTimer = new AtomicBoolean(false);
 
@@ -70,7 +70,7 @@ public class Dive {
 	private double p0Mbar = Double.NaN;                    // baseline pressure (tare)
 	private double fluidDensity = DEFAULT_FLUID_DENSITY;
 	private volatile boolean depthReady = false;
-	  private final I2CProvider i2c;
+	  private I2CProvider i2c=I2CSingle.i2c;
 	  private static final Object I2C_LOCK = new Object();
 
 	private static final class PressureTemp {

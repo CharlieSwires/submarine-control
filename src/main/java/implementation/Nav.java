@@ -22,8 +22,8 @@ public class Nav {
 	private static final Logger log = LoggerFactory.getLogger(Nav.class);
 
 	private I2C deviceMag;
-	private Context pi4j;
-	  private I2CProvider i2c;
+	private Context pi4j=I2CSingle.pi4j;
+	  private I2CProvider i2c=I2CSingle.i2c;
 	  private static final Object I2C_LOCK = new Object();
 
 	  @Autowired

@@ -42,11 +42,14 @@ public class Eng {
 
 	private DigitalOutput motor1pinA, motor1pinB, motor2pinA, motor2pinB, pumpsPinA, pumpsPinB;
 	private Pwm motor1pinE, motor2pinE;
-	private Context pi4j;
+	private Context pi4j=I2CSingle.pi4j;
+	  private static final Object I2C_LOCK = new Object();
 
+	
 @Autowired
 	  public Eng(Context pi4j) {
 	    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+	    synchronized (I2C_LOCK) {
 		try {
 	        log.info("Starting Eng method.");
 
@@ -64,7 +67,9 @@ public class Eng {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Abort");
+
 		}
+	    }
 	}
 
 	private DigitalOutputConfig buildDigitalOutputConfig(int address, String id) {
