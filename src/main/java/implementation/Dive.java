@@ -54,6 +54,9 @@ public class Dive {
 	private static final int CMD_RESET   = 0x1E;
 	private static final int CMD_ADC_READ = 0x00;
 	private static final int PROM_BASE   = 0xA0;           // PROM words 0..7 at A0..AE
+	  private static final int CMD_CONVERT_D1 = 0x40;
+	  private static final int CMD_CONVERT_D2 = 0x50;
+	  private static final int OSR_8192       = 0x0A;
 
 	// OSR=8192 conversion commands (explicit bytes are clearest)
 	private static final int CMD_CONV_D1_OSR8192 = 0x4A;   // pressure
@@ -136,29 +139,45 @@ public class Dive {
 	      log.warn("MS5837 not ready; skipping zero until device comes up.");
 	    }
 	  }
-	private void initMs5837() {
-	    try {
-	      I2CConfig cfg = I2C.newConfigBuilder(pi4j).bus(1).device(MS5837_ADDR).build();
-	      deviceDepth = i2CProvider.create(cfg);
+	  private void initMs5837() {
+		    try {
+		        I2CConfig cfg = I2C.newConfigBuilder(pi4j).bus(1).device(0x76).build();
+		        deviceDepth = i2CProvider.create(cfg);
 
-	      deviceDepth.write((byte)CMD_RESET);
-	      Thread.sleep(5);
+		        // 1) Reset with a single byte, wait longer
+		        deviceDepth.write((byte) 0x1E);      // CMD_RESET
+		        Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe
 
-	      // read PROM 0..7 (A0..AE)
-	      for (int i = 0; i < 8; i++) {
-	        byte[] two = new byte[2];
-	        deviceDepth.readRegister(0xA0 + i*2, two, 0, 2);
-	        prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
-	      }
+		        // 2) Read PROM words 0..7 using write(cmd) + read(2)
+		        byte[] two = new byte[2];
+		        for (int i = 0; i < 8; i++) {
+		            int cmd = 0xA0 + (i * 2);
+		            // Some chips need a gap between commands
+		            for (int attempt = 0; attempt < 3; attempt++) {
+		                try {
+		                    deviceDepth.write((byte) cmd);
+		                    Thread.sleep(2);                 // tiny settle delay
+		                    deviceDepth.read(two, 0, 2);     // read 2 bytes
+		                    prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
+		                    break; // success
+		                } catch (Exception e) {
+		                    if (attempt == 2) throw e;       // rethrow after retries
+		                    Thread.sleep(5);
+		                }
+		            }
+		        }
 
-	      depthReady = true;
-	      log.info("MS5837 init OK: C1={} C2={} ...", prom[1], prom[2]);
-	    } catch (Exception e) {
-	      depthReady = false;
-	      deviceDepth = null; // ensure null if init failed
-	      log.error("MS5837 init failed", e);
-	    }
-	  }
+		        // (optional) sanity check
+		        if (prom[1] == 0 || prom[1] == 0xFFFF) throw new IllegalStateException("PROM read bad");
+
+		        depthReady = true;
+		        log.info("MS5837 init OK: C1={} C2={}", prom[1], prom[2]);
+		    } catch (Exception e) {
+		        depthReady = false;
+		        deviceDepth = null;
+		        log.error("MS5837 init failed", e);
+		    }
+		}
 
 	  private void requireDepth() {
 	    if (!depthReady || deviceDepth == null) {
@@ -171,21 +190,14 @@ public class Dive {
 	    deviceDepth.write((byte) CMD_CONV_D1_OSR8192);
 	    Thread.sleep(OSR_8192_DELAY_MS);
 
-	    byte[] buf = new byte[3];
-	    deviceDepth.readRegister(CMD_ADC_READ, buf, 0, 3);
-	    long D1 = ((long) (buf[0] & 0xFF) << 16)
-	            | ((long) (buf[1] & 0xFF) << 8)
-	            |  (long) (buf[2] & 0xFF);
-
+	    long D1 = readADC(CMD_CONVERT_D1);
+	    
 	    // --- Read D2 (temperature raw) ---
 	    deviceDepth.write((byte) CMD_CONV_D2_OSR8192);
 	    Thread.sleep(OSR_8192_DELAY_MS);
 
-	    deviceDepth.readRegister(CMD_ADC_READ, buf, 0, 3);
-	    long D2 = ((long) (buf[0] & 0xFF) << 16)
-	            | ((long) (buf[1] & 0xFF) << 8)
-	            |  (long) (buf[2] & 0xFF);
-
+	    long D2 = readADC(CMD_CONVERT_D2);
+	    
 	    // --- Calibration coefficients C1..C6 ---
 	    long C1 = prom[1], C2 = prom[2], C3 = prom[3],
 	         C4 = prom[4], C5 = prom[5], C6 = prom[6];
@@ -441,6 +453,16 @@ public class Dive {
 		      return Constant.ERROR;
 		    }
 		  }
+
+	  private long readADC(int cmd) throws Exception {
+	      requireDepth();
+	      deviceDepth.write((byte) (cmd | OSR_8192));
+	      Thread.sleep(20);                     // OSR=8192 worst-case ~20ms
+	      byte[] b = new byte[3];
+	      deviceDepth.write((byte) CMD_ADC_READ);
+	      deviceDepth.read(b, 0, 3);
+	      return ((long)(b[0] & 0xFF) << 16) | ((long)(b[1] & 0xFF) << 8) | (long)(b[2] & 0xFF);
+	  }
 
 
 	public Integer zeroOffsets() {
