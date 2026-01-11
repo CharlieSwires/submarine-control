@@ -1,6 +1,7 @@
 C:\Users\charl\eclipse-workspace\submarine-control\src\main\java\Const\Constant.java
 C:\Users\charl\eclipse-workspace\submarine-control\src\main\java\implementation\Dive.java
 C:\Users\charl\eclipse-workspace\submarine-control\src\main\java\implementation\Eng.java
+C:\Users\charl\eclipse-workspace\submarine-control\src\main\java\implementation\I2CSingle.java
 C:\Users\charl\eclipse-workspace\submarine-control\src\main\java\implementation\ImageCapture.java
 C:\Users\charl\eclipse-workspace\submarine-control\src\main\java\implementation\Nav.java
 C:\Users\charl\eclipse-workspace\submarine-control\src\main\java\rest\DiveControl.java

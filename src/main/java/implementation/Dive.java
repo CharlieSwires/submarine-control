@@ -70,7 +70,8 @@ public class Dive {
 	private double p0Mbar = Double.NaN;                    // baseline pressure (tare)
 	private double fluidDensity = DEFAULT_FLUID_DENSITY;
 	private volatile boolean depthReady = false;
-	I2CProvider i2CProvider = null;
+	  private final I2CProvider i2c;
+	  private static final Object I2C_LOCK = new Object();
 
 	private static final class PressureTemp {
 	    final double pressureMbar;
@@ -81,12 +82,16 @@ public class Dive {
 	        this.temperatureC = temperatureC;
 	    }
 	}
-	public Dive() {
+	 @Autowired
+	  public Dive(Context pi4j, I2CProvider i2c) {
+	    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+	    this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+	    synchronized (I2C_LOCK) {
 		try {
 			log.info("Starting Dive method.");
 			pi4j = Pi4J.newAutoContext();
 			log.debug("Pi4J context initialized.");
-			i2CProvider = pi4j.provider("linuxfs-i2c");
+			i2c = pi4j.provider("linuxfs-i2c");
 			log.debug("I2C provider obtained.");
 
 			log.info("Starting Gyro method.");
@@ -98,7 +103,7 @@ public class Dive {
 					.device(0x6A)  // Adjust if using a different I2C address
 					.build();
 
-			deviceGyro = i2CProvider.create(configGyro);
+			deviceGyro = i2c.create(configGyro);
 			// Gyroscope initialization
 			deviceGyro.writeRegister(0x10, (byte) 0xA2); // CTRL2_A: 6.66kHz, 4g, gyro full-scale
 			deviceGyro.writeRegister(0x11, (byte) 0xA2); // CTRL2_G: 6.66kHz, 2000 dps, gyro full-scale
@@ -119,7 +124,7 @@ public class Dive {
 					.build();
 
 			// Create the I2C device for the PCA9685 using the configuration
-			devicePCA9685 = i2CProvider.create(configPCA9685);
+			devicePCA9685= i2c.create(configPCA9685);
 			devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
 			Thread.sleep(50);
 			setPWMFreq(50.0); // 50Hz for servos
@@ -128,6 +133,7 @@ public class Dive {
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices Servo", e);
 		}
+	    }
 	}
 	  @PostConstruct
 	  public void init() {
@@ -142,6 +148,9 @@ public class Dive {
 	  private void initMs5837() {
 		    try {
 	
+		        I2CConfig cfg = I2C.newConfigBuilder(pi4j).bus(1).device(MS5837_ADDR).build();
+		        deviceDepth = i2c.create(cfg);
+		        if (deviceDepth == null) throw new IllegalStateException("i2c.create returned null");
 		        // 1) Reset with a single byte, wait longer
 		        deviceDepth.write((byte) 0x1E);      // CMD_RESET
 		        Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe

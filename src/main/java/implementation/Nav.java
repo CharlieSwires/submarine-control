@@ -8,7 +8,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
@@ -24,16 +23,19 @@ public class Nav {
 
 	private I2C deviceMag;
 	private Context pi4j;
+	  private I2CProvider i2c;
+	  private static final Object I2C_LOCK = new Object();
 
-	@Autowired
-	private Dive dive;
-	
-	public Nav() {
-		try {
+	  @Autowired
+	  private Dive dive;
+	  
+	 @Autowired
+	  public Nav(Context pi4j, I2CProvider i2c) {
 	        log.info("Starting Nav method.");
-			// Initialize Pi4J with auto context
-			pi4j = Pi4J.newAutoContext();
-			I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
+		    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+		    this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+		    synchronized (I2C_LOCK) {
+				try {
 
 
 			// Create I2C config for magnetometer (LSM303DLHC)
@@ -45,7 +47,7 @@ public class Nav {
 					.build();
 
 			// Get I2C provider and create I2C instances
-			deviceMag = i2CProvider.create(configMag);
+			deviceMag = i2c.create(configMag);
 
 			// Initialize magnetometer
 			deviceMag.writeRegister(0x60, (byte) 0x8C); // Continuous conversion mode
@@ -55,6 +57,7 @@ public class Nav {
 			Thread.sleep(500); // Wait for settings to take effect
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices", e);
+		}
 		}
 	}
 

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -43,12 +44,11 @@ public class Eng {
 	private Pwm motor1pinE, motor2pinE;
 	private Context pi4j;
 
-	public Eng() {
+@Autowired
+	  public Eng(Context pi4j) {
+	    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
 		try {
 	        log.info("Starting Eng method.");
-
-			// Initialize Pi4J with auto context
-			pi4j = Pi4J.newAutoContext();
 
 			// Initialize GPIO digital output pins for motor direction control
 			motor1pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_A, "M1A"));
