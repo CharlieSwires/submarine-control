@@ -197,22 +197,13 @@ public class Dive {
 		        depthReady = true;
 		        log.info("MS5837 init OK: C1={} C2={}", prom[1], prom[2]);
 		    } catch (Exception e) {
+		        // If anything goes wrong during init, mark the sensor as not ready
 		        depthReady = false;
-
-		        // close the local I2C instance if we created it
-		        if (deviceDepth != null) {
-		            try {
-		                deviceDepth.close();
-		                Thread.sleep(100);
-		                I2CSingle.i2c=I2CSingle.i2c(I2CSingle.pi4j);
-		            } catch (Exception closeEx) {
-		                log.warn("Failed to close MS5837 I2C after init failure", closeEx);
-		            }
-		        }
-		        deviceDepth = null;
+		        // Do NOT close the I2C device here; other devices share the same bus,
+		        // and Pi4J keeps the IO id reserved even after close(), which leads to
+		        // IOAlreadyExistsException on re-create.
 		        log.error("MS5837 init failed", e);
-		    }
-		}
+		    }		}
 
 	  private void requireDepth() {
 	    if (!depthReady || deviceDepth == null) {
