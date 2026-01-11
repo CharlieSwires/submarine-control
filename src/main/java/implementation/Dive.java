@@ -100,27 +100,37 @@ public class Dive {
 			log.error("Error initializing I2C devices Gyro", e);
 		}
 		try {
-		    log.info("Starting Depth (MS5837) init...");
-		    I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
-		            .id("MS5837")
-		            .name("MS5837 Depth Sensor")
-		            .bus(1)
-		            .device(MS5837_ADDR)
-		            .build();
-		    deviceDepth = i2CProvider.create(configDepth);
+			I2CProvider i2c = pi4j.provider("linuxfs-i2c");
+			I2C dev = i2c.create(I2C.newConfigBuilder(pi4j).bus(1).device(0x76).build());
+			dev.write((byte)0x1E);           // reset
+			Thread.sleep(5);
+			byte[] prom = new byte[2];
+			dev.readRegister(0xA2, prom, 0, 2);   // C1
+			int c1 = ((prom[0] & 0xFF) << 8) | (prom[1] & 0xFF);
+			System.out.println("C1=" + c1);
 
-		    // Reset sensor
-	        deviceDepth.write((byte) CMD_RESET);
-	        Thread.sleep(5);
-
-	        // Read PROM words 0..7
-	        for (int i = 0; i < 8; i++) {
-	            byte[] two = new byte[2];
-	            deviceDepth.readRegister(PROM_BASE + (i * 2), two, 0, 2);
-	            prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
-	            log.debug("MS5837 PROM[" + i + "]=" + prom[i]);
-	        }
-		    // (Optional) CRC check on PROM here if you want extra robustness.
+//		    log.info("Starting Depth (MS5837) init...");
+//		    I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
+//		            .id("MS5837")
+//		            .name("MS5837 Depth Sensor")
+//		            .bus(1)
+//		            .device(MS5837_ADDR)
+//		            .build();
+//		    deviceDepth = i2CProvider.create(configDepth);
+//
+//		    // Reset sensor
+//	        deviceDepth.write((byte) CMD_RESET);
+//	        Thread.sleep(5);
+//
+//	        // Read PROM words 0..7
+//	        for (int i = 0; i < 8; i++) {
+//	            byte[] two = new byte[2];
+//	            deviceDepth.readRegister(PROM_BASE + (i * 2), two, 0, 2);
+//	            prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
+//	            log.debug("MS5837 PROM[" + i + "]=" + prom[i]);
+//	        }
+		   
+	        zeroOffsets();// (Optional) CRC check on PROM here if you want extra robustness.
 		} catch (Exception e) {
 		    log.error("Error initializing MS5837", e);
 		}
