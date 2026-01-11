@@ -141,9 +141,7 @@ public class Dive {
 	  }
 	  private void initMs5837() {
 		    try {
-		        I2CConfig cfg = I2C.newConfigBuilder(pi4j).bus(1).device(0x76).build();
-		        deviceDepth = i2CProvider.create(cfg);
-
+	
 		        // 1) Reset with a single byte, wait longer
 		        deviceDepth.write((byte) 0x1E);      // CMD_RESET
 		        Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe
