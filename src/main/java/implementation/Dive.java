@@ -1,6 +1,7 @@
 package implementation;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
 
 import Const.Constant;
+import jakarta.annotation.PostConstruct;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -64,6 +66,9 @@ public class Dive {
 	private final int[] prom = new int[8];                 // prom[1]..prom[6] => C1..C6
 	private double p0Mbar = Double.NaN;                    // baseline pressure (tare)
 	private double fluidDensity = DEFAULT_FLUID_DENSITY;
+	private volatile boolean depthReady = false;
+	I2CProvider i2CProvider = null;
+
 	private static final class PressureTemp {
 	    final double pressureMbar;
 	    final double temperatureC;
@@ -74,7 +79,6 @@ public class Dive {
 	    }
 	}
 	public Dive() {
-		I2CProvider i2CProvider = null;
 		try {
 			log.info("Starting Dive method.");
 			pi4j = Pi4J.newAutoContext();
@@ -99,41 +103,6 @@ public class Dive {
 		} catch (Exception e) {
 			log.error("Error initializing I2C devices Gyro", e);
 		}
-		try {
-			I2CProvider i2c = pi4j.provider("linuxfs-i2c");
-			I2C dev = i2c.create(I2C.newConfigBuilder(pi4j).bus(1).device(0x76).build());
-			dev.write((byte)0x1E);           // reset
-			Thread.sleep(5);
-			byte[] prom = new byte[2];
-			dev.readRegister(0xA2, prom, 0, 2);   // C1
-			int c1 = ((prom[0] & 0xFF) << 8) | (prom[1] & 0xFF);
-			System.out.println("C1=" + c1);
-
-//		    log.info("Starting Depth (MS5837) init...");
-//		    I2CConfig configDepth = I2C.newConfigBuilder(pi4j)
-//		            .id("MS5837")
-//		            .name("MS5837 Depth Sensor")
-//		            .bus(1)
-//		            .device(MS5837_ADDR)
-//		            .build();
-//		    deviceDepth = i2CProvider.create(configDepth);
-//
-//		    // Reset sensor
-//	        deviceDepth.write((byte) CMD_RESET);
-//	        Thread.sleep(5);
-//
-//	        // Read PROM words 0..7
-//	        for (int i = 0; i < 8; i++) {
-//	            byte[] two = new byte[2];
-//	            deviceDepth.readRegister(PROM_BASE + (i * 2), two, 0, 2);
-//	            prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
-//	            log.debug("MS5837 PROM[" + i + "]=" + prom[i]);
-//	        }
-		   
-	        zeroOffsets();// (Optional) CRC check on PROM here if you want extra robustness.
-		} catch (Exception e) {
-		    log.error("Error initializing MS5837", e);
-		}
 
 		try {
 			log.info("Starting Servos method. PWM_MIN, PWM_MAX:" +PWM_MIN + ", " +PWM_MAX);
@@ -157,7 +126,46 @@ public class Dive {
 			log.error("Error initializing I2C devices Servo", e);
 		}
 	}
-	
+	  @PostConstruct
+	  public void init() {
+	    // init other devices...
+	    initMs5837();            // try to bring up depth
+	    if (depthReady) {
+	      zeroPressureBaseline(); // now it’s safe to zero
+	    } else {
+	      log.warn("MS5837 not ready; skipping zero until device comes up.");
+	    }
+	  }
+	private void initMs5837() {
+	    try {
+	      I2CConfig cfg = I2C.newConfigBuilder(pi4j).bus(1).device(MS5837_ADDR).build();
+	      deviceDepth = i2CProvider.create(cfg);
+
+	      deviceDepth.write((byte)CMD_RESET);
+	      Thread.sleep(5);
+
+	      // read PROM 0..7 (A0..AE)
+	      for (int i = 0; i < 8; i++) {
+	        byte[] two = new byte[2];
+	        deviceDepth.readRegister(0xA0 + i*2, two, 0, 2);
+	        prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
+	      }
+
+	      depthReady = true;
+	      log.info("MS5837 init OK: C1={} C2={} ...", prom[1], prom[2]);
+	    } catch (Exception e) {
+	      depthReady = false;
+	      deviceDepth = null; // ensure null if init failed
+	      log.error("MS5837 init failed", e);
+	    }
+	  }
+
+	  private void requireDepth() {
+	    if (!depthReady || deviceDepth == null) {
+	      throw new IllegalStateException("MS5837 not initialized");
+	    }
+	  }
+
 	private PressureTemp readPressureTemp() throws Exception {
 	    // --- Read D1 (pressure raw) ---
 	    deviceDepth.write((byte) CMD_CONV_D1_OSR8192);
@@ -422,6 +430,17 @@ public class Dive {
 
 	    return Constant.ERROR;
 	}
+	  public Integer zeroPressureBaseline() {
+		    try {
+		      requireDepth();
+		      // average several reads to set p0
+		      // ...
+		      return 0;
+		    } catch (Exception e) {
+		      log.error("zeroOffsets failed", e);
+		      return Constant.ERROR;
+		    }
+		  }
 
 
 	public Integer zeroOffsets() {
