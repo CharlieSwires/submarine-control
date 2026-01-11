@@ -137,13 +137,30 @@ public class Dive {
 	}
 	  @PostConstruct
 	  public void init() {
+		    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+		    this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+		    synchronized (I2C_LOCK) {
 	    // init other devices...
-	    initMs5837();            // try to bring up depth
+	    boolean FAIL = true;
+	    int count = 0;
+		while (FAIL && count < 5) {
+		initMs5837();            // try to bring up depth
+	    
 	    if (depthReady) {
 	      zeroPressureBaseline(); // now it’s safe to zero
+	      FAIL = false;
 	    } else {
 	      log.warn("MS5837 not ready; skipping zero until device comes up.");
+	      try {
+			Thread.sleep(100);
+			count++;
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	    }
+		}
+		}
 	  }
 	  private void initMs5837() {
 		    try {

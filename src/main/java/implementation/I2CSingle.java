@@ -23,8 +23,9 @@ public class I2CSingle {
 	public static I2CProvider i2c(Context ctx) { return ctx.provider("linuxfs-i2c"); }
 
 	static {
+		if (i2c == null) {
 		pi4j = pi4j();
 		i2c = i2c(pi4j);
-
+		}
 	}
 }
