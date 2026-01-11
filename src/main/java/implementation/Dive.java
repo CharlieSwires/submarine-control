@@ -198,6 +198,17 @@ public class Dive {
 		        log.info("MS5837 init OK: C1={} C2={}", prom[1], prom[2]);
 		    } catch (Exception e) {
 		        depthReady = false;
+
+		        // close the local I2C instance if we created it
+		        if (I2CSingle.i2c != null) {
+		            try {
+		                ((I2C) i2c).close();
+		                Thread.sleep(100);
+		                I2CSingle.i2c=I2CSingle.i2c(I2CSingle.pi4j);
+		            } catch (Exception closeEx) {
+		                log.warn("Failed to close MS5837 I2C after init failure", closeEx);
+		            }
+		        }
 		        deviceDepth = null;
 		        log.error("MS5837 init failed", e);
 		    }
