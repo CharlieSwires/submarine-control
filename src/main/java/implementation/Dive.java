@@ -165,10 +165,17 @@ public class Dive {
 	  private void initMs5837() {
 		    try {
 	
-		        I2CConfig cfg = I2C.newConfigBuilder(pi4j).bus(1).device(MS5837_ADDR).build();
-		        deviceDepth = i2c.create(cfg);
-		        if (deviceDepth == null) throw new IllegalStateException("i2c.create returned null");
-		        // 1) Reset with a single byte, wait longer
+		        // Create the I2C device only once for this bus/address
+		        if (deviceDepth == null) {
+		            I2CConfig cfg = I2C.newConfigBuilder(pi4j)
+		                    .bus(1)
+		                    .device(MS5837_ADDR)   // 0x76 (or 0x77 if i2cdetect shows that)
+		                    .build();
+		            deviceDepth = i2c.create(cfg);
+		            if (deviceDepth == null) {
+		                throw new IllegalStateException("i2c.create returned null");
+		            }
+		        }		        // 1) Reset with a single byte, wait longer
 		        deviceDepth.write((byte) 0x1E);      // CMD_RESET
 		        Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe
 
