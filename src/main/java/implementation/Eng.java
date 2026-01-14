@@ -78,7 +78,7 @@ public class Eng {
 				.id(id)
 				.shutdown(DigitalState.LOW)
 				.initial(DigitalState.LOW)
-				.provider("pigpio-digital-output")
+				.provider("raspberrypi-digital-output")
 				.build();
 	}
 
@@ -89,7 +89,7 @@ public class Eng {
 				.pwmType(PwmType.HARDWARE)
 				.frequency(800) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
-                .provider("pigpio-pwm")
+                .provider("raspberrypi-pwm")
 				.build();
 	}
 
