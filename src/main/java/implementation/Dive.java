@@ -491,7 +491,7 @@ public class Dive {
 	}
 
 
-	public Integer getDepth() {
+	public synchronized Integer getDepth() {
 		requireDepth();
 		int attempts = 0;
 
