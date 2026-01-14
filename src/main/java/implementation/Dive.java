@@ -168,22 +168,33 @@ public class Dive {
 	private static final int PROM_WORD_COUNT  = 8;
 
 	private void initMs5837() throws IOException {
-		log.info("Initialising MS5837 at 0x76");
+	    log.info("Initialising MS5837 at 0x76");
 
-		if (deviceDepth == null) {
-			throw new IOException("MS5837 I2C device not initialised");
-		}
+	    // Lazily create the I2C device if needed
+	    if (deviceDepth == null) {
+	        I2CConfig depthConfig = I2C.newConfigBuilder(pi4j)
+	                .id("ms5837")
+	                .name("MS5837 Depth Sensor")
+	                .bus(1)
+	                .device(MS5837_ADDR) // 0x76
+	                .build();
 
-		try {
-			// 1) Send reset command
-			try {
-				deviceDepth.write(new byte[] { (byte) MS5837_RESET });
-				log.info("MS5837 reset command sent (0x1E)");
-			} catch (Exception e) {
-				log.error("Failed to send MS5837 reset command", e);
-				throw new IOException("Failed to send MS5837 reset command", e);
-			}
+	        deviceDepth = i2c.create(depthConfig);
+	        log.info("MS5837 I2C device created on bus 1, addr 0x{}",
+	                 Integer.toHexString(MS5837_ADDR));
+	    }
 
+	    try {
+	        // 1) Send reset command
+	        try {
+	            deviceDepth.write(new byte[] { (byte) MS5837_RESET });
+	            log.info("MS5837 reset command sent (0x1E)");
+	        } catch (Exception e) {
+	            log.error("Failed to send MS5837 reset command", e);
+	            throw new IOException("MS5837 reset failed", e);
+	        }
+
+	        // ... rest of your PROM read loop + CRC as you already have ...
 			// Give the sensor time to reset (datasheet says ~2.8ms; we’ll be generous)
 			try {
 				Thread.sleep(5);
@@ -255,10 +266,10 @@ public class Dive {
 				log.info("MS5837 PROM read OK: {}", Arrays.toString(prom));
 			}
 
-		} catch (IOException e) {
-			log.error("MS5837 init failed", e);
-			throw e;
-		}
+	    } catch (IOException e) {
+	        log.error("MS5837 init failed", e);
+	        throw e;
+	    }
 	}
 
 	private void requireDepth() {
