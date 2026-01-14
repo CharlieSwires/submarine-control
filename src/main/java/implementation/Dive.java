@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
+import com.pi4j.io.exception.IOException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -26,7 +27,7 @@ public class Dive {
 
 	@Autowired
 	private Eng eng;
-	
+
 	private I2C deviceGyro;
 	private I2C deviceDepth;
 	private I2C devicePCA9685;
@@ -54,9 +55,9 @@ public class Dive {
 	private static final int CMD_RESET   = 0x1E;
 	private static final int CMD_ADC_READ = 0x00;
 	private static final int PROM_BASE   = 0xA0;           // PROM words 0..7 at A0..AE
-	  private static final int CMD_CONVERT_D1 = 0x40;
-	  private static final int CMD_CONVERT_D2 = 0x50;
-	  private static final int OSR_8192       = 0x0A;
+	private static final int CMD_CONVERT_D1 = 0x40;
+	private static final int CMD_CONVERT_D2 = 0x50;
+	private static final int OSR_8192       = 0x0A;
 
 	// OSR=8192 conversion commands (explicit bytes are clearest)
 	private static final int CMD_CONV_D1_OSR8192 = 0x4A;   // pressure
@@ -70,213 +71,223 @@ public class Dive {
 	private double p0Mbar = Double.NaN;                    // baseline pressure (tare)
 	private double fluidDensity = DEFAULT_FLUID_DENSITY;
 	private volatile boolean depthReady = false;
-	  private I2CProvider i2c=I2CSingle.i2c;
-	  private static final Object I2C_LOCK = new Object();
+	private I2CProvider i2c=I2CSingle.i2c;
+	private static final Object I2C_LOCK = new Object();
 
 	private static final class PressureTemp {
-	    final double pressureMbar;
-	    final double temperatureC;
+		final double pressureMbar;
+		final double temperatureC;
 
-	    private PressureTemp(double pressureMbar, double temperatureC) {
-	        this.pressureMbar = pressureMbar;
-	        this.temperatureC = temperatureC;
-	    }
+		private PressureTemp(double pressureMbar, double temperatureC) {
+			this.pressureMbar = pressureMbar;
+			this.temperatureC = temperatureC;
+		}
 	}
-	 @Autowired
-	  public Dive(Context pi4j, I2CProvider i2c) {
-	    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
-	    this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
-	    synchronized (I2C_LOCK) {
-		try {
-			log.info("Starting Dive method.");
-			pi4j = Pi4J.newAutoContext();
-			log.debug("Pi4J context initialized.");
-			i2c = pi4j.provider("linuxfs-i2c");
-			log.debug("I2C provider obtained.");
+	@Autowired
+	public Dive(Context pi4j, I2CProvider i2c) {
+		this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+		this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+		synchronized (I2C_LOCK) {
+			try {
+				log.info("Starting Dive method.");
+				pi4j = Pi4J.newAutoContext();
+				log.debug("Pi4J context initialized.");
+				i2c = pi4j.provider("linuxfs-i2c");
+				log.debug("I2C provider obtained.");
 
-			log.info("Starting Gyro method.");
+				log.info("Starting Gyro method.");
 
-			I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
-					.id("LSM6DSO32-Gyro")
-					.name("LSM6DSO32 Gyroscope")
-					.bus(1)
-					.device(0x6A)  // Adjust if using a different I2C address
-					.build();
+				I2CConfig configGyro = I2C.newConfigBuilder(pi4j)
+						.id("LSM6DSO32-Gyro")
+						.name("LSM6DSO32 Gyroscope")
+						.bus(1)
+						.device(0x6A)  // Adjust if using a different I2C address
+						.build();
 
-			deviceGyro = i2c.create(configGyro);
-			// Gyroscope initialization
-			deviceGyro.writeRegister(0x10, (byte) 0xA2); // CTRL2_A: 6.66kHz, 4g, gyro full-scale
-			deviceGyro.writeRegister(0x11, (byte) 0xA2); // CTRL2_G: 6.66kHz, 2000 dps, gyro full-scale
-			Thread.sleep(100); // Wait for gyro settings to take effect
-		} catch (Exception e) {
-			log.error("Error initializing I2C devices Gyro", e);
+				deviceGyro = i2c.create(configGyro);
+				// Gyroscope initialization
+				deviceGyro.writeRegister(0x10, (byte) 0xA2); // CTRL2_A: 6.66kHz, 4g, gyro full-scale
+				deviceGyro.writeRegister(0x11, (byte) 0xA2); // CTRL2_G: 6.66kHz, 2000 dps, gyro full-scale
+				Thread.sleep(100); // Wait for gyro settings to take effect
+			} catch (Exception e) {
+				log.error("Error initializing I2C devices Gyro", e);
+			}
+
+			try {
+				log.info("Starting Servos method. PWM_MIN, PWM_MAX:" +PWM_MIN + ", " +PWM_MAX);
+				// Assuming you've already initialized 'pi4j' and 'i2CProvider' like you did for the other devices
+				// Here, we're setting up the I2C configuration for the PCA9685
+				I2CConfig configPCA9685 = I2C.newConfigBuilder(pi4j)
+						.id("PCA9685")
+						.name("PCA9685 PWM Controller")
+						.bus(1)  // This is the I2C bus. The Raspberry Pi has multiple I2C buses (0, 1), check which one you're using.
+						.device(0x40)  // This is the default I2C address for the PCA9685, change if you've set a different address.
+						.build();
+
+				// Create the I2C device for the PCA9685 using the configuration
+				devicePCA9685= i2c.create(configPCA9685);
+				devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
+				Thread.sleep(50);
+				setPWMFreq(50.0); // 50Hz for servos
+				Thread.sleep(40);
+
+			} catch (Exception e) {
+				log.error("Error initializing I2C devices Servo", e);
+			}
 		}
-
-		try {
-			log.info("Starting Servos method. PWM_MIN, PWM_MAX:" +PWM_MIN + ", " +PWM_MAX);
-			// Assuming you've already initialized 'pi4j' and 'i2CProvider' like you did for the other devices
-			// Here, we're setting up the I2C configuration for the PCA9685
-			I2CConfig configPCA9685 = I2C.newConfigBuilder(pi4j)
-					.id("PCA9685")
-					.name("PCA9685 PWM Controller")
-					.bus(1)  // This is the I2C bus. The Raspberry Pi has multiple I2C buses (0, 1), check which one you're using.
-					.device(0x40)  // This is the default I2C address for the PCA9685, change if you've set a different address.
-					.build();
-
-			// Create the I2C device for the PCA9685 using the configuration
-			devicePCA9685= i2c.create(configPCA9685);
-			devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
-			Thread.sleep(50);
-			setPWMFreq(50.0); // 50Hz for servos
-			Thread.sleep(40);
-
-		} catch (Exception e) {
-			log.error("Error initializing I2C devices Servo", e);
-		}
-	    }
 	}
-	  @PostConstruct
-	  public void init() {
-		    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
-		    this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
-		    synchronized (I2C_LOCK) {
-	    // init other devices...
-	    boolean FAIL = true;
-	    int count = 0;
-		while (FAIL && count < 5) {
-		initMs5837();            // try to bring up depth
-	    
-	    if (depthReady) {
-	      zeroPressureBaseline(); // now it’s safe to zero
-	      FAIL = false;
-	    } else {
-	      log.warn("MS5837 not ready; skipping zero until device comes up.");
-	      try {
-			Thread.sleep(100);
-			count++;
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	@PostConstruct
+	public void init() {
+		this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+		this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+		synchronized (I2C_LOCK) {
+			// init other devices...
+			boolean FAIL = true;
+			int count = 0;
+			while (FAIL && count < 5) {
+				initMs5837();            // try to bring up depth
+
+				if (depthReady) {
+					zeroPressureBaseline(); // now it’s safe to zero
+					FAIL = false;
+				} else {
+					log.warn("MS5837 not ready; skipping zero until device comes up.");
+					try {
+						Thread.sleep(100);
+						count++;
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
 		}
-	    }
+	}
+	private void initMs5837() {
+		try {
+
+			// Create the I2C device only once for this bus/address
+			if (deviceDepth == null) {
+				I2CConfig cfg = I2C.newConfigBuilder(pi4j)
+						.bus(1)
+						.device(MS5837_ADDR)   // 0x76 (or 0x77 if i2cdetect shows that)
+						.build();
+				deviceDepth = i2c.create(cfg);
+				if (deviceDepth == null) {
+					throw new IllegalStateException("i2c.create returned null");
+				}
+			}		        // 1) Reset with a single byte, wait longer
+			deviceDepth.write(new byte[] {(byte) 0x1E});      // CMD_RESET
+			Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe
+
+			// 2) Read PROM words 0..7
+			int[] prom = new int[8];
+			try {
+				for (int i = 0; i < 8; i++) {
+					int cmd = PROM_BASE + (i * 2);
+					byte[] two = new byte[2];
+					int attempts = 0;
+					while (attempts < 3) {
+						try {
+							// Combined transaction: command + read with repeated START,
+							// equivalent to: i2cget -y 1 0x76 <cmd> w
+							deviceDepth.readRegister(cmd, two);
+
+							prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
+							break;
+						} catch (Exception e) {
+							attempts++;
+							if (attempts >= 3) {
+								throw e;
+							}
+							log.warn("Retrying PROM read {}, attempt {}/3", i, attempts, e);
+							Thread.sleep(5);
+						}
+					}
+				}
+			} catch (Exception e) {
+				throw new IOException("Failed to read MS5837 PROM", e);
+			}
+
+			// (optional) sanity check
+			if (prom[1] == 0 || prom[1] == 0xFFFF) throw new IllegalStateException("PROM read bad");
+
+			depthReady = true;
+			log.info("MS5837 init OK: C1={} C2={}", prom[1], prom[2]);
+		} catch (Exception e) {
+			// If anything goes wrong during init, mark the sensor as not ready
+			depthReady = false;
+			// Do NOT close the I2C device here; other devices share the same bus,
+			// and Pi4J keeps the IO id reserved even after close(), which leads to
+			// IOAlreadyExistsException on re-create.
+			log.error("MS5837 init failed", e);
+		}		}
+
+	private void requireDepth() {
+		if (!depthReady || deviceDepth == null) {
+			throw new IllegalStateException("MS5837 not initialized");
 		}
-		}
-	  }
-	  private void initMs5837() {
-		    try {
-	
-		        // Create the I2C device only once for this bus/address
-		        if (deviceDepth == null) {
-		            I2CConfig cfg = I2C.newConfigBuilder(pi4j)
-		                    .bus(1)
-		                    .device(MS5837_ADDR)   // 0x76 (or 0x77 if i2cdetect shows that)
-		                    .build();
-		            deviceDepth = i2c.create(cfg);
-		            if (deviceDepth == null) {
-		                throw new IllegalStateException("i2c.create returned null");
-		            }
-		        }		        // 1) Reset with a single byte, wait longer
-		        deviceDepth.write(new byte[] {(byte) 0x1E});      // CMD_RESET
-		        Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe
-
-		        // 2) Read PROM words 0..7 using write(cmd) + read(2)
-		        byte[] two = new byte[2];
-		        for (int i = 0; i < 8; i++) {
-		            int cmd = 0xA0 + (i * 2);
-		            // Some chips need a gap between commands
-		            for (int attempt = 0; attempt < 3; attempt++) {
-		                try {
-		                    deviceDepth.write(new byte[] {(byte) cmd});
-		                    Thread.sleep(2);                 // tiny settle delay
-		                    deviceDepth.read(two, 0, 2);     // read 2 bytes
-		                    prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
-		                    break; // success
-		                } catch (Exception e) {
-		                    if (attempt == 2) throw e;       // rethrow after retries
-		                    Thread.sleep(5);
-		                }
-		            }
-		        }
-
-		        // (optional) sanity check
-		        if (prom[1] == 0 || prom[1] == 0xFFFF) throw new IllegalStateException("PROM read bad");
-
-		        depthReady = true;
-		        log.info("MS5837 init OK: C1={} C2={}", prom[1], prom[2]);
-		    } catch (Exception e) {
-		        // If anything goes wrong during init, mark the sensor as not ready
-		        depthReady = false;
-		        // Do NOT close the I2C device here; other devices share the same bus,
-		        // and Pi4J keeps the IO id reserved even after close(), which leads to
-		        // IOAlreadyExistsException on re-create.
-		        log.error("MS5837 init failed", e);
-		    }		}
-
-	  private void requireDepth() {
-	    if (!depthReady || deviceDepth == null) {
-	      throw new IllegalStateException("MS5837 not initialized");
-	    }
-	  }
+	}
 
 	private PressureTemp readPressureTemp() throws Exception {
-	    // --- Read D1 (pressure raw) ---
-	    deviceDepth.write(new byte[] {(byte) CMD_CONV_D1_OSR8192});
-	    Thread.sleep(OSR_8192_DELAY_MS);
+		// --- Read D1 (pressure raw) ---
+		deviceDepth.write(new byte[] {(byte) CMD_CONV_D1_OSR8192});
+		Thread.sleep(OSR_8192_DELAY_MS);
 
-	    long D1 = readADC(CMD_CONVERT_D1);
-	    
-	    // --- Read D2 (temperature raw) ---
-	    deviceDepth.write(new byte[] {(byte) CMD_CONV_D2_OSR8192});
-	    Thread.sleep(OSR_8192_DELAY_MS);
+		long D1 = readADC(CMD_CONVERT_D1);
 
-	    long D2 = readADC(CMD_CONVERT_D2);
-	    
-	    // --- Calibration coefficients C1..C6 ---
-	    long C1 = prom[1], C2 = prom[2], C3 = prom[3],
-	         C4 = prom[4], C5 = prom[5], C6 = prom[6];
+		// --- Read D2 (temperature raw) ---
+		deviceDepth.write(new byte[] {(byte) CMD_CONV_D2_OSR8192});
+		Thread.sleep(OSR_8192_DELAY_MS);
 
-	    // --- First-order compensation ---
-	    long dT   = D2 - (C5 << 8);
-	    long TEMP = 2000L + (dT * C6) / 8_388_608L;     // 0.01 °C
+		long D2 = readADC(CMD_CONVERT_D2);
 
-	    long OFF  = (C2 * 65_536L) + ((C4 * dT) / 128L);
-	    long SENS = (C1 * 32_768L) + ((C3 * dT) / 256L);
+		// --- Calibration coefficients C1..C6 ---
+		long C1 = prom[1], C2 = prom[2], C3 = prom[3],
+				C4 = prom[4], C5 = prom[5], C6 = prom[6];
 
-	    // --- Second-order compensation ---
-	    long T2 = 0, OFF2 = 0, SENS2 = 0;
+		// --- First-order compensation ---
+		long dT   = D2 - (C5 << 8);
+		long TEMP = 2000L + (dT * C6) / 8_388_608L;     // 0.01 °C
 
-	    if (TEMP < 2000L) {
-	        long t = TEMP - 2000L;
-	        long t2 = t * t;
+		long OFF  = (C2 * 65_536L) + ((C4 * dT) / 128L);
+		long SENS = (C1 * 32_768L) + ((C3 * dT) / 256L);
 
-	        T2    = (3L * dT * dT) / 8_589_934_592L;    // 2^33
-	        OFF2  = (3L * t2) / 2L;
-	        SENS2 = (5L * t2) / 8L;
+		// --- Second-order compensation ---
+		long T2 = 0, OFF2 = 0, SENS2 = 0;
 
-	        if (TEMP < -1500L) {
-	            long tt = TEMP + 1500L;
-	            long tt2 = tt * tt;
-	            OFF2  += 7L * tt2;
-	            SENS2 += 4L * tt2;
-	        }
-	    } else {
-	        T2 = (2L * dT * dT) / 137_438_953_472L;     // 2^37
-	        long t = TEMP - 2000L;
-	        OFF2 = (t * t) / 16L;
-	        // SENS2 stays 0
-	    }
+		if (TEMP < 2000L) {
+			long t = TEMP - 2000L;
+			long t2 = t * t;
 
-	    TEMP -= T2;
-	    OFF  -= OFF2;
-	    SENS -= SENS2;
+			T2    = (3L * dT * dT) / 8_589_934_592L;    // 2^33
+			OFF2  = (3L * t2) / 2L;
+			SENS2 = (5L * t2) / 8L;
 
-	    // --- Pressure (MS5837): result is 0.01 mbar ---
-	    long P01mbar = ((((D1 * SENS) / 2_097_152L) - OFF) / 32_768L);
+			if (TEMP < -1500L) {
+				long tt = TEMP + 1500L;
+				long tt2 = tt * tt;
+				OFF2  += 7L * tt2;
+				SENS2 += 4L * tt2;
+			}
+		} else {
+			T2 = (2L * dT * dT) / 137_438_953_472L;     // 2^37
+			long t = TEMP - 2000L;
+			OFF2 = (t * t) / 16L;
+			// SENS2 stays 0
+		}
 
-	    double pressureMbar = P01mbar / 100.0;
-	    double temperatureC = TEMP / 100.0;
+		TEMP -= T2;
+		OFF  -= OFF2;
+		SENS -= SENS2;
 
-	    return new PressureTemp(pressureMbar, temperatureC);
+		// --- Pressure (MS5837): result is 0.01 mbar ---
+		long P01mbar = ((((D1 * SENS) / 2_097_152L) - OFF) / 32_768L);
+
+		double pressureMbar = P01mbar / 100.0;
+		double temperatureC = TEMP / 100.0;
+
+		return new PressureTemp(pressureMbar, temperatureC);
 	}
 
 	private void setPWMFreq(double freq) throws Exception {
@@ -319,22 +330,22 @@ public class Dive {
 		return Constant.ERROR;
 	}
 	private void zeroPressureBaseline(int samples) throws Exception {
-	    double sum = 0.0;
-	    int good = 0;
+		double sum = 0.0;
+		int good = 0;
 
-	    for (int i = 0; i < samples; i++) {
-	        PressureTemp r = readPressureTemp();
-	        sum += r.pressureMbar;
-	        good++;
-	        Thread.sleep(25);
-	    }
+		for (int i = 0; i < samples; i++) {
+			PressureTemp r = readPressureTemp();
+			sum += r.pressureMbar;
+			good++;
+			Thread.sleep(25);
+		}
 
-	    if (good > 0) {
-	        p0Mbar = sum / good;
-	        log.info(String.format("MS5837 baseline set: P0=%.2f mbar (%d samples)", p0Mbar, good));
-	    } else {
-	        throw new IllegalStateException("No valid MS5837 samples for baseline");
-	    }
+		if (good > 0) {
+			p0Mbar = sum / good;
+			log.info(String.format("MS5837 baseline set: P0=%.2f mbar (%d samples)", p0Mbar, good));
+		} else {
+			throw new IllegalStateException("No valid MS5837 samples for baseline");
+		}
 	}
 
 	// Watch Dog thread class
@@ -436,79 +447,85 @@ public class Dive {
 
 
 	public Integer getDepth() {
-	    int attempts = 0;
+		int attempts = 0;
 
-	    while (attempts++ < 5) {
-	        try {
-	            // Kick watchdog exactly as you already do
-	            if (!disabled) {
-	                if (watchDogThread != null) {
-	                    startTimer.set(true);
-	                    watchDogThread.interrupt();
-	                }
-	            } else {
-	                if (watchDogThread != null) {
-	                    startTimer.set(false);
-	                    watchDogThread.interrupt();
-	                }
-	            }
+		while (attempts++ < 5) {
+			try {
+				// Kick watchdog exactly as you already do
+				if (!disabled) {
+					if (watchDogThread != null) {
+						startTimer.set(true);
+						watchDogThread.interrupt();
+					}
+				} else {
+					if (watchDogThread != null) {
+						startTimer.set(false);
+						watchDogThread.interrupt();
+					}
+				}
 
-	            PressureTemp r = readPressureTemp();
+				PressureTemp r = readPressureTemp();
 
-	            if (Double.isNaN(p0Mbar)) {
-	                p0Mbar = r.pressureMbar; // first-ever baseline
-	            }
+				if (Double.isNaN(p0Mbar)) {
+					p0Mbar = r.pressureMbar; // first-ever baseline
+				}
 
-	            double depthM = ((r.pressureMbar - p0Mbar) * 100.0) / (fluidDensity * G);
-	            int depthMm = (int) Math.round(depthM * 1000.0);
+				double depthM = ((r.pressureMbar - p0Mbar) * 100.0) / (fluidDensity * G);
+				int depthMm = (int) Math.round(depthM * 1000.0);
 
-	            log.debug(String.format("P=%.2f mbar T=%.2f C depth=%d mm P0=%.2f rho=%.1f",
-	                    r.pressureMbar, r.temperatureC, depthMm, p0Mbar, fluidDensity));
+				log.debug(String.format("P=%.2f mbar T=%.2f C depth=%d mm P0=%.2f rho=%.1f",
+						r.pressureMbar, r.temperatureC, depthMm, p0Mbar, fluidDensity));
 
-	            return -depthMm; // your convention: down negative
+				return -depthMm; // your convention: down negative
 
-	        } catch (Exception e) {
-	            log.warn("getDepth attempt " + attempts + " failed", e);
-	            try { Thread.sleep(50); } catch (InterruptedException ie) { /* ignore */ }
-	        }
-	    }
+			} catch (Exception e) {
+				log.warn("getDepth attempt " + attempts + " failed", e);
+				try { Thread.sleep(50); } catch (InterruptedException ie) { /* ignore */ }
+			}
+		}
 
-	    return Constant.ERROR;
+		return Constant.ERROR;
 	}
-	  public Integer zeroPressureBaseline() {
-		    try {
-		      requireDepth();
-		      // average several reads to set p0
-		      // ...
-		      return 0;
-		    } catch (Exception e) {
-		      log.error("zeroOffsets failed", e);
-		      return Constant.ERROR;
-		    }
-		  }
+	public Integer zeroPressureBaseline() {
+		try {
+			requireDepth();
+			// average several reads to set p0
+			// ...
+			return 0;
+		} catch (Exception e) {
+			log.error("zeroOffsets failed", e);
+			return Constant.ERROR;
+		}
+	}
 
-	  private long readADC(int cmd) throws Exception {
-	      requireDepth();
-	      deviceDepth.write(new byte[] {(byte) (cmd | OSR_8192)});
-	      Thread.sleep(20);                     // OSR=8192 worst-case ~20ms
-	      byte[] b = new byte[3];
-	      deviceDepth.write(new byte[] {(byte) CMD_ADC_READ});
-	      deviceDepth.read(b, 0, 3);
-	      return ((long)(b[0] & 0xFF) << 16) | ((long)(b[1] & 0xFF) << 8) | (long)(b[2] & 0xFF);
-	  }
+	private long readADC(int cmd) throws Exception {
+		requireDepth();
+
+		// Start conversion
+		deviceDepth.write(new byte[] {(byte) (cmd | OSR_8192)});
+		Thread.sleep(20);  // OSR=8192 worst-case ~20ms
+
+		// Read 24-bit result via combined transaction
+		byte[] b = new byte[3];
+		deviceDepth.readRegister(CMD_ADC_READ, b);
+
+		return ((long)(b[0] & 0xFF) << 16)
+				| ((long)(b[1] & 0xFF) << 8)
+				|  (long)(b[2] & 0xFF);
+	}
 
 
 	public Integer zeroOffsets() {
-	    try {
-	        zeroPressureBaseline(12);   // call into your Depth bean
-	        offsetPitch = getDiveAngle();
-	        if (offsetPitch == Constant.ERROR) offsetPitch = 0;
-	        log.info("Zeroed offsets: pitch0=" + offsetPitch);
-	        return 0;
-	    } catch (Exception e) {
-	        log.error("zeroOffsets failed", e);
-	        return Constant.ERROR;
-	    }
+		try {
+			zeroPressureBaseline(12);   // call into your Depth bean
+			offsetPitch = getDiveAngle();
+			if (offsetPitch == Constant.ERROR) offsetPitch = 0;
+			log.info("Zeroed offsets: pitch0=" + offsetPitch);
+			return 0;
+		} catch (Exception e) {
+			log.error("zeroOffsets failed", e);
+			return Constant.ERROR;
+		}
 	}
 
 	public Integer setRudder(Integer angle) {
