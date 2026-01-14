@@ -165,7 +165,7 @@ public class Dive {
 		}
 	}
 	private static final int MS5837_RESET     = 0x1E;
-	private static final int PROM_WORD_COUNT  = 8;
+	private static final int PROM_WORD_COUNT  = 7;
 
 	private void initMs5837() throws IOException {
 	    log.info("Initialising MS5837 at 0x76");
