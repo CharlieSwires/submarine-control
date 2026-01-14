@@ -264,6 +264,7 @@ public class Dive {
 				log.warn("MS5837 PROM words look suspiciously zero-ish: {}", Arrays.toString(prom));
 			} else {
 				log.info("MS5837 PROM read OK: {}", Arrays.toString(prom));
+				return;
 			}
 
 	    } catch (IOException e) {
@@ -496,7 +497,7 @@ public class Dive {
 
 
 	public Integer getDepth() {
-		if (deviceDepth == null) return 0;
+		requireDepth();
 		int attempts = 0;
 
 		while (attempts++ < 5) {
@@ -537,15 +538,19 @@ public class Dive {
 		return Constant.ERROR;
 	}
 	public Integer zeroPressureBaseline() {
-		try {
-			requireDepth();
-			// average several reads to set p0
-			// ...
-			return 0;
-		} catch (Exception e) {
-			log.error("zeroOffsets failed", e);
-			return Constant.ERROR;
-		}
+	    try {
+	        // Make sure the MS5837 device is up before trying to zero it
+	        requireDepth();
+
+	        // Re-use the detailed baseline logic below
+	        // (12 samples matches zeroOffsets(); bump if you want smoother baseline)
+	        zeroPressureBaseline(12);
+
+	        return 0;
+	    } catch (Exception e) {
+	        log.error("zeroPressureBaseline failed", e);
+	        return Constant.ERROR;
+	    }
 	}
 
 	private long readADC(int cmd) throws Exception {
