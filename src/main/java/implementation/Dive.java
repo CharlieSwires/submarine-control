@@ -553,22 +553,66 @@ public class Dive {
 	private long readADC(int cmd) throws Exception {
 	    requireDepth();
 
-	    int convCmd = cmd | OSR_4096;   // try lower OSR
+	    final int maxAttempts = 3;
 
-	    // start conversion
-	    deviceDepth.write(new byte[] {(byte) convCmd});
+	    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+	        try {
+	            // 1. Start conversion
+	            synchronized (I2C_LOCK) {
+	                // Send conversion command (e.g. 0x48 or 0x58)
+	            	deviceDepth.write(new byte[] {(byte)  cmd});
+	            }
 
-	    // wait long enough for 4096 OSR (9.04 ms typ) – use 20ms to be safe
-	    Thread.sleep(20);
+	            // 2. Wait for conversion to complete
+	            // For OSR=4096 the datasheet says ~9 ms; be generous
+	            Thread.sleep(20);
 
-	    byte[] b = new byte[3];
-	    int read = deviceDepth.readRegister(CMD_ADC_READ, b);
-	    if (read != 3) {
-	        throw new IOException("MS5837 ADC read returned " + read + " bytes");
+	            // 3. Issue ADC read command, then read 3 bytes
+	            byte[] b = new byte[3];
+
+	            synchronized (I2C_LOCK) {
+	                // Send "ADC read" command 0x00
+	                deviceDepth.write(new byte[] {(byte) CMD_ADC_READ});
+
+	                int read = deviceDepth.read(b, 0, 3);
+	                if (read != 3) {
+	                    throw new IOException("Expected 3 bytes from ADC, got " + read);
+	                }
+	            }
+
+	            long value = ((b[0] & 0xFFL) << 16)
+	                       | ((b[1] & 0xFFL) << 8)
+	                       |  (b[2] & 0xFFL);
+
+	            if (log.isDebugEnabled()) {
+	                log.debug("MS5837 ADC cmd=0x{} raw={}, bytes={}",
+	                        String.format("%02X", cmd),
+	                        value,
+	                        Arrays.toString(b));
+	            }
+
+	            return value;
+
+	        } catch (Exception e) {
+	            if (attempt == maxAttempts) {
+	                log.error("readADC cmd=0x{} failed after {} attempts",
+	                        String.format("%02X", cmd), maxAttempts, e);
+	                throw e;
+	            } else {
+	                log.warn("readADC cmd=0x{} attempt {}/{} failed: {}",
+	                        String.format("%02X", cmd),
+	                        attempt,
+	                        maxAttempts,
+	                        e.toString());
+	                Thread.sleep(10);
+	            }
+	        }
 	    }
 
-	    return ((b[0] & 0xFFL) << 16) | ((b[1] & 0xFFL) << 8) | (b[2] & 0xFFL);
+	    // Should never get here
+	    throw new IOException("readADC unreachable");
 	}
+
 
 	public Integer zeroOffsets() {
 		try {
