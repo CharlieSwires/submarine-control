@@ -1,5 +1,6 @@
 package implementation;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -163,65 +164,102 @@ public class Dive {
 			}
 		}
 	}
-	private void initMs5837() {
+	private static final int MS5837_RESET     = 0x1E;
+	private static final int PROM_WORD_COUNT  = 8;
+
+	private void initMs5837() throws IOException {
+		log.info("Initialising MS5837 at 0x76");
+
+		if (deviceDepth == null) {
+			throw new IOException("MS5837 I2C device not initialised");
+		}
+
 		try {
-
-			// Create the I2C device only once for this bus/address
-			if (deviceDepth == null) {
-				I2CConfig cfg = I2C.newConfigBuilder(pi4j)
-						.bus(1)
-						.device(MS5837_ADDR)   // 0x76 (or 0x77 if i2cdetect shows that)
-						.build();
-				deviceDepth = i2c.create(cfg);
-				if (deviceDepth == null) {
-					throw new IllegalStateException("i2c.create returned null");
-				}
-			}		        // 1) Reset with a single byte, wait longer
-			deviceDepth.write(new byte[] {(byte) 0x1E});      // CMD_RESET
-			Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe
-
-			// 2) Read PROM words 0..7
-			int[] prom = new int[8];
+			// 1) Send reset command
 			try {
-				for (int i = 0; i < 8; i++) {
-					int cmd = PROM_BASE + (i * 2);
-					byte[] two = new byte[2];
-					int attempts = 0;
-					while (attempts < 3) {
-						try {
-							// Combined transaction: command + read with repeated START,
-							// equivalent to: i2cget -y 1 0x76 <cmd> w
-							deviceDepth.readRegister(cmd, two);
+				deviceDepth.write(new byte[] { (byte) MS5837_RESET });
+				log.info("MS5837 reset command sent (0x1E)");
+			} catch (Exception e) {
+				log.error("Failed to send MS5837 reset command", e);
+				throw new IOException("Failed to send MS5837 reset command", e);
+			}
 
-							prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
-							break;
-						} catch (Exception e) {
-							attempts++;
-							if (attempts >= 3) {
-								throw e;
+			// Give the sensor time to reset (datasheet says ~2.8ms; we’ll be generous)
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException ie) {
+				Thread.currentThread().interrupt();
+			}
+
+			// 2) Read PROM words 0..7 using explicit write(cmd) + read(2),
+			//    to mirror: i2cget -y 1 0x76 0xA0 w  etc.
+			byte[] two = new byte[2];
+			log.info("Reading MS5837 PROM words with write+read sequence");
+
+			for (int i = 0; i < PROM_WORD_COUNT; i++) {
+				int cmd = PROM_BASE + (i * 2);  // 0xA0, 0xA2, ..., 0xAE
+
+				for (int attempt = 0; attempt < 3; attempt++) {
+					try {
+						log.debug("PROM read {}: sending command 0x{}", i, Integer.toHexString(cmd));
+
+						// Set PROM address
+						deviceDepth.write(new byte[] { (byte) cmd });
+
+						// Tiny delay to let chip prepare data (a couple of ms is plenty)
+						try {
+							Thread.sleep(2);
+						} catch (InterruptedException ie) {
+							Thread.currentThread().interrupt();
+						}
+
+						// Now read 2 bytes (16-bit word), like `i2cget ... w`
+						int readBytes = deviceDepth.read(two, 0, 2);
+						if (readBytes != 2) {
+							throw new IOException("Expected 2 bytes from PROM, got " + readBytes);
+						}
+
+						int value = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
+						prom[i] = value;
+
+						log.info("PROM[{}] = 0x{} ({}), raw bytes [{}, {}]",
+								i,
+								Integer.toHexString(value & 0xFFFF),
+								value,
+								two[0] & 0xFF,
+								two[1] & 0xFF);
+
+						// Success, move to next word
+						break;
+
+					} catch (Exception e) {
+						if (attempt == 2) {
+							log.error("PROM read {} failed after {} attempts", i, attempt + 1, e);
+							throw new IOException("Failed to read MS5837 PROM word " + i, e);
+						} else {
+							log.warn("Retrying PROM read {}, attempt {}/3", i, attempt + 1, e);
+							try {
+								Thread.sleep(5);
+							} catch (InterruptedException ie) {
+								Thread.currentThread().interrupt();
 							}
-							log.warn("Retrying PROM read {}, attempt {}/3", i, attempts, e);
-							Thread.sleep(5);
 						}
 					}
 				}
-			} catch (Exception e) {
-				throw new IOException("Failed to read MS5837 PROM", e);
 			}
 
-			// (optional) sanity check
-			if (prom[1] == 0 || prom[1] == 0xFFFF) throw new IllegalStateException("PROM read bad");
+			// (Optional) very basic sanity check
+			if (prom[1] == 0 && prom[2] == 0) {
+				log.warn("MS5837 PROM words look suspiciously zero-ish: {}", Arrays.toString(prom));
+			} else {
+				log.info("MS5837 PROM read OK: {}", Arrays.toString(prom));
+			}
 
-			depthReady = true;
-			log.info("MS5837 init OK: C1={} C2={}", prom[1], prom[2]);
-		} catch (Exception e) {
-			// If anything goes wrong during init, mark the sensor as not ready
-			depthReady = false;
-			// Do NOT close the I2C device here; other devices share the same bus,
-			// and Pi4J keeps the IO id reserved even after close(), which leads to
-			// IOAlreadyExistsException on re-create.
+		} catch (IOException e) {
 			log.error("MS5837 init failed", e);
-		}		}
+			throw e;
+		}
+	}
 
 	private void requireDepth() {
 		if (!depthReady || deviceDepth == null) {
