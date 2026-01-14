@@ -496,6 +496,7 @@ public class Dive {
 
 
 	public Integer getDepth() {
+		if (deviceDepth == null) return 0;
 		int attempts = 0;
 
 		while (attempts++ < 5) {
