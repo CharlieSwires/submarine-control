@@ -282,15 +282,9 @@ public class Dive {
 
 	private PressureTemp readPressureTemp() throws Exception {
 		// --- Read D1 (pressure raw) ---
-		deviceDepth.write(new byte[] {(byte) CMD_CONV_D1_OSR8192});
-		Thread.sleep(OSR_8192_DELAY_MS);
-
 		long D1 = readADC(CMD_CONVERT_D1);
 
 		// --- Read D2 (temperature raw) ---
-		deviceDepth.write(new byte[] {(byte) CMD_CONV_D2_OSR8192});
-		Thread.sleep(OSR_8192_DELAY_MS);
-
 		long D2 = readADC(CMD_CONVERT_D2);
 
 		// --- Calibration coefficients C1..C6 ---
@@ -554,22 +548,27 @@ public class Dive {
 	    }
 	}
 
+	private static final int OSR_4096 = 0x08;   // instead of 0x0A
+
 	private long readADC(int cmd) throws Exception {
-		requireDepth();
+	    requireDepth();
 
-		// Start conversion
-		deviceDepth.write(new byte[] {(byte) (cmd | OSR_8192)});
-		Thread.sleep(20);  // OSR=8192 worst-case ~20ms
+	    int convCmd = cmd | OSR_4096;   // try lower OSR
 
-		// Read 24-bit result via combined transaction
-		byte[] b = new byte[3];
-		deviceDepth.readRegister(CMD_ADC_READ, b);
+	    // start conversion
+	    deviceDepth.write(new byte[] {(byte) convCmd});
 
-		return ((long)(b[0] & 0xFF) << 16)
-				| ((long)(b[1] & 0xFF) << 8)
-				|  (long)(b[2] & 0xFF);
+	    // wait long enough for 4096 OSR (9.04 ms typ) – use 20ms to be safe
+	    Thread.sleep(20);
+
+	    byte[] b = new byte[3];
+	    int read = deviceDepth.readRegister(CMD_ADC_READ, b);
+	    if (read != 3) {
+	        throw new IOException("MS5837 ADC read returned " + read + " bytes");
+	    }
+
+	    return ((b[0] & 0xFFL) << 16) | ((b[1] & 0xFFL) << 8) | (b[2] & 0xFFL);
 	}
-
 
 	public Integer zeroOffsets() {
 		try {
