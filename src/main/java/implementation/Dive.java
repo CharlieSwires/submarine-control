@@ -244,7 +244,7 @@ public class Dive {
 						break;
 
 					} catch (Exception e) {
-						if (attempt == 2) {
+						if (attempt >= 2) {
 							log.error("PROM read {} failed after {} attempts", i, attempt + 1, e);
 							throw new IOException("Failed to read MS5837 PROM word " + i, e);
 						} else {
@@ -264,6 +264,7 @@ public class Dive {
 				log.warn("MS5837 PROM words look suspiciously zero-ish: {}", Arrays.toString(prom));
 			} else {
 				log.info("MS5837 PROM read OK: {}", Arrays.toString(prom));
+				depthReady = true;
 				return;
 			}
 
