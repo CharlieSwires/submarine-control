@@ -176,7 +176,7 @@ public class Dive {
 		                throw new IllegalStateException("i2c.create returned null");
 		            }
 		        }		        // 1) Reset with a single byte, wait longer
-		        deviceDepth.write((byte) 0x1E);      // CMD_RESET
+		        deviceDepth.write(new byte[] {(byte) 0x1E});      // CMD_RESET
 		        Thread.sleep(20);                    // datasheet ~2.8ms; use 20ms to be safe
 
 		        // 2) Read PROM words 0..7 using write(cmd) + read(2)
@@ -186,7 +186,7 @@ public class Dive {
 		            // Some chips need a gap between commands
 		            for (int attempt = 0; attempt < 3; attempt++) {
 		                try {
-		                    deviceDepth.write((byte) cmd);
+		                    deviceDepth.write(new byte[] {(byte) cmd});
 		                    Thread.sleep(2);                 // tiny settle delay
 		                    deviceDepth.read(two, 0, 2);     // read 2 bytes
 		                    prom[i] = ((two[0] & 0xFF) << 8) | (two[1] & 0xFF);
@@ -220,13 +220,13 @@ public class Dive {
 
 	private PressureTemp readPressureTemp() throws Exception {
 	    // --- Read D1 (pressure raw) ---
-	    deviceDepth.write((byte) CMD_CONV_D1_OSR8192);
+	    deviceDepth.write(new byte[] {(byte) CMD_CONV_D1_OSR8192});
 	    Thread.sleep(OSR_8192_DELAY_MS);
 
 	    long D1 = readADC(CMD_CONVERT_D1);
 	    
 	    // --- Read D2 (temperature raw) ---
-	    deviceDepth.write((byte) CMD_CONV_D2_OSR8192);
+	    deviceDepth.write(new byte[] {(byte) CMD_CONV_D2_OSR8192});
 	    Thread.sleep(OSR_8192_DELAY_MS);
 
 	    long D2 = readADC(CMD_CONVERT_D2);
@@ -489,10 +489,10 @@ public class Dive {
 
 	  private long readADC(int cmd) throws Exception {
 	      requireDepth();
-	      deviceDepth.write((byte) (cmd | OSR_8192));
+	      deviceDepth.write(new byte[] {(byte) (cmd | OSR_8192)});
 	      Thread.sleep(20);                     // OSR=8192 worst-case ~20ms
 	      byte[] b = new byte[3];
-	      deviceDepth.write((byte) CMD_ADC_READ);
+	      deviceDepth.write(new byte[] {(byte) CMD_ADC_READ});
 	      deviceDepth.read(b, 0, 3);
 	      return ((long)(b[0] & 0xFF) << 16) | ((long)(b[1] & 0xFF) << 8) | (long)(b[2] & 0xFF);
 	  }
