@@ -616,7 +616,6 @@ public class Dive {
 
 	public Integer zeroOffsets() {
 		try {
-			zeroPressureBaseline(12);   // call into your Depth bean
 			offsetPitch = getDiveAngle();
 			if (offsetPitch == Constant.ERROR) offsetPitch = 0;
 			log.info("Zeroed offsets: pitch0=" + offsetPitch);
