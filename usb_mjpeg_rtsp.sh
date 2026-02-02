@@ -61,8 +61,7 @@ while true; do
     --v4l2-chroma=MJPG \
     --live-caching="$LIVE_CACHING_MS" \
     --sout-rtp-caching="$SOUT_RTP_CACHING_MS" \
-    --rtsp-host="$HOST_IP" \
-    --sout "#rtp{sdp=rtsp://:${PORT}${PATHNAME}}" \
+    --sout "#rtp{sdp=rtsp://0.0.0.0:${PORT}${PATHNAME}}" \
     --no-sout-all --sout-keep \
     >>"$LOG" 2>&1 || true
 
