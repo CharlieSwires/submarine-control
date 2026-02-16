@@ -23,41 +23,41 @@ public class Nav {
 
 	private I2C deviceMag;
 	private Context pi4j=I2CSingle.pi4j;
-	  private I2CProvider i2c=I2CSingle.i2c;
-	  private static final Object I2C_LOCK = new Object();
+	private I2CProvider i2c=I2CSingle.i2c;
+	private static final Object I2C_LOCK = new Object();
 
-	  @Autowired
-	  private Dive dive;
-	  
-	 @Autowired
-	  public Nav(Context pi4j, I2CProvider i2c) {
-	        log.info("Starting Nav method.");
-		    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
-		    this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
-		    synchronized (I2C_LOCK) {
-				try {
+	@Autowired
+	private Dive dive;
+
+	@Autowired
+	public Nav(Context pi4j, I2CProvider i2c) {
+		log.info("Starting Nav method.");
+		this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+		this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+		synchronized (I2C_LOCK) {
+			try {
 
 
-			// Create I2C config for magnetometer (LSM303DLHC)
-			I2CConfig configMag = I2C.newConfigBuilder(pi4j)
-					.id("LSM303AGR-Mag")
-					.name("LSM303AGR Magnetometer")
-					.bus(1)
-					.device(0x1E)
-					.build();
+				// Create I2C config for magnetometer (LSM303DLHC)
+				I2CConfig configMag = I2C.newConfigBuilder(pi4j)
+						.id("LSM303AGR-Mag")
+						.name("LSM303AGR Magnetometer")
+						.bus(1)
+						.device(0x1E)
+						.build();
 
-			// Get I2C provider and create I2C instances
-			deviceMag = i2c.create(configMag);
+				// Get I2C provider and create I2C instances
+				deviceMag = i2c.create(configMag);
 
-			// Initialize magnetometer
-			deviceMag.writeRegister(0x60, (byte) 0x8C); // Continuous conversion mode
-			deviceMag.writeRegister(0x61, (byte) 0x02); // Data output rate = 100Hz
-			deviceMag.writeRegister(0x62, (byte) 0x10); // Set gain = +/- 1.3g
+				// Initialize magnetometer
+				deviceMag.writeRegister(0x60, (byte) 0x8C); // Continuous conversion mode
+				deviceMag.writeRegister(0x61, (byte) 0x02); // Data output rate = 100Hz
+				deviceMag.writeRegister(0x62, (byte) 0x10); // Set gain = +/- 1.3g
 
-			Thread.sleep(500); // Wait for settings to take effect
-		} catch (Exception e) {
-			log.error("Error initializing I2C devices", e);
-		}
+				Thread.sleep(500); // Wait for settings to take effect
+			} catch (Exception e) {
+				log.error("Error initializing I2C devices", e);
+			}
 		}
 	}
 

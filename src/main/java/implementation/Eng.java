@@ -43,33 +43,33 @@ public class Eng {
 	private DigitalOutput motor1pinA, motor1pinB, motor2pinA, motor2pinB, pumpsPinA, pumpsPinB;
 	private Pwm motor1pinE, motor2pinE;
 	private Context pi4j=I2CSingle.pi4j;
-	  private static final Object I2C_LOCK = new Object();
+	private static final Object I2C_LOCK = new Object();
 
-	
-@Autowired
-	  public Eng(Context pi4j) {
-	    this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
-	    synchronized (I2C_LOCK) {
-		try {
-	        log.info("Starting Eng method.");
 
-			// Initialize GPIO digital output pins for motor direction control
-			motor1pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_A, "M1A"));
-			motor1pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_B, "M1B"));
-			motor2pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_A, "M2A"));
-			motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
-			pumpsPinA = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_A, "M3A"));
-			pumpsPinB = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_B, "M3B"));
+	@Autowired
+	public Eng(Context pi4j) {
+		this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
+		synchronized (I2C_LOCK) {
+			try {
+				log.info("Starting Eng method.");
 
-			// Initialize PWM pins for motor speed control
-			motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
-			motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("Abort");
+				// Initialize GPIO digital output pins for motor direction control
+				motor1pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_A, "M1A"));
+				motor1pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_B, "M1B"));
+				motor2pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_A, "M2A"));
+				motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
+				pumpsPinA = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_A, "M3A"));
+				pumpsPinB = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_B, "M3B"));
 
+				// Initialize PWM pins for motor speed control
+				motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
+				motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException("Abort");
+
+			}
 		}
-	    }
 	}
 
 	private DigitalOutputConfig buildDigitalOutputConfig(int address, String id) {
@@ -85,11 +85,11 @@ public class Eng {
 	private PwmConfig buildPwmConfig(int address, String id) {
 		return Pwm.newConfigBuilder(pi4j)
 				.address(address)
-                .id(id)
+				.id(id)
 				.pwmType(PwmType.HARDWARE)
 				.frequency(800) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
-                .provider("raspberrypi-pwm")
+				.provider("raspberrypi-pwm")
 				.build();
 	}
 
@@ -121,31 +121,31 @@ public class Eng {
 	}
 
 
-    public Integer getTemperature() {
-        try {
-            // Execute the command to get the temperature
-            Process process = Runtime.getRuntime().exec("vcgencmd measure_temp");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	public Integer getTemperature() {
+		try {
+			// Execute the command to get the temperature
+			Process process = Runtime.getRuntime().exec("vcgencmd measure_temp");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-            // Read the command output
-            String line = reader.readLine();
-            if (line != null && !line.isEmpty()) {
-                // Extract the temperature value from the output string
-                // The output is in the format: temp=XX.X'C
-                String tempString = line.split("=")[1].replace("'C", "");
-                
-                // Convert to double, multiply by 10, and then to integer
-                Double tempDouble = Double.parseDouble(tempString) * 10;
-                return tempDouble.intValue();
-            }
-        } catch (IOException e) {
-        	log.error("Problem getting temperature.");        }
-        return Constant.ERROR; 
-    }
+			// Read the command output
+			String line = reader.readLine();
+			if (line != null && !line.isEmpty()) {
+				// Extract the temperature value from the output string
+				// The output is in the format: temp=XX.X'C
+				String tempString = line.split("=")[1].replace("'C", "");
+
+				// Convert to double, multiply by 10, and then to integer
+				Double tempDouble = Double.parseDouble(tempString) * 10;
+				return tempDouble.intValue();
+			}
+		} catch (IOException e) {
+			log.error("Problem getting temperature.");        }
+		return Constant.ERROR; 
+	}
 
 	public void setDirection(Boolean action) {
 		// TODO Auto-generated method stub
 		pumpsPinA.setState(action);
 		pumpsPinB.setState(!action);
-	
+
 	}}

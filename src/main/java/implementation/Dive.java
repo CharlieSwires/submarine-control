@@ -88,6 +88,7 @@ public class Dive {
 	public Dive(Context pi4j, I2CProvider i2c) {
 		this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
 		this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+		watchDogThread = new WatchDog();
 		synchronized (I2C_LOCK) {
 			try {
 				log.info("Starting Dive method.");
@@ -168,33 +169,33 @@ public class Dive {
 	private static final int PROM_WORD_COUNT  = 7;
 
 	private void initMs5837() throws IOException {
-	    log.info("Initialising MS5837 at 0x76");
+		log.info("Initialising MS5837 at 0x76");
 
-	    // Lazily create the I2C device if needed
-	    if (deviceDepth == null) {
-	        I2CConfig depthConfig = I2C.newConfigBuilder(pi4j)
-	                .id("ms5837")
-	                .name("MS5837 Depth Sensor")
-	                .bus(1)
-	                .device(MS5837_ADDR) // 0x76
-	                .build();
+		// Lazily create the I2C device if needed
+		if (deviceDepth == null) {
+			I2CConfig depthConfig = I2C.newConfigBuilder(pi4j)
+					.id("ms5837")
+					.name("MS5837 Depth Sensor")
+					.bus(1)
+					.device(MS5837_ADDR) // 0x76
+					.build();
 
-	        deviceDepth = i2c.create(depthConfig);
-	        log.info("MS5837 I2C device created on bus 1, addr 0x{}",
-	                 Integer.toHexString(MS5837_ADDR));
-	    }
+			deviceDepth = i2c.create(depthConfig);
+			log.info("MS5837 I2C device created on bus 1, addr 0x{}",
+					Integer.toHexString(MS5837_ADDR));
+		}
 
-	    try {
-	        // 1) Send reset command
-	        try {
-	            deviceDepth.write(new byte[] { (byte) MS5837_RESET });
-	            log.info("MS5837 reset command sent (0x1E)");
-	        } catch (Exception e) {
-	            log.error("Failed to send MS5837 reset command", e);
-	            throw new IOException("MS5837 reset failed", e);
-	        }
+		try {
+			// 1) Send reset command
+			try {
+				deviceDepth.write(new byte[] { (byte) MS5837_RESET });
+				log.info("MS5837 reset command sent (0x1E)");
+			} catch (Exception e) {
+				log.error("Failed to send MS5837 reset command", e);
+				throw new IOException("MS5837 reset failed", e);
+			}
 
-	        // ... rest of your PROM read loop + CRC as you already have ...
+			// ... rest of your PROM read loop + CRC as you already have ...
 			// Give the sensor time to reset (datasheet says ~2.8ms; we’ll be generous)
 			try {
 				Thread.sleep(5);
@@ -268,10 +269,10 @@ public class Dive {
 				return;
 			}
 
-	    } catch (IOException e) {
-	        log.error("MS5837 init failed", e);
-	        throw e;
-	    }
+		} catch (IOException e) {
+			log.error("MS5837 init failed", e);
+			throw e;
+		}
 	}
 
 	private void requireDepth() {
@@ -533,84 +534,84 @@ public class Dive {
 		return Constant.ERROR;
 	}
 	public Integer zeroPressureBaseline() {
-	    try {
-	        // Make sure the MS5837 device is up before trying to zero it
-	        requireDepth();
+		try {
+			// Make sure the MS5837 device is up before trying to zero it
+			requireDepth();
 
-	        // Re-use the detailed baseline logic below
-	        // (12 samples matches zeroOffsets(); bump if you want smoother baseline)
-	        zeroPressureBaseline(12);
+			// Re-use the detailed baseline logic below
+			// (12 samples matches zeroOffsets(); bump if you want smoother baseline)
+			zeroPressureBaseline(12);
 
-	        return 0;
-	    } catch (Exception e) {
-	        log.error("zeroPressureBaseline failed", e);
-	        return Constant.ERROR;
-	    }
+			return 0;
+		} catch (Exception e) {
+			log.error("zeroPressureBaseline failed", e);
+			return Constant.ERROR;
+		}
 	}
 
 	private static final int OSR_4096 = 0x08;   // instead of 0x0A
 
 	private long readADC(int cmd) throws Exception {
-	    requireDepth();
+		requireDepth();
 
-	    final int maxAttempts = 3;
+		final int maxAttempts = 3;
 
-	    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-	        try {
-	            // 1. Start conversion
-	            synchronized (I2C_LOCK) {
-	                // Send conversion command (e.g. 0x48 or 0x58)
-	            	deviceDepth.write(new byte[] {(byte)  cmd});
-	            }
+		for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				// 1. Start conversion
+				synchronized (I2C_LOCK) {
+					// Send conversion command (e.g. 0x48 or 0x58)
+					deviceDepth.write(new byte[] {(byte)  cmd});
+				}
 
-	            // 2. Wait for conversion to complete
-	            // For OSR=4096 the datasheet says ~9 ms; be generous
-	            Thread.sleep(20);
+				// 2. Wait for conversion to complete
+				// For OSR=4096 the datasheet says ~9 ms; be generous
+				Thread.sleep(20);
 
-	            // 3. Issue ADC read command, then read 3 bytes
-	            byte[] b = new byte[3];
+				// 3. Issue ADC read command, then read 3 bytes
+				byte[] b = new byte[3];
 
-	            synchronized (I2C_LOCK) {
-	                // Send "ADC read" command 0x00
-	                deviceDepth.write(new byte[] {(byte) CMD_ADC_READ});
+				synchronized (I2C_LOCK) {
+					// Send "ADC read" command 0x00
+					deviceDepth.write(new byte[] {(byte) CMD_ADC_READ});
 
-	                int read = deviceDepth.read(b, 0, 3);
-	                if (read != 3) {
-	                    throw new IOException("Expected 3 bytes from ADC, got " + read);
-	                }
-	            }
+					int read = deviceDepth.read(b, 0, 3);
+					if (read != 3) {
+						throw new IOException("Expected 3 bytes from ADC, got " + read);
+					}
+				}
 
-	            long value = ((b[0] & 0xFFL) << 16)
-	                       | ((b[1] & 0xFFL) << 8)
-	                       |  (b[2] & 0xFFL);
+				long value = ((b[0] & 0xFFL) << 16)
+						| ((b[1] & 0xFFL) << 8)
+						|  (b[2] & 0xFFL);
 
-	            if (log.isDebugEnabled()) {
-	                log.debug("MS5837 ADC cmd=0x{} raw={}, bytes={}",
-	                        String.format("%02X", cmd),
-	                        value,
-	                        Arrays.toString(b));
-	            }
+				if (log.isDebugEnabled()) {
+					log.debug("MS5837 ADC cmd=0x{} raw={}, bytes={}",
+							String.format("%02X", cmd),
+							value,
+							Arrays.toString(b));
+				}
 
-	            return value;
+				return value;
 
-	        } catch (Exception e) {
-	            if (attempt == maxAttempts) {
-	                log.error("readADC cmd=0x{} failed after {} attempts",
-	                        String.format("%02X", cmd), maxAttempts, e);
-	                throw e;
-	            } else {
-	                log.warn("readADC cmd=0x{} attempt {}/{} failed: {}",
-	                        String.format("%02X", cmd),
-	                        attempt,
-	                        maxAttempts,
-	                        e.toString());
-	                Thread.sleep(10);
-	            }
-	        }
-	    }
+			} catch (Exception e) {
+				if (attempt == maxAttempts) {
+					log.error("readADC cmd=0x{} failed after {} attempts",
+							String.format("%02X", cmd), maxAttempts, e);
+					throw e;
+				} else {
+					log.warn("readADC cmd=0x{} attempt {}/{} failed: {}",
+							String.format("%02X", cmd),
+							attempt,
+							maxAttempts,
+							e.toString());
+					Thread.sleep(10);
+				}
+			}
+		}
 
-	    // Should never get here
-	    throw new IOException("readADC unreachable");
+		// Should never get here
+		throw new IOException("readADC unreachable");
 	}
 
 
