@@ -28,12 +28,12 @@ public class Eng {
 	private static final Logger log = LoggerFactory.getLogger(Eng.class);
 
 	// Motor 1 (Left Motor) Pins
-	private static final int MOTOR_1_PIN_E = 12; // PWM pin for left motor speed
+	private static final int MOTOR_1_PIN_E = 0; // PWM pin for left motor speed
 	private static final int MOTOR_1_PIN_A = 17; // Direction pin A for left motor
 	private static final int MOTOR_1_PIN_B = 27; // Direction pin B for left motor
 
 	// Motor 2 (Right Motor) Pins
-	private static final int MOTOR_2_PIN_E = 19; // PWM pin for right motor speed
+	private static final int MOTOR_2_PIN_E = 1; // PWM pin for right motor speed
 	private static final int MOTOR_2_PIN_A = 5; // Direction pin A for right motor
 	private static final int MOTOR_2_PIN_B = 6; // Direction pin B for right motor
 
@@ -89,7 +89,7 @@ public class Eng {
 				.pwmType(PwmType.HARDWARE)
 				.frequency(800) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
-				.provider("raspberrypi-pwm")
+				.provider("linuxfs-pwm")
 				.build();
 	}
 
