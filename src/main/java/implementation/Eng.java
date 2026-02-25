@@ -78,7 +78,7 @@ public class Eng {
 				.id(id)
 				.shutdown(DigitalState.LOW)
 				.initial(DigitalState.LOW)
-				.provider("raspberrypi-digital-output")
+				.provider("pigpio-digital-output")
 				.build();
 	}
 
@@ -87,7 +87,7 @@ public class Eng {
 				.address(address)
 				.id(id)
 				.pwmType(PwmType.HARDWARE)
-				.frequency(800) // Set the PWM frequency if necessary
+				.frequency(20000) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
 				.provider("linuxfs-pwm")
 				.build();
