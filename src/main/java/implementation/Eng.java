@@ -115,7 +115,7 @@ public class Eng {
 
 
 		// Set speed using the absolute value of percentPower
-		motor1pinE.on((Number)setDuty(percentPower));
+		motor1pinE.on((Double)setDuty(percentPower));
 		log.debug("type : " +motor1pinE.pwmType());
 		return percentPower;
 	}
@@ -125,7 +125,7 @@ public class Eng {
 
 
 		// Set speed using the absolute value of percentPower
-		motor2pinE.on((Number)setDuty(percentPower));
+		motor2pinE.on((Double)setDuty(percentPower));
 		log.debug("type : " +motor2pinE.pwmType());
 
 		return percentPower;
