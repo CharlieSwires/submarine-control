@@ -54,10 +54,6 @@ public class Eng {
 				log.info("Starting Eng method.");
 
 				// Initialize GPIO digital output pins for motor direction control
-				motor1pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_A, "M1A"));
-				motor1pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_1_PIN_B, "M1B"));
-				motor2pinA = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_A, "M2A"));
-				motor2pinB = pi4j.create(buildDigitalOutputConfig(MOTOR_2_PIN_B, "M2B"));
 				pumpsPinA = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_A, "M3A"));
 				pumpsPinB = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_B, "M3B"));
 
@@ -87,21 +83,39 @@ public class Eng {
 				.address(address)
 				.id(id)
 				.pwmType(PwmType.HARDWARE)
-				.frequency(20000) // Set the PWM frequency if necessary
+				.frequency(50) // Set the PWM frequency if necessary
 				.dutyCycle(0) // Start with 0% duty cycle
 				.provider("linuxfs-pwm")
 				.build();
 	}
 
+	private static final double ESC_MIN = 5.0;    // 1.0ms
+	private static final double ESC_NEUTRAL = 7.5; // 1.5ms
+	private static final double ESC_MAX = 10.0;   // 2.0ms
+
+	public static double setDuty(double percent) {
+	    // percent range: -100 to +100
+
+	    percent = Math.max(-100, Math.min(100, percent));
+
+	    double duty;
+
+	    if (percent == 0) {
+	        duty = ESC_NEUTRAL;
+	    } else if (percent > 0) {
+	        duty = ESC_NEUTRAL + (percent / 100.0) * (ESC_MAX - ESC_NEUTRAL);
+	    } else {
+	        duty = ESC_NEUTRAL + (percent / 100.0) * (ESC_NEUTRAL - ESC_MIN);
+	    }
+
+	    return duty;
+	}
 	public Integer setPowerLeft(Integer percentPower) {
 		log.debug("setPowerLeft:" + percentPower + "%");
 
-		// Set direction based on the sign of percentPower
-		motor1pinA.setState(percentPower >= 0);
-		motor1pinB.setState(percentPower < 0);
 
 		// Set speed using the absolute value of percentPower
-		motor1pinE.on(Math.abs(percentPower));
+		motor1pinE.on((Number)setDuty(percentPower));
 		log.debug("type : " +motor1pinE.pwmType());
 		return percentPower;
 	}
@@ -109,12 +123,9 @@ public class Eng {
 	public Integer setPowerRight(Integer percentPower) {
 		log.debug("setPowerRight:" + percentPower + "%");
 
-		// Set direction based on the sign of percentPower
-		motor2pinA.setState(percentPower >= 0);
-		motor2pinB.setState(percentPower < 0);
 
 		// Set speed using the absolute value of percentPower
-		motor2pinE.on(Math.abs(percentPower));
+		motor2pinE.on((Number)setDuty(percentPower));
 		log.debug("type : " +motor2pinE.pwmType());
 
 		return percentPower;
@@ -143,9 +154,4 @@ public class Eng {
 		return Constant.ERROR; 
 	}
 
-	public void setDirection(Boolean action) {
-		// TODO Auto-generated method stub
-		pumpsPinA.setState(action);
-		pumpsPinB.setState(!action);
-
-	}}
+}

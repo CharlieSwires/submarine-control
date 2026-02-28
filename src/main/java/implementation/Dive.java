@@ -483,8 +483,7 @@ public class Dive {
 
 	public Integer setFillTank(Integer percent) {
 		log.debug("setFillTank:"+percent);
-		int pwm = 4095*Math.abs(percent)/100;
-		eng.setDirection(percent > 0 ? true :false);
+		int pwm = (int) (4095*Eng.setDuty(percent));
 		if (setPWM(3, pwm) != Constant.ERROR)
 			return percent;
 		else
