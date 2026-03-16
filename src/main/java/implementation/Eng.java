@@ -29,18 +29,11 @@ public class Eng {
 
 	// Motor 1 (Left Motor) Pins
 	private static final int MOTOR_1_PIN_E = 0; // PWM pin for left motor speed
-	private static final int MOTOR_1_PIN_A = 17; // Direction pin A for left motor
-	private static final int MOTOR_1_PIN_B = 27; // Direction pin B for left motor
 
 	// Motor 2 (Right Motor) Pins
 	private static final int MOTOR_2_PIN_E = 1; // PWM pin for right motor speed
-	private static final int MOTOR_2_PIN_A = 5; // Direction pin A for right motor
-	private static final int MOTOR_2_PIN_B = 6; // Direction pin B for right motor
 
-	private static final int MOTOR_3_PIN_A = 25;
-	private static final int MOTOR_3_PIN_B = 26;
 
-	private DigitalOutput motor1pinA, motor1pinB, motor2pinA, motor2pinB, pumpsPinA, pumpsPinB;
 	private Pwm motor1pinE, motor2pinE;
 	private Context pi4j=I2CSingle.pi4j;
 	private static final Object I2C_LOCK = new Object();
@@ -53,9 +46,6 @@ public class Eng {
 			try {
 				log.info("Starting Eng method.");
 
-				// Initialize GPIO digital output pins for motor direction control
-				pumpsPinA = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_A, "M3A"));
-				pumpsPinB = pi4j.create(buildDigitalOutputConfig(MOTOR_3_PIN_B, "M3B"));
 
 				// Initialize PWM pins for motor speed control
 				motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
@@ -66,16 +56,6 @@ public class Eng {
 
 			}
 		}
-	}
-
-	private DigitalOutputConfig buildDigitalOutputConfig(int address, String id) {
-		return DigitalOutput.newConfigBuilder(pi4j)
-				.address(address)
-				.id(id)
-				.shutdown(DigitalState.LOW)
-				.initial(DigitalState.LOW)
-				.provider("pigpio-digital-output")
-				.build();
 	}
 
 	private PwmConfig buildPwmConfig(int address, String id) {

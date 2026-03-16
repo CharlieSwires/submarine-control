@@ -74,7 +74,9 @@ public class Dive {
 	private volatile boolean depthReady = false;
 	private I2CProvider i2c=I2CSingle.i2c;
 	private static final Object I2C_LOCK = new Object();
-
+	private static final int POWER_SWITCH_CHANNEL = 4;
+	private static final int POWER_ON_ANGLE  = 120; // adjust after testing
+	private static final int POWER_OFF_ANGLE = 60;
 	private static final class PressureTemp {
 		final double pressureMbar;
 		final double temperatureC;
@@ -132,6 +134,7 @@ public class Dive {
 				Thread.sleep(50);
 				setPWMFreq(50.0); // 50Hz for servos
 				Thread.sleep(40);
+				highPowerEnable(false);
 
 			} catch (Exception e) {
 				log.error("Error initializing I2C devices Servo", e);
@@ -164,9 +167,11 @@ public class Dive {
 				}
 			}
 		}
+
 	}
 	private static final int MS5837_RESET     = 0x1E;
 	private static final int PROM_WORD_COUNT  = 7;
+	
 
 	private void initMs5837() throws IOException {
 		log.info("Initialising MS5837 at 0x76");
@@ -637,6 +642,19 @@ public class Dive {
 		} else
 			return Constant.ERROR;
 
+	}
+	public Integer highPowerEnable(boolean enable) {
+
+	    int angle = enable ? POWER_ON_ANGLE : POWER_OFF_ANGLE;
+
+	    int pwm = angleToPWM(angle);
+
+	    if (setPWM(POWER_SWITCH_CHANNEL, pwm) != Constant.ERROR) {
+	        log.debug("High power enable: " + enable);
+	        return (enable ? 1 : 0);
+	    } else {
+	        return Constant.ERROR;
+	    }
 	}
 
 }
