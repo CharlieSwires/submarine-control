@@ -90,6 +90,7 @@ public class Dive {
 	public Dive(Context pi4j, I2CProvider i2c) {
 		this.pi4j = java.util.Objects.requireNonNull(pi4j, "pi4j context is null");
 		this.i2c  = java.util.Objects.requireNonNull(i2c,  "i2c provider is null");
+		disabled = !"true".equals(System.getenv("WATCHDOG_ENABLED"))? true : false;
 		watchDogThread = new WatchDog();
 		synchronized (I2C_LOCK) {
 			try {
