@@ -41,7 +41,7 @@ public class DiveControl {
         int result = dive.zeroOffsets();
         return ResponseEntity.ok(result);
     }
-    @GetMapping(path = "power", produces = "application/json")
+    @GetMapping(path = "power/{enable}", produces = "application/json")
     public ResponseEntity<Integer> power(@PathVariable("enable") int enable) {
         int result = dive.highPowerEnable((enable == 1)? true:false);
         return ResponseEntity.ok(result);
