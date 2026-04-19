@@ -45,25 +45,19 @@ public class Dive {
 	private static final int LED0_ON_H = 0x07;
 	private static final int LED0_OFF_L = 0x08;
 	private static final int LED0_OFF_H = 0x09;
-	private static final int  MIN_PULSE_WIDTH = 500;//us
-	private static final int  MAX_PULSE_WIDTH = 6000;//us
+	private static final int MIN_PULSE_WIDTH = 1000; // us
+	private static final int MAX_PULSE_WIDTH = 2000; // us
 	private static final double TICK_PER_MICRO= 50.0 * 4096.0  / ( 1000000.0);
 	private static final int PWM_MIN = (int) Math.round(TICK_PER_MICRO * MIN_PULSE_WIDTH); // Minimum PWM value for 0 degrees was 150
 	private static final int PWM_MAX = (int) Math.round(TICK_PER_MICRO * MAX_PULSE_WIDTH); // Maximum PWM value for 180 degrees
 	public static final Integer EMERGENCY_PUMP_POWER = 100;
 	// --- MS5837 (Blue Robotics Bar02) constants ---
 	private static final int MS5837_ADDR = 0x76;           // change to 0x77 if i2cdetect shows that
-	private static final int CMD_RESET   = 0x1E;
 	private static final int CMD_ADC_READ = 0x00;
 	private static final int PROM_BASE   = 0xA0;           // PROM words 0..7 at A0..AE
 	private static final int CMD_CONVERT_D1 = 0x40;
 	private static final int CMD_CONVERT_D2 = 0x50;
-	private static final int OSR_8192       = 0x0A;
 
-	// OSR=8192 conversion commands (explicit bytes are clearest)
-	private static final int CMD_CONV_D1_OSR8192 = 0x4A;   // pressure
-	private static final int CMD_CONV_D2_OSR8192 = 0x5A;   // temperature
-	private static final int OSR_8192_DELAY_MS   = 20;
 
 	private static final double G = 9.80665;
 	private static final double DEFAULT_FLUID_DENSITY = 997.0; // fresh water; ~1025 for sea
@@ -73,10 +67,10 @@ public class Dive {
 	private double fluidDensity = DEFAULT_FLUID_DENSITY;
 	private volatile boolean depthReady = false;
 	private I2CProvider i2c=I2CSingle.i2c;
+	private int POWER_ON_US  = 2000;//uS
+	private int POWER_OFF_US = 1000;//uS
 	private static final Object I2C_LOCK = new Object();
 	private static final int POWER_SWITCH_CHANNEL = 4;
-	private static final int POWER_ON_ANGLE  = 120; // adjust after testing
-	private static final int POWER_OFF_ANGLE = 60;
 	private static final class PressureTemp {
 		final double pressureMbar;
 		final double temperatureC;
@@ -343,14 +337,16 @@ public class Dive {
 	}
 
 	private void setPWMFreq(double freq) throws Exception {
-		int prescale = calculatePrescale(freq);
-		byte oldmode = (byte) devicePCA9685.readRegister(PCA9685_MODE1); // Read MODE1 register
-		byte newmode = (byte) ((oldmode & 0x7F) | 0x10); // sleep
-		//	    devicePCA9685.writeRegister(PCA9685_MODE1, newmode); // go to sleep
-		devicePCA9685.writeRegister(PRE_SCALE, (byte) prescale); // set the prescaler
-		//	    devicePCA9685.writeRegister(PCA9685_MODE1, oldmode);
-		//	    Thread.sleep(5);
-		//	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); //  This sets the RESTART bit to wake up the PCA9685
+	    int prescale = calculatePrescale(freq);
+
+	    int oldmode = devicePCA9685.readRegister(PCA9685_MODE1) & 0xFF;
+	    int sleep = (oldmode & 0x7F) | 0x10;   // sleep bit set
+
+	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) sleep);
+	    devicePCA9685.writeRegister(PRE_SCALE, (byte) prescale);
+	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) oldmode);
+	    Thread.sleep(5);
+	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); // restart
 	}
 	private int calculatePrescale(double freq) {
 		double prescaleval = 25000000.0; // 25,000,000 Hz
@@ -644,18 +640,19 @@ public class Dive {
 			return Constant.ERROR;
 
 	}
+	private int microsecondsToCounts(int us) {
+	    double ticksPerMicro = 50.0 * 4096.0 / 1_000_000.0;
+	    return (int)Math.round(us * ticksPerMicro);
+	}
 	public Integer highPowerEnable(boolean enable) {
-
-	    int angle = enable ? POWER_ON_ANGLE : POWER_OFF_ANGLE;
-
-	    int pwm = angleToPWM(angle);
+	    int us = enable ? POWER_ON_US : POWER_OFF_US;
+	    int pwm = microsecondsToCounts(us);
 
 	    if (setPWM(POWER_SWITCH_CHANNEL, pwm) != Constant.ERROR) {
-	        log.debug("High power enable: " + enable);
-	        return (enable ? 1 : 0);
+	        log.debug("High power enable: " + enable + " pulse=" + us + "us");
+	        return enable ? 1 : 0;
 	    } else {
 	        return Constant.ERROR;
 	    }
 	}
-
 }
