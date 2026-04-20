@@ -631,8 +631,7 @@ public class Dive {
 	public Integer setRudder(Integer angle) {
 		angle += 90;
 		int pwm = angleToPWM(angle);
-		// Assuming channel 1 for the back servo
-		setPWM(2, pwm);
+
 		if (setPWM(2, pwm) != Constant.ERROR) {
 			log.debug("setRudder: " + angle);
 			return angle;
