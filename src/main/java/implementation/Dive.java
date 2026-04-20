@@ -641,8 +641,7 @@ public class Dive {
 
 	}
 	private int microsecondsToCounts(int us) {
-	    double ticksPerMicro = 50.0 * 4096.0 / 1_000_000.0;
-	    return (int)Math.round(us * ticksPerMicro);
+	    return (int)Math.round(us * TICK_PER_MICRO);
 	}
 	public Integer highPowerEnable(boolean enable) {
 	    int us = enable ? POWER_ON_US : POWER_OFF_US;
