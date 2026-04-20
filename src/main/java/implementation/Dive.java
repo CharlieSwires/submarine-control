@@ -437,6 +437,8 @@ public class Dive {
 	// Set the angle for the front servo
 	public Integer setFrontAngle(int angle) {
 		angle += 90;
+		angle = angle > 180 ? 180 : angle;
+		angle = angle < 0 ? 0 : angle;
 		int pwm = angleToPWM(angle);
 		// Assuming channel 0 for the front servo
 		if (setPWM(0, pwm) != Constant.ERROR) {
@@ -448,6 +450,8 @@ public class Dive {
 	// Set the angle for the back servo
 	public Integer setBackAngle(int angle) {
 		angle += 90;
+		angle = angle > 180 ? 180 : angle;
+		angle = angle < 0 ? 0 : angle;
 		int pwm = angleToPWM(angle);
 		// Assuming channel 1 for the back servo
 		if (setPWM(1, pwm) != Constant.ERROR) {
@@ -630,6 +634,9 @@ public class Dive {
 
 	public Integer setRudder(Integer angle) {
 		angle += 90;
+		angle = angle > 180 ? 180 : angle;
+		angle = angle < 0 ? 0 : angle;
+		
 		int pwm = angleToPWM(angle);
 
 		if (setPWM(2, pwm) != Constant.ERROR) {
