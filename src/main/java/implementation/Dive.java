@@ -661,15 +661,39 @@ public class Dive {
 	private int microsecondsToCounts(int us) {
 	    return (int)Math.round(us * TICK_PER_MICRO);
 	}
+	private void dumpPowerPWM() {
+	    try {
+	        int offset = 4 * POWER_SWITCH_CHANNEL;
+
+	        int onL  = devicePCA9685.readRegister(LED0_ON_L  + offset) & 0xFF;
+	        int onH  = devicePCA9685.readRegister(LED0_ON_H  + offset) & 0xFF;
+	        int offL = devicePCA9685.readRegister(LED0_OFF_L + offset) & 0xFF;
+	        int offH = devicePCA9685.readRegister(LED0_OFF_H + offset) & 0xFF;
+
+	        int on  = onL  | ((onH  & 0x0F) << 8);
+	        int off = offL | ((offH & 0x0F) << 8);
+
+	        log.info("POWER PWM readback: ON={} OFF={}", on, off);
+
+	    } catch (Exception e) {
+	        log.error("Unable to read power PWM", e);
+	    }
+	}
 	public Integer highPowerEnable(boolean enable) {
 	    int us = enable ? POWER_ON_US : POWER_OFF_US;
 	    int pwm = microsecondsToCounts(us);
 
-	    if (setPWM(POWER_SWITCH_CHANNEL, pwm) != Constant.ERROR) {
-	        log.debug("High power enable: " + enable + " pulse=" + us + "us");
+	    int result = setPWM(POWER_SWITCH_CHANNEL, pwm);
+
+	    dumpPowerPWM();
+
+	    if (result != Constant.ERROR) {
+	        log.info("High power enable={} pulse={}us counts={}",
+	                 enable, us, pwm);
+
 	        return enable ? 1 : 0;
-	    } else {
-	        return Constant.ERROR;
 	    }
+
+	    return Constant.ERROR;
 	}
 }
