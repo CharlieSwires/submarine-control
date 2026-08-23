@@ -67,8 +67,8 @@ public class Dive {
 	private double fluidDensity = DEFAULT_FLUID_DENSITY;
 	private volatile boolean depthReady = false;
 	private I2CProvider i2c=I2CSingle.i2c;
-	private int POWER_ON_US  = 2000;//uS
-	private int POWER_OFF_US = 1000;//uS
+	private int POWER_ON_US  = 1900;//uS
+	private int POWER_OFF_US = 1100;//uS
 	private static final Object I2C_LOCK = new Object();
 	private static final int POWER_SWITCH_CHANNEL = 4;
 	private static final class PressureTemp {
@@ -125,12 +125,13 @@ public class Dive {
 
 				// Create the I2C device for the PCA9685 using the configuration
 				devicePCA9685= i2c.create(configPCA9685);
-				devicePCA9685.writeRegister(PCA9685_MODE1, 0x81);
-				Thread.sleep(50);
-				setPWMFreq(50.0); // 50Hz for servos
-				Thread.sleep(40);
-				highPowerEnable(false);
+				devicePCA9685.writeRegister(PCA9685_MODE1, 0x00);
+				Thread.sleep(10);
 
+				setPWMFreq(50.0);
+				Thread.sleep(10);
+
+				highPowerEnable(false);
 			} catch (Exception e) {
 				log.error("Error initializing I2C devices Servo", e);
 			}
@@ -339,14 +340,25 @@ public class Dive {
 	private void setPWMFreq(double freq) throws Exception {
 	    int prescale = calculatePrescale(freq);
 
-	    int oldmode = devicePCA9685.readRegister(PCA9685_MODE1) & 0xFF;
-	    int sleep = (oldmode & 0x7F) | 0x10;   // sleep bit set
+	    int oldMode = devicePCA9685.readRegister(PCA9685_MODE1) & 0xFF;
 
-	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) sleep);
-	    devicePCA9685.writeRegister(PRE_SCALE, (byte) prescale);
-	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) oldmode);
+	    int sleepMode = (oldMode & 0x7F) | 0x10;
+
+	    devicePCA9685.writeRegister(PCA9685_MODE1, sleepMode);
+	    devicePCA9685.writeRegister(PRE_SCALE, prescale);
+
+	    // Wake up
+	    devicePCA9685.writeRegister(PCA9685_MODE1, oldMode & ~0x10);
+
 	    Thread.sleep(5);
-	    devicePCA9685.writeRegister(PCA9685_MODE1, (byte) (oldmode | 0x80)); // restart
+
+	    // Restart oscillator
+	    devicePCA9685.writeRegister(
+	        PCA9685_MODE1,
+	        (oldMode & ~0x10) | 0x80
+	    );
+
+	    Thread.sleep(5);
 	}
 	private int calculatePrescale(double freq) {
 		double prescaleval = 25000000.0; // 25,000,000 Hz
