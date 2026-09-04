@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.exception.IOException;
+import com.pi4j.io.gpio.digital.DigitalOutput;
+import com.pi4j.io.gpio.digital.DigitalOutputConfig;
+import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -67,10 +70,10 @@ public class Dive {
 	private double fluidDensity = DEFAULT_FLUID_DENSITY;
 	private volatile boolean depthReady = false;
 	private I2CProvider i2c=I2CSingle.i2c;
-	private int POWER_ON_US  = 1900;//uS
-	private int POWER_OFF_US = 1100;//uS
 	private static final Object I2C_LOCK = new Object();
-	private static final int POWER_SWITCH_CHANNEL = 4;
+	private static final int HIGH_POWER_GPIO = 13;
+	private DigitalOutput highPowerGpio;
+
 	private static final class PressureTemp {
 		final double pressureMbar;
 		final double temperatureC;
@@ -135,6 +138,20 @@ public class Dive {
 			} catch (Exception e) {
 				log.error("Error initializing I2C devices Servo", e);
 			}
+			try {
+				DigitalOutputConfig powerConfig = DigitalOutput.newConfigBuilder(pi4j)
+						.id("high-power-enable")
+						.name("High Power Enable GPIO13")
+						.address(HIGH_POWER_GPIO)
+						.initial(DigitalState.LOW)
+						.shutdown(DigitalState.LOW)
+						.build();
+
+				highPowerGpio = pi4j.create(powerConfig);
+				highPowerGpio.low();
+			} catch (Exception e) {
+				log.error("Error initializing GPIO 13", e);
+			}
 		}
 	}
 	@PostConstruct
@@ -167,7 +184,7 @@ public class Dive {
 	}
 	private static final int MS5837_RESET     = 0x1E;
 	private static final int PROM_WORD_COUNT  = 7;
-	
+
 
 	private void initMs5837() throws IOException {
 		log.info("Initialising MS5837 at 0x76");
@@ -338,27 +355,27 @@ public class Dive {
 	}
 
 	private void setPWMFreq(double freq) throws Exception {
-	    int prescale = calculatePrescale(freq);
+		int prescale = calculatePrescale(freq);
 
-	    int oldMode = devicePCA9685.readRegister(PCA9685_MODE1) & 0xFF;
+		int oldMode = devicePCA9685.readRegister(PCA9685_MODE1) & 0xFF;
 
-	    int sleepMode = (oldMode & 0x7F) | 0x10;
+		int sleepMode = (oldMode & 0x7F) | 0x10;
 
-	    devicePCA9685.writeRegister(PCA9685_MODE1, sleepMode);
-	    devicePCA9685.writeRegister(PRE_SCALE, prescale);
+		devicePCA9685.writeRegister(PCA9685_MODE1, sleepMode);
+		devicePCA9685.writeRegister(PRE_SCALE, prescale);
 
-	    // Wake up
-	    devicePCA9685.writeRegister(PCA9685_MODE1, oldMode & ~0x10);
+		// Wake up
+		devicePCA9685.writeRegister(PCA9685_MODE1, oldMode & ~0x10);
 
-	    Thread.sleep(5);
+		Thread.sleep(5);
 
-	    // Restart oscillator
-	    devicePCA9685.writeRegister(
-	        PCA9685_MODE1,
-	        (oldMode & ~0x10) | 0x80
-	    );
+		// Restart oscillator
+		devicePCA9685.writeRegister(
+				PCA9685_MODE1,
+				(oldMode & ~0x10) | 0x80
+				);
 
-	    Thread.sleep(5);
+		Thread.sleep(5);
 	}
 	private int calculatePrescale(double freq) {
 		double prescaleval = 25000000.0; // 25,000,000 Hz
@@ -648,7 +665,7 @@ public class Dive {
 		angle += 90;
 		angle = angle > 180 ? 180 : angle;
 		angle = angle < 0 ? 0 : angle;
-		
+
 		int pwm = angleToPWM(angle);
 
 		if (setPWM(2, pwm) != Constant.ERROR) {
@@ -658,42 +675,25 @@ public class Dive {
 			return Constant.ERROR;
 
 	}
-	private int microsecondsToCounts(int us) {
-	    return (int)Math.round(us * TICK_PER_MICRO);
-	}
-	private void dumpPowerPWM() {
-	    try {
-	        int offset = 4 * POWER_SWITCH_CHANNEL;
 
-	        int onL  = devicePCA9685.readRegister(LED0_ON_L  + offset) & 0xFF;
-	        int onH  = devicePCA9685.readRegister(LED0_ON_H  + offset) & 0xFF;
-	        int offL = devicePCA9685.readRegister(LED0_OFF_L + offset) & 0xFF;
-	        int offH = devicePCA9685.readRegister(LED0_OFF_H + offset) & 0xFF;
-
-	        int on  = onL  | ((onH  & 0x0F) << 8);
-	        int off = offL | ((offH & 0x0F) << 8);
-
-	        log.info("POWER PWM readback: ON={} OFF={}", on, off);
-
-	    } catch (Exception e) {
-	        log.error("Unable to read power PWM", e);
-	    }
-	}
 	public Integer highPowerEnable(boolean enable) {
-	    int us = enable ? POWER_ON_US : POWER_OFF_US;
-	    int pwm = microsecondsToCounts(us);
+	    try {
+	        if (highPowerGpio == null) {
+	            return Constant.ERROR;
+	        }
 
-	    int result = setPWM(POWER_SWITCH_CHANNEL, pwm);
-
-	    dumpPowerPWM();
-
-	    if (result != Constant.ERROR) {
-	        log.info("High power enable={} pulse={}us counts={}",
-	                 enable, us, pwm);
+	        if (enable) {
+	            highPowerGpio.high();
+	        } else {
+	            highPowerGpio.low();
+	        }
 
 	        return enable ? 1 : 0;
+
+	    } catch (Exception e) {
+	        log.error("Unable to set high-power GPIO{}", HIGH_POWER_GPIO, e);
+	        return Constant.ERROR;
 	    }
 
-	    return Constant.ERROR;
 	}
 }
