@@ -1,48 +1,73 @@
 submarine-control
 -----------------
-<p>in git bash</p>
+<p>In Git Bash:</p>
 <p>git clone https://github.com/CharlieSwires/submarine-control</p>
 
-<p>This contains both the Java and Bash. Note: if you want to be sure 
-that you have the latest code delete the submarine-control directory and re clone,
-git pull isn't reliable.</p>
+<p>This repository contains both the Java submarine-control application and the Bash scripts used to run it on the Raspberry Pi.</p>
+
+<p>Note: if you want to be sure that you have the latest code, you can delete the local submarine-control directory and clone the repository again.</p>
+
+Current Raspberry Pi / Camera Hardware
+--------------------------------------
+
+<p>The submarine now uses a <strong>Raspberry Pi Zero 2 W</strong> rather than the earlier Raspberry Pi 4B. The Zero 2 W was chosen because its smaller physical size and lower power consumption are better suited to the submarine.</p>
+
+<p>The original Raspberry Pi ribbon-cable/CSI camera is no longer used. Video is provided by a <strong>waterproof USB HD camera</strong>, connected to the Pi as a standard V4L2 USB video device (normally <code>/dev/video0</code>).</p>
+
+<p>The current video script is <code>usb_mjpeg_rtsp.sh</code>. It expects the USB camera to support MJPEG and streams the video using VLC over RTSP. The defaults are 640x480, with <code>runner.sh</code> currently requesting 25 fps.</p>
 
 build
 -----
 <p>mvn clean package</p>
 
-<p>produces submarine-control.jar in target</p>
+<p>This produces <code>submarine-control.jar</code> in the <code>target</code> directory.</p>
 
 deploy
 ------
-<p>Turn on your set up Raspberry Pi in my case
-the Pi4b revision 1.5 Running Raspian Bullseye 32bit Full. 
-This is for the first time or after you make a change in your repo.</p>
-<p>Using putty on windows ssh onto the Pi, make sure you've enabled ssh on the Pi.</p>
-<p>type: git clone (your copy of the submarine-control repo)</p>
-<p>type: cd submarine-control</p>
-<p>type: chmod 777 runner.sh</p>
-<p>type: chmod 777 libcam.sh</p>
-<p>type: chmod 777 runnerHD.sh</p>
-<p>type: chmod 777 libcamHD.sh</p>
-<p>type: chmod 777 run_file.sh</p>
-<p>type: cd ..</p>
-<p>type for SD: ~/submarine-control/runner.sh</p>
-<p>or type for HD not both: ~/submarine-control/runnerHD.sh</p>
-<p> I put the cd's and chmod's into the .bashrc just so logging in corrects the permissions.</p>
-<p> In the .bashrc you will need: export WATCHDOG_ENABLED="true" if you wish for emergency 
-surface on loss of contact. If you don't want to alter your .bashrc for the watchdog 
-then you can do this in the runner.sh: sudo WATCHDOG_ENABLED="true" java -jar 
-~/submarine-control/target/submarine-control.jar</p>
-<p> crontab -e and add this line:</p>
-<p>@reboot /path/to/run_file.sh</p>
-<p>for auto run. </p>
+<p>Turn on the configured <strong>Raspberry Pi Zero 2 W</strong>. This procedure is needed for the first installation or after making changes to the repository.</p>
+
+<p>Using PuTTY (or another SSH client) on Windows, SSH onto the Pi. Make sure SSH has first been enabled on the Pi.</p>
+
+<p>Type:</p>
+<p><code>git clone (your copy of the submarine-control repo)</code></p>
+<p><code>cd submarine-control</code></p>
+<p><code>chmod 777 runner.sh</code></p>
+<p><code>chmod 777 usb_mjpeg_rtsp.sh</code></p>
+<p><code>chmod 777 run_file.sh</code></p>
+<p><code>cd ..</code></p>
+<p><code>~/submarine-control/runner.sh</code></p>
+
+<p>The current <code>runner.sh</code> starts the waterproof USB camera RTSP stream and the Java submarine-control application. It also enables I2C and brings <code>wlan0</code> down where required by the submarine networking configuration.</p>
+
+<p>If you wish to enable emergency surfacing on loss of contact, set:</p>
+<p><code>export WATCHDOG_ENABLED="true"</code></p>
+
+<p><code>runner.sh</code> currently supplies this setting when the Java application is started.</p>
+
+<p>For automatic startup, run:</p>
+<p><code>crontab -e</code></p>
+<p>and add:</p>
+<p><code>@reboot /path/to/run_file.sh</code></p>
+
+USB Camera / Video Stream
+-------------------------
+
+<p>The waterproof USB HD camera is normally expected at <code>/dev/video0</code>.</p>
+
+<p>The streaming script requires VLC (<code>cvlc</code>) and <code>v4l2-ctl</code>. The camera must advertise an MJPEG mode. The script checks this before starting the stream.</p>
+
+<p>The camera settings can be overridden with environment variables. For example:</p>
+<p><code>WIDTH=640 HEIGHT=480 FPS=25 ~/submarine-control/usb_mjpeg_rtsp.sh</code></p>
+
+<p>The RTSP server listens on port <code>8554</code>.</p>
 
 Playing the Video Stream
 ------------------------
 
-<p>On your PC which is sharing it's WiFi hotspot with the Pi 
-connect to rtsp://192.168.137.205:8554/ on VLC. Your IP address may be different.</p>
+<p>On the PC sharing its Wi-Fi hotspot with the Pi, open VLC and connect to:</p>
+<p><code>rtsp://192.168.137.205:8554/</code></p>
+
+<p>The Pi IP address may be different on your network. The <code>usb_mjpeg_rtsp.sh</code> script prints the detected host IP and RTSP URL when it starts.</p>
 
 RESTful
 -------
@@ -65,19 +90,18 @@ DiveControl
 <p>returns angleDegrees - offset</p>
 <p>http://192.168.137.205:8080/submarine/dive/depth - done</p>
 <p>returns integer mm - offset</p>
-<p>http://192.168.137.205:8080/submarine/dive/depth/zero - done - sets the 
+<p>http://192.168.137.205:8080/submarine/dive/depth/zero - done - sets the
 offset for diveAngle and depth</p>
 
 NavigationControl
 -----------------
 
 <p>http://192.168.137.205:8080/submarine/navigation/bearing - done</p>
-<p>returns angleDegrees
+<p>returns angleDegrees</p>
 <p>http://192.168.137.205:8080/submarine/navigation/rudder/{angleDegrees} - done</p>
 
 WiFi Dongle
 -----------
 
 <p>https://thepihut.com/blogs/raspberry-pi-tutorials/how-to-setup-a-rtl881cu-usb-wifi-adapter-with-the-raspberry-pi-4</p>
-<p>added rfkill block 0 to runner.sh and runnerHD.sh</p>
-
+<p>The runner configuration disables <code>wlan0</code> as part of the submarine's current networking setup.</p>
