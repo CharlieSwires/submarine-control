@@ -86,11 +86,18 @@ DiveControl
 <p>http://192.168.137.205:8080/submarine/dive/front/{angleDegrees} - done</p>
 <p>http://192.168.137.205:8080/submarine/dive/back/{angleDegrees} - done</p>
 <p>http://192.168.137.205:8080/submarine/dive/fill-tank/{percentPower} - done</p>
+
+<p><strong>12 V High-Power MOSFET Switch</strong></p>
+<p>The submarine's high-current 12 V supply is switched by the 100 A MOSFET module. The control input is driven from Raspberry Pi <strong>GPIO 13</strong> through a transistor interface, so the Pi GPIO does not directly switch the high-current 12 V load.</p>
+<p><code>http://192.168.137.205:8080/submarine/dive/power/1</code> - enable high-power 12 V supply (GPIO 13 HIGH)</p>
+<p><code>http://192.168.137.205:8080/submarine/dive/power/0</code> - disable high-power 12 V supply (GPIO 13 LOW)</p>
+<p>The GPIO is configured LOW initially and LOW on shutdown, so the high-power supply defaults to off.</p>
+
 <p>http://192.168.137.205:8080/submarine/dive/dive-angle - done</p>
 <p>returns angleDegrees - offset</p>
 <p>http://192.168.137.205:8080/submarine/dive/depth - done</p>
 <p>returns integer mm - offset</p>
-<p>http://192.168.137.205:8080/submarine/dive/depth/zero - done - sets the
+<p>http://192.168.137.205:8080/submarine/dive/zero - done - sets the
 offset for diveAngle and depth</p>
 
 NavigationControl
