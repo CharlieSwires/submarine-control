@@ -1,0 +1,6 @@
+# Always use Unix line endings for Bash scripts
+*.sh text eol=lf
+
+# Windows batch files retain Windows line endings
+*.bat text eol=crlf
+*.cmd text eol=crlf

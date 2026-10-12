@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-PI="student@RaspberryPi.local"
+PI="student@192.168.137.88"
 REMOTE="/home/student/submarine-control"
 
 echo "Building submarine-control..."
