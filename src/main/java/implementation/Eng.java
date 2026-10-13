@@ -16,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfig;
@@ -39,6 +38,8 @@ public class Eng {
 	private static final int MOTOR_2_PIN_E = 1; // PWM pin for right motor speed
 
 
+	private static final int HIGH_POWER_GPIO = 13;
+	private DigitalOutput highPowerGpio;
 	private Pwm motor1pinE, motor2pinE;
 	private Context pi4j=I2CSingle.pi4j;
 	private static final Object I2C_LOCK = new Object();
@@ -52,12 +53,30 @@ public class Eng {
 				log.info("Starting Eng method.");
 
 
+				// Fail closed: acquire the SSS output, with LOW as initial and shutdown state.
+				DigitalOutputConfig powerConfig = DigitalOutput.newConfigBuilder(pi4j)
+					.id("high-power-enable")
+					.name("High Power Enable GPIO13")
+					.address(HIGH_POWER_GPIO)
+					.provider("gpiod-digital-output")
+					.initial(DigitalState.LOW)
+					.shutdown(DigitalState.LOW)
+					.build();
+				highPowerGpio = pi4j.create(powerConfig);
+				highPowerGpio.low();
+
 				// Initialize PWM pins for motor speed control
 				motor1pinE = pi4j.create(buildPwmConfig(MOTOR_1_PIN_E, "M1E"));
 				motor2pinE = pi4j.create(buildPwmConfig(MOTOR_2_PIN_E, "M2E"));
+				// Neutral servo pulses before the 12 V SSS can be enabled.
+				motor1pinE.on(ESC_NEUTRAL);
+				motor2pinE.on(ESC_NEUTRAL);
 			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RuntimeException("Abort");
+				log.error("Unable to initialize propulsion PWM or high-power GPIO13", e);
+				if (highPowerGpio != null) {
+					try { highPowerGpio.low(); } catch (Exception ignored) { }
+				}
+				throw new IllegalStateException("Abort: propulsion power cannot be safely initialized", e);
 
 			}
 		}
@@ -116,6 +135,26 @@ public class Eng {
 		return percentPower;
 	}
 
+
+	/** Controls the GPIO13 transistor which drives the 12 V / 100 A solid-state switch. */
+	public synchronized Integer highPowerEnable(boolean enable) {
+		try {
+			if (highPowerGpio == null) return Constant.ERROR;
+			if (enable) {
+				if (motor1pinE == null || motor2pinE == null) return Constant.ERROR;
+				// Neutral must already be present when the ESC power is applied.
+				motor1pinE.on(ESC_NEUTRAL);
+				motor2pinE.on(ESC_NEUTRAL);
+				highPowerGpio.high();
+			} else {
+				highPowerGpio.low();
+			}
+			return enable ? 1 : 0;
+		} catch (Exception e) {
+			log.error("Unable to set high-power GPIO{}", HIGH_POWER_GPIO, e);
+			return Constant.ERROR;
+		}
+	}
 
 	public Integer getTemperature() {
 		try {

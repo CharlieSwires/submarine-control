@@ -18,9 +18,6 @@ import org.springframework.stereotype.Component;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.exception.IOException;
-import com.pi4j.io.gpio.digital.DigitalOutput;
-import com.pi4j.io.gpio.digital.DigitalOutputConfig;
-import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -76,8 +73,6 @@ public class Dive {
 	private volatile boolean depthReady = false;
 	private I2CProvider i2c=I2CSingle.i2c;
 	private static final Object I2C_LOCK = new Object();
-	private static final int HIGH_POWER_GPIO = 13;
-	private DigitalOutput highPowerGpio;
 
 	private static final class PressureTemp {
 		final double pressureMbar;
@@ -139,23 +134,8 @@ public class Dive {
 				setPWMFreq(50.0);
 				Thread.sleep(10);
 
-				highPowerEnable(false);
 			} catch (Exception e) {
 				log.error("Error initializing I2C devices Servo", e);
-			}
-			try {
-				DigitalOutputConfig powerConfig = DigitalOutput.newConfigBuilder(pi4j)
-						.id("high-power-enable")
-						.name("High Power Enable GPIO13")
-						.address(HIGH_POWER_GPIO)
-						.initial(DigitalState.LOW)
-						.shutdown(DigitalState.LOW)
-						.build();
-
-				highPowerGpio = pi4j.create(powerConfig);
-				highPowerGpio.low();
-			} catch (Exception e) {
-				log.error("Error initializing GPIO 13", e);
 			}
 		}
 	}
@@ -681,24 +661,4 @@ public class Dive {
 
 	}
 
-	public Integer highPowerEnable(boolean enable) {
-	    try {
-	        if (highPowerGpio == null) {
-	            return Constant.ERROR;
-	        }
-
-	        if (enable) {
-	            highPowerGpio.high();
-	        } else {
-	            highPowerGpio.low();
-	        }
-
-	        return enable ? 1 : 0;
-
-	    } catch (Exception e) {
-	        log.error("Unable to set high-power GPIO{}", HIGH_POWER_GPIO, e);
-	        return Constant.ERROR;
-	    }
-
-	}
 }

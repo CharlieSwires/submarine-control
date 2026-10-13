@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import implementation.Dive;
+import implementation.Eng;
 
 @RestController
 @RequestMapping(path = "dive")
@@ -20,6 +21,9 @@ public class DiveControl {
 
 	@Autowired
 	private Dive dive;
+
+	@Autowired
+	private Eng eng;
 	
     @GetMapping(path = "front/{angle}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Integer> getFront (@PathVariable("angle") Integer angle){
@@ -48,7 +52,7 @@ public class DiveControl {
     }
     @GetMapping(path = "power/{enable}", produces = "application/json")
     public ResponseEntity<Integer> power(@PathVariable("enable") int enable) {
-        int result = dive.highPowerEnable((enable == 1)? true:false);
+        int result = eng.highPowerEnable(enable == 1);
         return ResponseEntity.ok(result);
     }
 
